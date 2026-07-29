@@ -103,7 +103,7 @@
 </head>
 <body>
   <h1>Пиксельный миллион</h1>
-  <div class="subtitle">Купи пиксель навсегда. 1 пиксель = 100 ₽. Минимальный блок 10×10 (1000 ₽).</div>
+  <div class="subtitle">Купи пиксель навсегда. 1 пиксель = 50 ₽. Минимальный блок 10×10 (5000 ₽).</div>
   <div class="stats">
     <div>Продано: <span id="sold-count">0</span> пикселей</div>
     <div>Свободно: <span id="free-count">1000000</span> пикселей</div>
@@ -125,28 +125,13 @@
 
   <script>
     // ========== НАСТРОЙКИ ==========
-    const PIXEL_PRICE = 100; // руб за пиксель
+    const PIXEL_PRICE = 50; // руб за пиксель
     const MIN_BLOCK = 10;    // мин блок 10x10
 
     // ========== МАССИВ ПРОДАННЫХ БЛОКОВ ==========
     // Каждый объект: { x, y, w, h, img (base64), link, name }
     // Координаты x,y – левый верхний угол блока в пикселях холста (0–999)
-    const soldPixels = [
-      // Пример 1: красный квадрат 20x20 с надписью "А"
-      {
-        x: 100, y: 100, w: 20, h: 20,
-        img: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAAC6j+0QAAAARklEQVQ4y2Ng+M9AAWBigAL4TwFmYKAEMEIZDChMZkYqEAMDEwMDA8N/BgYGBgYGBkYqEAMjFQEXlZkwMDDwUEwDAwMDA4MBJQAAAP//AwAhpwsYdCU2uwAAAABJRU5ErkJggg==',
-        link: 'https://example.com',
-        name: 'Ромашка'
-      },
-      // Пример 2: синий квадрат 15x15 с надписью "Б"
-      {
-        x: 500, y: 200, w: 15, h: 15,
-        img: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAAX6X+2AAAAO0lEQVQ4y2Ng+M9AAWBigAL4TwFmYKAEMEIZDChMZkYqEAMDEwMDA8N/BgYGBgYGBkYqEAMjFQEXlZkwMDDwUEwDAwMDA4MBJQAAAP//AwAhpwsYdCU2uwAAAABJRU5ErkJggg==',
-        link: 'https://example.org',
-        name: 'Старт'
-      }
-    ];
+    const soldPixels = [];
 
     // Подсчёт проданных пикселей
     function updateStats() {
