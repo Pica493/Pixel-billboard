@@ -255,7 +255,747 @@
     // При изменении размеров окна canvas сам адаптируется через CSS
     // Но можно принудительно перерисовать, если нужно (не обязательно)
   </script>
+<!-- ========== ВСЕ ПАСХАЛКИ, ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, ЗМЕЙКА + ПОЛЕ ВВОДА ========== -->
+<style>
+  #effects-layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 200;
+    overflow: hidden;
+  }
+  #effects-layer > * { pointer-events: auto; }
 
+  #easter-input-container {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.7);
+    border-radius: 20px;
+    padding: 5px 10px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 10px rgba(0,255,0,0.3);
+  }
+  #easter-input-container .icon { font-size: 18px; margin-right: 5px; opacity: 0.8; }
+  #easter-input {
+    background: transparent;
+    border: none;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 14px;
+    width: 120px;
+    outline: none;
+  }
+  #easter-input::placeholder { color: rgba(0,255,0,0.5); }
+
+  body.night-mode { background-color: #0a1a2e !important; color: #c0d0e0 !important; }
+  body.night-mode canvas { filter: brightness(0.9) hue-rotate(5deg); }
+
+  .snowflake, .raindrop, .leaf {
+    position: absolute; top: -30px; z-index: 300; pointer-events: none; animation-timing-function: linear;
+  }
+  .snowflake { width: 8px; height: 8px; background: white; border-radius: 50%; animation: snowfall linear infinite; }
+  .raindrop { width: 2px; height: 12px; background: #a0c0f0; animation: rainfall linear infinite; }
+  .leaf { width: 12px; height: 12px; background: orange; border-radius: 50% 0; animation: leafall linear infinite; }
+  @keyframes snowfall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(360deg); } }
+  @keyframes rainfall { 0% { transform: translateY(0); } 100% { transform: translateY(100vh); } }
+  @keyframes leafall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(720deg); } }
+  .olaf { position: fixed; bottom: -80px; left: 20px; z-index: 400; animation: rise-up 1s ease-out forwards; }
+  @keyframes rise-up { to { bottom: 20px; } }
+  .special-leaf {
+    width: 20px; height: 20px; background: #f90; border-radius: 50% 0; position: fixed; bottom: 20px; right: 20px;
+    z-index: 400; cursor: pointer; pointer-events: auto;
+  }
+  body.rasengan-cursor {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' stroke='%2300f' stroke-width='3' fill='none' stroke-dasharray='8 4'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2300f'/%3E%3C/svg%3E") 16 16, auto;
+  }
+
+  .heisenberg-hat .hat-crown { width:150px; height:100px; background:linear-gradient(175deg, #3a3a3a 5%, #1a1a1a 50%, #0d0d0d 95%); border-radius:40% 40% 0 0 / 50% 50% 0 0; margin:0 auto; position:relative; top:-20px; }
+  .heisenberg-hat .hat-band { position:absolute; bottom:25px; width:100%; height:18px; background:linear-gradient(180deg, #b8860b, #8b6508 50%, #5c4305); }
+  .heisenberg-hat .hat-brim { width:240px; height:50px; background:radial-gradient(ellipse at center, #2a2a2a 0%, #111 80%); border-radius:50%; margin:0 auto; }
+
+  .impala-container { position:fixed; z-index:500; top:50%; left:-400px; transform:translateY(-50%); animation:impala-drive 5s linear forwards; }
+  @keyframes impala-drive { from { left:-400px; } to { left:110%; } }
+  .impala { display:flex; align-items:center; }
+  .impala-front-bumper { width:30px; height:60px; background:linear-gradient(90deg, #aaa, #ddd 30%, #fff 50%, #ddd 70%, #888); border-radius:10px 0 0 10px; }
+  .impala-rear-bumper { width:25px; height:55px; background:linear-gradient(90deg, #888, #ddd 30%, #fff 50%, #ccc 70%, #777); border-radius:0 10px 10px 0; }
+  .impala-grill { width:40px; height:50px; background:linear-gradient(180deg, #222, #000); border-radius:5px 0 0 5px; display:flex; flex-direction:column; justify-content:space-evenly; padding:5px; }
+  .headlight { width:12px; height:12px; background:radial-gradient(circle, #fff 20%, #ffd700 60%, #aa8800 100%); border-radius:50%; }
+  .impala-body { width:320px; height:90px; background:linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%); border-radius:5px 40px 15px 5px / 30px 60px 20px 30px; display:flex; align-items:center; padding-left:15px; }
+  .impala-windows { display:flex; gap:8px; }
+  .window { height:35px; background:linear-gradient(180deg, #7ec8e3 0%, #2c5f7a 100%); border-radius:8px 8px 3px 3px; }
+  .window-front { width:55px; } .window-rear { width:65px; } .window-back { width:50px; height:30px; border-radius:3px 15px 3px 3px; }
+  .wheel { width:32px; height:32px; background:radial-gradient(circle at 35% 35%, #eee, #444 60%, #111 100%); border-radius:50%; position:absolute; bottom:-15px; }
+  .wheel-front { left:50px; } .wheel-rear { right:60px; }
+
+  @keyframes runRight { from { left:-50px; } to { left:110%; } }
+  @keyframes tardisFade { 0%{opacity:0;transform:translate(-50%,-50%) scale(0);} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.2);} 100%{opacity:0;transform:translate(-50%,-50%) scale(1);} }
+</style>
+
+<div id="effects-layer"></div>
+
+<div id="easter-input-container">
+  <span class="icon">🔍</span>
+  <input type="text" id="easter-input" placeholder="Код...">
+</div>
+
+<script>
+  (function(){
+    const GLOBAL_COOLDOWN = 3000;
+    const INDIVIDUAL_COOLDOWN = 60000;
+    let lastGlobalActivation = 0;
+    const cooldowns = {};
+
+    function canActivate(name) {
+      const now = Date.now();
+      if (now - lastGlobalActivation < GLOBAL_COOLDOWN) return false;
+      if (cooldowns[name] && now - cooldowns[name] < INDIVIDUAL_COOLDOWN) return false;
+      return true;
+    }
+    function setActivated(name) {
+      const now = Date.now();
+      lastGlobalActivation = now;
+      cooldowns[name] = now;
+    }
+
+    const canvas = window.canvas;
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvas-container');
+    const effectsLayer = document.getElementById('effects-layer');
+    const easterInput = document.getElementById('easter-input');
+
+    function safeRedraw() {
+      if (typeof window.redraw === 'function') {
+        window.redraw();
+      } else {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        if (typeof soldPixels !== 'undefined') {
+          soldPixels.forEach(b => {
+            const img = new Image();
+            img.src = b.img;
+            img.onload = () => ctx.drawImage(img, b.x, b.y, b.w, b.h);
+          });
+        }
+      }
+    }
+
+    function showMessage(text, color = '#fff', duration = 3000) {
+      const msg = document.createElement('div');
+      msg.textContent = text;
+      Object.assign(msg.style, {
+        position: 'fixed', top: '10%', left: '50%', transform: 'translateX(-50%)',
+        color: color, background: 'rgba(0,0,0,0.8)', padding: '0.5rem 1.5rem',
+        borderRadius: '8px', zIndex: 1500, fontWeight: 'bold', pointerEvents: 'none'
+      });
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), duration);
+    }
+
+    const easterEggs = [];
+    function addEasterEgg(name, combo, action) {
+      easterEggs.push({ name, combo: combo.toUpperCase(), action });
+    }
+
+    let inputTimer;
+    easterInput.addEventListener('input', function() {
+      clearTimeout(inputTimer);
+      const val = easterInput.value.trim().toUpperCase();
+      if (val.length > 0) {
+        inputTimer = setTimeout(() => {
+          activateCombo(val);
+          easterInput.value = '';
+        }, 800);
+      }
+    });
+
+    easterInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        clearTimeout(inputTimer);
+        const val = easterInput.value.trim().toUpperCase();
+        if (val.length > 0) {
+          activateCombo(val);
+          easterInput.value = '';
+        }
+      }
+    });
+
+    function activateCombo(combo) {
+      for (let egg of easterEggs) {
+        if (combo.includes(egg.combo)) {
+          if (canActivate(egg.name)) {
+            setActivated(egg.name);
+            egg.action();
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    let inputBuffer = [];
+    let bufferClearTimer;
+    window.addEventListener('keydown', function(e) {
+      if (e.target === easterInput) return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      inputBuffer.push(e.key.toUpperCase());
+      clearTimeout(bufferClearTimer);
+      bufferClearTimer = setTimeout(() => { inputBuffer = []; }, 2000);
+      if (inputBuffer.length > 30) inputBuffer = inputBuffer.slice(-20);
+    });
+
+    function checkKonami() {
+      const code = ['ARROWUP','ARROWUP','ARROWDOWN','ARROWDOWN','ARROWLEFT','ARROWRIGHT','ARROWLEFT','ARROWRIGHT','KEYB','KEYA'];
+      if (inputBuffer.length < 10) return false;
+      const tail = inputBuffer.slice(-10).map(k => {
+        if (k === 'UP') return 'ARROWUP';
+        if (k === 'DOWN') return 'ARROWDOWN';
+        if (k === 'LEFT') return 'ARROWLEFT';
+        if (k === 'RIGHT') return 'ARROWRIGHT';
+        return k;
+      });
+      return tail.join(',') === code.join(',');
+    }
+
+    window.addEventListener('keydown', function(e) {
+      if (e.target === easterInput) return;
+      if (checkKonami()) {
+        if (canActivate('konami')) {
+          setActivated('konami');
+          triggerMatrixRain();
+          inputBuffer = [];
+        }
+      }
+    });
+
+    // ================= 1. КАЛЕНДАРЬ И ВРЕМЯ МСК =================
+    function updateClock() {
+      const now = new Date();
+      const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+      const dateStr = msk.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+      const timeStr = msk.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      let clockEl = document.getElementById('msk-clock');
+      if (!clockEl) {
+        clockEl = document.createElement('div');
+        clockEl.id = 'msk-clock';
+        clockEl.style.cssText = 'position:fixed; top:10px; right:10px; color:white; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:5px; font-family:monospace; z-index:500;';
+        document.body.appendChild(clockEl);
+      }
+      clockEl.innerHTML = `${dateStr}<br>${timeStr} MSK`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ================= 2. МАТРИЦА (KONAMI) =================
+    function triggerMatrixRain() {
+      const matrixCanvas = document.createElement('canvas');
+      matrixCanvas.width = canvas.width;
+      matrixCanvas.height = canvas.height;
+      matrixCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:300;';
+      container.appendChild(matrixCanvas);
+      const mctx = matrixCanvas.getContext('2d');
+      const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789';
+      const fontSize = 15;
+      const columns = Math.floor(matrixCanvas.width / fontSize);
+      const drops = Array(columns).fill(0);
+      const draw = () => {
+        mctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        mctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+        mctx.fillStyle = '#0f0';
+        mctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          mctx.fillText(text, i * fontSize, drops[i] * fontSize);
+          if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      };
+      const interval = setInterval(draw, 40);
+      setTimeout(() => {
+        clearInterval(interval);
+        matrixCanvas.remove();
+        safeRedraw();
+      }, 4000);
+    }
+
+    // ================= 3. ПОГОДА =================
+    let weatherTimer;
+    function startSnow() {
+      for (let i=0; i<50; i++) {
+        const flake = document.createElement('div');
+        flake.className = 'snowflake weather-particle';
+        flake.style.left = Math.random() * 100 + '%';
+        flake.style.animationDuration = (2 + Math.random()*3) + 's';
+        effectsLayer.appendChild(flake);
+      }
+      if (Math.random() < 0.3) {
+        setTimeout(() => {
+          const olaf = document.createElement('div');
+          olaf.className = 'olaf';
+          olaf.textContent = '⛄';
+          olaf.style.fontSize = '40px';
+          document.body.appendChild(olaf);
+          setTimeout(() => olaf.remove(), 10000);
+        }, 2000);
+      }
+      setTimeout(() => {
+        effectsLayer.querySelectorAll('.snowflake').forEach(el => el.remove());
+      }, 15000);
+    }
+    function startRain() {
+      for (let i=0; i<30; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'raindrop weather-particle';
+        drop.style.left = Math.random() * 100 + '%';
+        drop.style.animationDuration = (1 + Math.random()*1.5) + 's';
+        effectsLayer.appendChild(drop);
+      }
+      setTimeout(() => {
+        effectsLayer.querySelectorAll('.raindrop').forEach(el => el.remove());
+      }, 12000);
+    }
+    function startLeaves() {
+      for (let i=0; i<20; i++) {
+        const leaf = document.createElement('div');
+        leaf.className = 'leaf weather-particle';
+        leaf.style.left = Math.random() * 100 + '%';
+        leaf.style.animationDuration = (3 + Math.random()*4) + 's';
+        effectsLayer.appendChild(leaf);
+      }
+      setTimeout(() => {
+        const special = document.createElement('div');
+        special.className = 'special-leaf';
+        document.body.appendChild(special);
+        special.addEventListener('click', () => {
+          document.body.classList.toggle('rasengan-cursor');
+          setTimeout(() => document.body.classList.remove('rasengan-cursor'), 10000);
+          special.remove();
+        });
+        setTimeout(() => special.remove(), 15000);
+      }, 5000);
+      setTimeout(() => {
+        effectsLayer.querySelectorAll('.leaf').forEach(el => el.remove());
+      }, 18000);
+    }
+    function setWeather(state) {
+      effectsLayer.querySelectorAll('.weather-particle').forEach(el => el.remove());
+      if (state === 'snow') startSnow();
+      else if (state === 'rain') startRain();
+      else if (state === 'leaves') startLeaves();
+    }
+    function randomWeather() {
+      const r = Math.random();
+      if (r < 0.6) return 'clear';
+      if (r < 0.8) return 'snow';
+      if (r < 0.95) return 'rain';
+      return 'leaves';
+    }
+    function scheduleWeather() {
+      weatherTimer = setTimeout(() => {
+        setWeather(randomWeather());
+        scheduleWeather();
+      }, 120000 + Math.random() * 180000);
+    }
+    scheduleWeather();
+
+    // ================= 4. ДЕЛОРЕАН В 16:29 =================
+    function checkDelorean() {
+      const now = new Date();
+      const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+      if (msk.getHours() === 16 && msk.getMinutes() === 29 && msk.getSeconds() < 5) {
+        if (canActivate('delorean')) {
+          setActivated('delorean');
+          const car = document.createElement('div');
+          car.textContent = '🚗⚡';
+          car.style.cssText = 'position:fixed; top:10%; left:-100px; font-size:40px; z-index:500; transition: left 4s linear;';
+          document.body.appendChild(car);
+          requestAnimationFrame(() => car.style.left = '110%');
+          setTimeout(() => car.remove(), 4500);
+          showMessage('1.21 Гигаватт!', '#0ff');
+        }
+      }
+    }
+    setInterval(checkDelorean, 1000);
+
+    // ================= 5. МИНИ-ТИР BIT =================
+    function startBitGame() {
+      if (!canActivate('bitgame')) return;
+      setActivated('bitgame');
+      let score = 0;
+      let timeLeft = 30;
+      const scoreEl = document.createElement('div');
+      scoreEl.style.cssText = 'position:fixed; top:20px; left:20px; color:white; background:black; padding:5px 10px; z-index:1000; font-family:monospace;';
+      scoreEl.textContent = 'Очки: 0';
+      document.body.appendChild(scoreEl);
+
+      const gameInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+          clearInterval(gameInterval);
+          clearInterval(spawnInterval);
+          document.querySelectorAll('.bit-target').forEach(el => el.remove());
+          scoreEl.remove();
+          const best = localStorage.getItem('bitRecord') || 0;
+          if (score > best) localStorage.setItem('bitRecord', score);
+          showMessage(`Игра окончена! Счёт: ${score}. Рекорд: ${localStorage.getItem('bitRecord')}`, '#ff0', 3000);
+          return;
+        }
+        timeLeft--;
+        scoreEl.textContent = `Очки: ${score} | Время: ${timeLeft}`;
+      }, 1000);
+
+      const spawnInterval = setInterval(() => {
+        const target = document.createElement('div');
+        target.className = 'bit-target';
+        target.style.cssText = 'position:absolute; width:20px; height:20px; background:red; z-index:999; cursor:pointer;';
+        target.style.left = Math.random() * (container.offsetWidth - 20) + 'px';
+        target.style.top = Math.random() * (container.offsetHeight - 20) + 'px';
+        container.appendChild(target);
+        target.addEventListener('click', (e) => {
+          e.stopPropagation();
+          score++;
+          target.remove();
+        });
+        setTimeout(() => target.remove(), 2000);
+      }, 800);
+
+      setTimeout(() => {
+        clearInterval(gameInterval);
+        clearInterval(spawnInterval);
+        document.querySelectorAll('.bit-target').forEach(el => el.remove());
+        scoreEl.remove();
+      }, 31000);
+    }
+    addEasterEgg('bitgame', 'BIT', startBitGame);
+
+    // ================= 6. НОЧНОЙ РЕЖИМ =================
+    function checkNightMode() {
+      const now = new Date();
+      const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+      if (msk.getHours() >= 22 || msk.getHours() < 6) {
+        document.body.classList.add('night-mode');
+      } else {
+        document.body.classList.remove('night-mode');
+      }
+    }
+    setInterval(checkNightMode, 60000);
+    checkNightMode();
+
+    // ================= 7. ЗМЕЙКА (SNAKE) =================
+    function startSnake() {
+      if (!canActivate('snake')) return;
+      setActivated('snake');
+
+      const snakeCanvas = document.createElement('canvas');
+      snakeCanvas.width = canvas.width;
+      snakeCanvas.height = canvas.height;
+      snakeCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:250;';
+      container.appendChild(snakeCanvas);
+      const sctx = snakeCanvas.getContext('2d');
+
+      const CELL_SIZE = 10;
+      const COLS = canvas.width / CELL_SIZE;
+      const ROWS = canvas.height / CELL_SIZE;
+
+      let snake = [
+        {x: Math.floor(COLS/2), y: Math.floor(ROWS/2)},
+        {x: Math.floor(COLS/2)-1, y: Math.floor(ROWS/2)},
+        {x: Math.floor(COLS/2)-2, y: Math.floor(ROWS/2)}
+      ];
+      let direction = {x: 1, y: 0};
+      let nextDirection = {x: 1, y: 0};
+      let food = spawnFood();
+      let gameOver = false;
+      let gameInterval;
+
+      function isCellFree(cellX, cellY) {
+        const px = cellX * CELL_SIZE, py = cellY * CELL_SIZE;
+        for (let block of soldPixels) {
+          if (px < block.x + block.w && px + CELL_SIZE > block.x &&
+              py < block.y + block.h && py + CELL_SIZE > block.y) {
+            return false;
+          }
+        }
+        return cellX >= 0 && cellX < COLS && cellY >= 0 && cellY < ROWS;
+      }
+
+      function spawnFood() {
+        for (let i = 0; i < 1000; i++) {
+          const fx = Math.floor(Math.random() * COLS), fy = Math.floor(Math.random() * ROWS);
+          if (isCellFree(fx, fy) && !snake.some(s => s.x === fx && s.y === fy)) {
+            return {x: fx, y: fy};
+          }
+        }
+        return null;
+      }
+
+      function drawSnake() {
+        sctx.clearRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+        sctx.fillStyle = '#00cc00';
+        snake.forEach(seg => sctx.fillRect(seg.x * CELL_SIZE, seg.y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1));
+        if (food) {
+          sctx.fillStyle = '#ff3333';
+          sctx.fillRect(food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
+        }
+        if (gameOver) {
+          sctx.fillStyle = 'rgba(0,0,0,0.7)';
+          sctx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+          sctx.fillStyle = '#fff';
+          sctx.font = '20px monospace';
+          sctx.textAlign = 'center';
+          sctx.fillText('Игра окончена!', snakeCanvas.width/2, snakeCanvas.height/2);
+        }
+      }
+
+      function step() {
+        if (gameOver) return;
+        if (!(nextDirection.x === -direction.x && nextDirection.y === -direction.y)) {
+          direction = nextDirection;
+        }
+        const head = snake[0];
+        const newHead = {x: head.x + direction.x, y: head.y + direction.y};
+        if (!isCellFree(newHead.x, newHead.y) || snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+          gameOver = true;
+          drawSnake();
+          clearInterval(gameInterval);
+          setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+          return;
+        }
+        snake.unshift(newHead);
+        if (food && newHead.x === food.x && newHead.y === food.y) {
+          food = spawnFood();
+          if (!food) {
+            gameOver = true;
+            drawSnake();
+            clearInterval(gameInterval);
+            setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+            return;
+          }
+        } else {
+          snake.pop();
+        }
+        drawSnake();
+      }
+
+      function handleKey(e) {
+        e.preventDefault();
+        const keyMap = { 'ArrowUp': {x:0, y:-1}, 'ArrowDown': {x:0, y:1}, 'ArrowLeft': {x:-1, y:0}, 'ArrowRight': {x:1, y:0} };
+        if (keyMap[e.key]) nextDirection = keyMap[e.key];
+      }
+      window.addEventListener('keydown', handleKey);
+
+      drawSnake();
+      gameInterval = setInterval(step, 150);
+
+      const cleanup = () => {
+        clearInterval(gameInterval);
+        window.removeEventListener('keydown', handleKey);
+        if (snakeCanvas.parentNode) snakeCanvas.remove();
+        safeRedraw();
+      };
+      setTimeout(cleanup, 120000);
+    }
+    addEasterEgg('snake', 'SNAKE', startSnake);
+
+    // ================= 8. ПОРТАЛ БЛИЧ =================
+    function triggerBleachPortal() {
+      if (!canActivate('bleach')) return;
+      setActivated('bleach');
+      const portal = document.createElement('div');
+      portal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:400;';
+      document.body.appendChild(portal);
+      for (let i=0; i<30; i++) {
+        const butterfly = document.createElement('div');
+        butterfly.textContent = '🦋';
+        butterfly.style.cssText = `position:absolute; left:${Math.random()*100}%; top:${Math.random()*100}%; font-size:20px; animation: fly 2s linear infinite;`;
+        portal.appendChild(butterfly);
+      }
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,100,255,0.5)';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      setTimeout(() => {
+        portal.remove();
+        ctx.restore();
+        safeRedraw();
+      }, 3000);
+      showMessage('Врата Сенкаймон открыты', '#00f');
+    }
+    addEasterEgg('bleach', 'BLEACH', triggerBleachPortal);
+
+    // ================= 9. DVD-ЗАСТАВКА =================
+    let inactivityTimer;
+    function resetInactivity() {
+      clearTimeout(inactivityTimer);
+      const dvd = document.getElementById('dvd-logo');
+      if (dvd) dvd.remove();
+      inactivityTimer = setTimeout(() => {
+        if (canActivate('dvd')) {
+          setActivated('dvd');
+          const logo = document.createElement('div');
+          logo.id = 'dvd-logo';
+          logo.textContent = 'Купи пиксель';
+          logo.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#ff0; color:#000; padding:10px; font-family:monospace; z-index:600; border-radius:5px;';
+          document.body.appendChild(logo);
+          let x = Math.random() * window.innerWidth, y = Math.random() * window.innerHeight;
+          let dx = 2, dy = 2;
+          function animate() {
+            x += dx; y += dy;
+            if (x <= 0 || x + logo.offsetWidth >= window.innerWidth) { dx *= -1; checkCorner(x,y); }
+            if (y <= 0 || y + logo.offsetHeight >= window.innerHeight) { dy *= -1; checkCorner(x,y); }
+            logo.style.left = x + 'px';
+            logo.style.top = y + 'px';
+            if (document.getElementById('dvd-logo')) requestAnimationFrame(animate);
+          }
+          function checkCorner(x,y) {
+            if ((x <= 1 || x + logo.offsetWidth >= window.innerWidth-1) && (y <= 1 || y + logo.offsetHeight >= window.innerHeight-1)) {
+              showMessage('Точно в угол!', '#ff0', 1000);
+            }
+          }
+          animate();
+          window.addEventListener('mousemove', () => logo.remove(), { once: true });
+        }
+      }, 30000);
+    }
+    window.addEventListener('mousemove', resetInactivity);
+    window.addEventListener('keydown', resetInactivity);
+    resetInactivity();
+
+    // ================= 10. САЙЛЕНТ ХИЛЛ =================
+    function silentHill() {
+      if (!canActivate('silenthill')) return;
+      setActivated('silenthill');
+      showMessage('Пирамидоголовый приближается...', '#f00', 5000);
+    }
+    addEasterEgg('silenthill', 'SILENT', silentHill);
+    addEasterEgg('silenthill', 'PYRAMID', silentHill);
+
+    // ================= 11. ПОКЕМОНЫ =================
+    function pikachuRun() {
+      if (!canActivate('pikachu')) return;
+      setActivated('pikachu');
+      const pika = document.createElement('div');
+      pika.textContent = '⚡🐱';
+      pika.style.cssText = 'position:fixed; top:50%; left:-50px; font-size:40px; z-index:500; animation: runRight 4s linear forwards;';
+      document.body.appendChild(pika);
+      pika.addEventListener('click', () => showMessage('Pika-pika!', '#ff0'));
+      setTimeout(() => pika.remove(), 4000);
+    }
+    addEasterEgg('pikachu', 'PIKACHU', pikachuRun);
+
+    function pokeball() {
+      if (!canActivate('pokeball')) return;
+      setActivated('pokeball');
+      const ball = document.createElement('div');
+      ball.textContent = '🔴⚪';
+      ball.style.cssText = 'position:fixed; top:50%; left:50%; font-size:30px; z-index:500;';
+      document.body.appendChild(ball);
+      setTimeout(() => ball.remove(), 3000);
+    }
+    addEasterEgg('pokeball', 'POKEBALL', pokeball);
+
+    // ================= 12. MARIO / LUIGI =================
+    addEasterEgg('mario', 'MARIO', () => { if(canActivate('mario')){setActivated('mario');showMessage('Марио!','#f00',2000);} });
+    addEasterEgg('luigi', 'LUIGI', () => { if(canActivate('luigi')){setActivated('luigi');showMessage('Луиджи!','#0f0',2000);} });
+
+    // ================= 13. ВЕДЬМАК =================
+    addEasterEgg('igni', 'IGNI', () => { if(canActivate('igni')){setActivated('igni');document.body.style.cursor='url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Ccircle cx=\'16\' cy=\'16\' r=\'10\' fill=\'orange\'/%3E%3C/svg%3E") 16 16, auto';setTimeout(()=>document.body.style.cursor='',5000);} });
+    addEasterEgg('aard', 'AARD', () => { if(canActivate('aard')){setActivated('aard');showMessage('Aard!','#0ff',2000);} });
+    addEasterEgg('witcher', 'WITCHER', () => { if(canActivate('witcher')){setActivated('witcher');showMessage('Заплатите чеканной монетой','silver',3000);} });
+
+    // ================= 14. ДОКТОР КТО =================
+    addEasterEgg('tardis', 'TARDIS', () => {
+      if (!canActivate('tardis')) return;
+      setActivated('tardis');
+      const box = document.createElement('div');
+      box.textContent = '📞';
+      box.style.cssText = 'position:fixed; top:50%; left:50%; font-size:80px; z-index:500; animation: tardisFade 2s forwards;';
+      document.body.appendChild(box);
+      setTimeout(() => box.remove(), 2000);
+    });
+
+    // ================= 15. ГАРРИ ПОТТЕР =================
+    addEasterEgg('lumos', 'LUMOS', () => {
+      if (canActivate('lumos')) {
+        setActivated('lumos');
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,215,0,0.3)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        setTimeout(() => { ctx.restore(); safeRedraw(); }, 2000);
+      }
+    });
+    addEasterEgg('nox', 'NOX', () => {
+      if (canActivate('nox')) {
+        setActivated('nox');
+        safeRedraw();
+        showMessage('Nox!', '#aaa');
+      }
+    });
+
+    // ================= 16. СВЕТОВОЙ МЕЧ (F) =================
+    let lightsaberActive = false;
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'f' && !lightsaberActive && !e.target.closest('input,textarea')) {
+        if (!canActivate('lightsaber')) return;
+        setActivated('lightsaber');
+        lightsaberActive = true;
+        document.body.style.cursor = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Crect x=\'14\' y=\'2\' width=\'4\' height=\'20\' fill=\'%230f0\'/%3E%3C/svg%3E") 16 16, auto';
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'f' && lightsaberActive) {
+        lightsaberActive = false;
+        document.body.style.cursor = '';
+      }
+    });
+
+    // ================= 17. ШЛЯПА ХАЙЗЕНБЕРГА =================
+    addEasterEgg('heisenberg', 'HEISENBERG', () => {
+      if (!canActivate('heisenberg')) return;
+      setActivated('heisenberg');
+      const hat = document.createElement('div');
+      hat.className = 'heisenberg-hat';
+      hat.innerHTML = `<div class="hat-crown"><div class="hat-band"></div></div><div class="hat-brim"></div>`;
+      hat.style.cssText = 'position:fixed; top:40%; left:50%; transform:translate(-50%,-50%); z-index:1000; cursor:pointer;';
+      document.body.appendChild(hat);
+      setTimeout(() => hat.remove(), 5000);
+    });
+
+    // ================= 18. ИМПАЛА =================
+    addEasterEgg('impala', 'SUPERNATURAL', () => {
+      if (!canActivate('impala')) return;
+      setActivated('impala');
+      const impala = document.createElement('div');
+      impala.className = 'impala-container';
+      impala.innerHTML = `
+        <div class="impala">
+          <div class="impala-front-bumper"></div>
+          <div class="impala-grill"><div class="headlight"></div>${Array(5).fill('<div class="grill-line"></div>').join('')}</div>
+          <div class="impala-body">
+            <div class="impala-windows">
+              <div class="window window-front"></div>
+              <div class="window window-rear"></div>
+              <div class="window window-back"></div>
+            </div>
+          </div>
+          <div class="impala-rear-bumper"></div>
+          <div class="wheel wheel-front"></div>
+          <div class="wheel wheel-rear"></div>
+        </div>
+      `;
+      document.body.appendChild(impala);
+      setTimeout(() => impala.remove(), 5000);
+      showMessage('Driver picks the music, shotgun shuts his cakehole', '#fff', 4000);
+    });
+
+    console.log('Все пасхалки загружены. Удачи!');
+  })();
+</script>
   
 </body>
 </html>
