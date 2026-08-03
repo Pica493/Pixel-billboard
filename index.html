@@ -445,7 +445,7 @@
 
   window.addEventListener('keydown', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
+console.log('Клавиша:', e.key, 'Цель:', e.target.tagName);
     // Добавляем в буфер
     inputBuffer.push(e.key.toUpperCase());
     clearTimeout(bufferClearTimer);
