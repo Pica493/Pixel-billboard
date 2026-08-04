@@ -259,7 +259,7 @@ window.canvas = canvas;
 window.soldPixels = soldPixels;
 window.redraw = redraw;
   </script>
-  <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА ========== -->
+ <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + МАТРИЦА ========== -->
 <style>
   #effects-layer {
     position: absolute;
@@ -298,55 +298,20 @@ window.redraw = redraw;
   body.night-mode { background-color: #0a1a2e !important; color: #c0d0e0 !important; }
   body.night-mode canvas { filter: brightness(0.9) hue-rotate(5deg); }
 
-  /* ПОГОДНЫЕ ЧАСТИЦЫ */
   .snowflake, .raindrop, .leaf, .comet {
-    position: absolute;
-    top: -30px;
-    z-index: 300;
-    pointer-events: none;
-    animation-timing-function: linear;
+    position: absolute; top: -30px; z-index: 300; pointer-events: none; animation-timing-function: linear;
   }
-  .snowflake {
-    width: 8px; height: 8px;
-    background: white;
-    border-radius: 50%;
-    animation: snowfall linear infinite;
-  }
-  .raindrop {
-    width: 2px; height: 12px;
-    background: #a0c0f0;
-    animation: rainfall linear infinite;
-  }
-  .leaf {
-    width: 12px; height: 12px;
-    background: orange;
-    border-radius: 50% 0;
-    animation: leafall linear infinite;
-  }
+  .snowflake { width: 8px; height: 8px; background: white; border-radius: 50%; animation: snowfall linear infinite; }
+  .raindrop { width: 2px; height: 12px; background: #a0c0f0; animation: rainfall linear infinite; }
+  .leaf { width: 12px; height: 12px; background: orange; border-radius: 50% 0; animation: leafall linear infinite; }
   .comet {
-    width: 3px; height: 3px;
-    background: white;
-    border-radius: 50%;
-    box-shadow: 0 0 6px 2px #ffd700;
-    animation: cometFall linear infinite;
+    width: 3px; height: 3px; background: white; border-radius: 50%;
+    box-shadow: 0 0 6px 2px #ffd700; animation: cometFall linear infinite;
   }
-  @keyframes snowfall {
-    0% { transform: translateY(0) rotate(0deg); }
-    100% { transform: translateY(100vh) rotate(360deg); }
-  }
-  @keyframes rainfall {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(100vh); }
-  }
-  @keyframes leafall {
-    0% { transform: translateY(0) rotate(0deg); }
-    100% { transform: translateY(100vh) rotate(720deg); }
-  }
-  @keyframes cometFall {
-    0% { transform: translate(0, 0) scale(1); opacity: 1; }
-    70% { opacity: 1; }
-    100% { transform: translate(-80px, 80vh) scale(0.2); opacity: 0; }
-  }
+  @keyframes snowfall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(360deg); } }
+  @keyframes rainfall { 0% { transform: translateY(0); } 100% { transform: translateY(100vh); } }
+  @keyframes leafall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(720deg); } }
+  @keyframes cometFall { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-80px, 80vh) scale(0.2); opacity: 0; } }
 </style>
 
 <div id="effects-layer"></div>
@@ -358,169 +323,125 @@ window.redraw = redraw;
 
 <script>
 (function(){
-  // ================= ОСНОВНЫЕ ЭЛЕМЕНТЫ =================
   const effectsLayer = document.getElementById('effects-layer');
-// ---------- НАЧАЛО БЛОКА ПАСХАЛОК ----------
-const canvas = window.canvas;
-if (!canvas) {
-  console.warn('Пасхалки: canvas не найден. Убедитесь, что объявлены window.canvas, window.soldPixels, window.redraw');
-  return;
-}
-const ctx = canvas.getContext('2d');
-const container = document.getElementById('canvas-container');
+  const easterInput = document.getElementById('easter-input');
 
-// Функция восстановления холста (использует глобальную redraw)
-function safeRedraw() {
-  if (typeof window.redraw === 'function') {
-    window.redraw();
-  } else {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    if (typeof window.soldPixels !== 'undefined') {
-      window.soldPixels.forEach(b => {
-        const img = new Image();
-        img.src = b.img;
-        img.onload = () => ctx.drawImage(img, b.x, b.y, b.w, b.h);
-      });
+  // ---------- ПАСХАЛКИ ----------
+  const canvas = window.canvas;
+  if (!canvas) { console.warn('canvas не найден'); return; }
+  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('canvas-container');
+
+  function safeRedraw() {
+    if (typeof window.redraw === 'function') window.redraw();
+    else {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      if (typeof window.soldPixels !== 'undefined') {
+        window.soldPixels.forEach(b => {
+          const img = new Image(); img.src = b.img;
+          img.onload = () => ctx.drawImage(img, b.x, b.y, b.w, b.h);
+        });
+      }
     }
   }
-}
 
-// Система пасхалок
-const GLOBAL_COOLDOWN = 3000;
-const INDIVIDUAL_COOLDOWN = 60000;
-let lastGlobalActivation = 0;
-const cooldowns = {};
-
-function canActivate(name) {
-  const now = Date.now();
-  if (now - lastGlobalActivation < GLOBAL_COOLDOWN) return false;
-  if (cooldowns[name] && now - cooldowns[name] < INDIVIDUAL_COOLDOWN) return false;
-  return true;
-}
-function setActivated(name) {
-  const now = Date.now();
-  lastGlobalActivation = now;
-  cooldowns[name] = now;
-}
-
-const easterEggs = [];
-function addEasterEgg(name, combo, action) {
-  easterEggs.push({ name, combo: combo.toUpperCase(), action });
-}
-
-// Обработка поля ввода (лупы)
-let inputTimer;
-easterInput.addEventListener('input', function() {
-  clearTimeout(inputTimer);
-  const val = easterInput.value.trim().toUpperCase();
-  if (val.length > 0) {
-    inputTimer = setTimeout(() => {
-      activateCombo(val);
-      easterInput.value = '';
-    }, 800);
+  const GLOBAL_COOLDOWN = 3000, INDIVIDUAL_COOLDOWN = 60000;
+  let lastGlobalActivation = 0, cooldowns = {};
+  function canActivate(name) {
+    const now = Date.now();
+    if (now - lastGlobalActivation < GLOBAL_COOLDOWN) return false;
+    if (cooldowns[name] && now - cooldowns[name] < INDIVIDUAL_COOLDOWN) return false;
+    return true;
   }
-});
+  function setActivated(name) { lastGlobalActivation = Date.now(); cooldowns[name] = Date.now(); }
 
-easterInput.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
+  const easterEggs = [];
+  function addEasterEgg(name, combo, action) {
+    easterEggs.push({ name, combo: combo.toUpperCase(), action });
+  }
+
+  // Обработка лупы
+  let inputTimer;
+  easterInput.addEventListener('input', function() {
     clearTimeout(inputTimer);
     const val = easterInput.value.trim().toUpperCase();
     if (val.length > 0) {
-      activateCombo(val);
-      easterInput.value = '';
+      inputTimer = setTimeout(() => { activateCombo(val); easterInput.value = ''; }, 800);
     }
-  }
-});
-
-function activateCombo(combo) {
-  for (let egg of easterEggs) {
-    if (combo.includes(egg.combo)) {
-      if (canActivate(egg.name)) {
-        setActivated(egg.name);
-        egg.action();
-        return true;
-      }
-    }
-  }
-  return false;
-}
-// ---------- КОНЕЦ БЛОКА ПАСХАЛОК ----------
-// ================= ПАСХАЛКА: МАТРИЦА =================
-function triggerMatrixRain() {
-  const matrixCanvas = document.createElement('canvas');
-  matrixCanvas.width = canvas.width;
-  matrixCanvas.height = canvas.height;
-  matrixCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:300;';
-  container.appendChild(matrixCanvas);
-  const mctx = matrixCanvas.getContext('2d');
-  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789';
-  const fontSize = 15;
-  const columns = Math.floor(matrixCanvas.width / fontSize);
-  const drops = Array(columns).fill(0);
-
-  const draw = () => {
-    mctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    mctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
-    mctx.fillStyle = '#0f0';
-    mctx.font = fontSize + 'px monospace';
-    for (let i = 0; i < drops.length; i++) {
-      const text = chars[Math.floor(Math.random() * chars.length)];
-      mctx.fillText(text, i * fontSize, drops[i] * fontSize);
-      if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
-        drops[i] = 0;
-      }
-      drops[i]++;
-    }
-  };
-
-  const interval = setInterval(draw, 40);
-  setTimeout(() => {
-    clearInterval(interval);
-    matrixCanvas.remove();
-    safeRedraw();
-  }, 4000);
-}
-// Отслеживание клавиш для Konami
-let inputBuffer = [];
-let bufferClearTimer;
-
-window.addEventListener('keydown', function(e) {
-  // Не обрабатываем, если печатаем в поле ввода
-  if (e.target === easterInput) return;
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-  inputBuffer.push(e.key.toUpperCase());
-  clearTimeout(bufferClearTimer);
-  bufferClearTimer = setTimeout(() => { inputBuffer = []; }, 2000);
-  if (inputBuffer.length > 30) inputBuffer = inputBuffer.slice(-20);
-
-  if (checkKonami()) {
-    if (canActivate('konami')) {
-      setActivated('konami');
-      triggerMatrixRain();
-      inputBuffer = [];
-    }
-  }
-});
-
-function checkKonami() {
-  const code = ['ARROWUP','ARROWUP','ARROWDOWN','ARROWDOWN','ARROWLEFT','ARROWRIGHT','ARROWLEFT','ARROWRIGHT','KEYB','KEYA'];
-  if (inputBuffer.length < 10) return false;
-  const tail = inputBuffer.slice(-10).map(k => {
-    if (k === 'UP') return 'ARROWUP';
-    if (k === 'DOWN') return 'ARROWDOWN';
-    if (k === 'LEFT') return 'ARROWLEFT';
-    if (k === 'RIGHT') return 'ARROWRIGHT';
-    return k;
   });
-  return tail.join(',') === code.join(',');
-}
-// Регистрируем пасхалку (для лупы)
-addEasterEgg('matrix', 'MATRIX', triggerMatrixRain);
-addEasterEgg('matrix', 'KONAMI', triggerMatrixRain);
-  // ================= 1. КАЛЕНДАРЬ И ВРЕМЯ МСК =================
+  easterInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      clearTimeout(inputTimer);
+      const val = easterInput.value.trim().toUpperCase();
+      if (val.length > 0) { activateCombo(val); easterInput.value = ''; }
+    }
+  });
+
+  function activateCombo(combo) {
+    for (let egg of easterEggs) {
+      if (combo.includes(egg.combo)) {
+        if (canActivate(egg.name)) { setActivated(egg.name); egg.action(); return true; }
+      }
+    }
+    return false;
+  }
+
+  // Konami с клавиатуры
+  let inputBuffer = [], bufferClearTimer;
+  window.addEventListener('keydown', function(e) {
+    if (e.target === easterInput) return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    inputBuffer.push(e.key.toUpperCase());
+    clearTimeout(bufferClearTimer);
+    bufferClearTimer = setTimeout(() => { inputBuffer = []; }, 2000);
+    if (inputBuffer.length > 30) inputBuffer = inputBuffer.slice(-20);
+    if (checkKonami()) {
+      if (canActivate('konami')) { setActivated('konami'); triggerMatrixRain(); inputBuffer = []; }
+    }
+  });
+
+  function checkKonami() {
+    const code = ['ARROWUP','ARROWUP','ARROWDOWN','ARROWDOWN','ARROWLEFT','ARROWRIGHT','ARROWLEFT','ARROWRIGHT','KEYB','KEYA'];
+    if (inputBuffer.length < 10) return false;
+    const tail = inputBuffer.slice(-10).map(k => {
+      if (k === 'UP') return 'ARROWUP';
+      if (k === 'DOWN') return 'ARROWDOWN';
+      if (k === 'LEFT') return 'ARROWLEFT';
+      if (k === 'RIGHT') return 'ARROWRIGHT';
+      return k;
+    });
+    return tail.join(',') === code.join(',');
+  }
+
+  // Сама Матрица
+  function triggerMatrixRain() {
+    const matrixCanvas = document.createElement('canvas');
+    matrixCanvas.width = canvas.width; matrixCanvas.height = canvas.height;
+    matrixCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:300;';
+    container.appendChild(matrixCanvas);
+    const mctx = matrixCanvas.getContext('2d');
+    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789';
+    const fontSize = 15, columns = Math.floor(matrixCanvas.width / fontSize);
+    const drops = Array(columns).fill(0);
+    const draw = () => {
+      mctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; mctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+      mctx.fillStyle = '#0f0'; mctx.font = fontSize + 'px monospace';
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        mctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    };
+    const interval = setInterval(draw, 40);
+    setTimeout(() => { clearInterval(interval); matrixCanvas.remove(); safeRedraw(); }, 4000);
+  }
+
+  addEasterEgg('matrix', 'MATRIX', triggerMatrixRain);
+  addEasterEgg('matrix', 'KONAMI', triggerMatrixRain);
+
+  // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
     const now = new Date();
     const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
@@ -528,181 +449,80 @@ addEasterEgg('matrix', 'KONAMI', triggerMatrixRain);
     const timeStr = msk.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     let clockEl = document.getElementById('msk-clock');
     if (!clockEl) {
-      clockEl = document.createElement('div');
-      clockEl.id = 'msk-clock';
+      clockEl = document.createElement('div'); clockEl.id = 'msk-clock';
       clockEl.style.cssText = 'position:fixed; top:10px; right:10px; color:white; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:5px; font-family:monospace; z-index:500;';
       document.body.appendChild(clockEl);
     }
     clockEl.innerHTML = `${dateStr}<br>${timeStr} MSK`;
   }
-  setInterval(updateClock, 1000);
-  updateClock();
+  setInterval(updateClock, 1000); updateClock();
 
-  // ================= 2. НОЧНОЙ РЕЖИМ =================
+  // ---------- НОЧНОЙ РЕЖИМ ----------
   function checkNightMode() {
     const now = new Date();
     const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
-    if (msk.getHours() >= 22 || msk.getHours() < 6) {
-      document.body.classList.add('night-mode');
-    } else {
-      document.body.classList.remove('night-mode');
-    }
+    if (msk.getHours() >= 22 || msk.getHours() < 6) document.body.classList.add('night-mode');
+    else document.body.classList.remove('night-mode');
   }
-  setInterval(checkNightMode, 60000);
-  checkNightMode();
+  setInterval(checkNightMode, 60000); checkNightMode();
 
-  // ================= 3. ПОГОДА (дождь, снег, листья, кометы) =================
-  let currentWeather = null;
-  let weatherTimeout = null;
-  let weatherParticles = [];
-
-  function clearWeather() {
-    effectsLayer.querySelectorAll('.weather-particle').forEach(el => el.remove());
-    weatherParticles = [];
-  }
-
-  function startSnow() {
-    clearWeather();
-    for (let i = 0; i < 50; i++) {
-      const flake = document.createElement('div');
-      flake.className = 'snowflake weather-particle';
-      flake.style.left = Math.random() * 100 + '%';
-      flake.style.animationDuration = (2 + Math.random() * 3) + 's';
-      effectsLayer.appendChild(flake);
-      weatherParticles.push(flake);
-    }
-  }
-
-  function startRain() {
-    clearWeather();
-    for (let i = 0; i < 40; i++) {
-      const drop = document.createElement('div');
-      drop.className = 'raindrop weather-particle';
-      drop.style.left = Math.random() * 100 + '%';
-      drop.style.animationDuration = (1 + Math.random() * 1.5) + 's';
-      effectsLayer.appendChild(drop);
-      weatherParticles.push(drop);
-    }
-  }
-
-  function startLeaves() {
-    clearWeather();
-    for (let i = 0; i < 25; i++) {
-      const leaf = document.createElement('div');
-      leaf.className = 'leaf weather-particle';
-      leaf.style.left = Math.random() * 100 + '%';
-      leaf.style.animationDuration = (3 + Math.random() * 4) + 's';
-      effectsLayer.appendChild(leaf);
-      weatherParticles.push(leaf);
-    }
-  }
-
-  function startComets() {
-    clearWeather();
-    for (let i = 0; i < 8; i++) {
-      const comet = document.createElement('div');
-      comet.className = 'comet weather-particle';
-      comet.style.left = Math.random() * 90 + '%';
-      comet.style.top = Math.random() * 30 + '%';
-      comet.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
-      effectsLayer.appendChild(comet);
-      weatherParticles.push(comet);
-    }
-  }
-
+  // ---------- ПОГОДА ----------
+  let weatherTimeout;
+  function clearWeather() { effectsLayer.querySelectorAll('.weather-particle').forEach(el => el.remove()); }
+  function startSnow() { clearWeather(); for(let i=0;i<50;i++){ const f=document.createElement('div'); f.className='snowflake weather-particle'; f.style.left=Math.random()*100+'%'; f.style.animationDuration=(2+Math.random()*3)+'s'; effectsLayer.appendChild(f); } }
+  function startRain() { clearWeather(); for(let i=0;i<40;i++){ const d=document.createElement('div'); d.className='raindrop weather-particle'; d.style.left=Math.random()*100+'%'; d.style.animationDuration=(1+Math.random()*1.5)+'s'; effectsLayer.appendChild(d); } }
+  function startLeaves() { clearWeather(); for(let i=0;i<25;i++){ const l=document.createElement('div'); l.className='leaf weather-particle'; l.style.left=Math.random()*100+'%'; l.style.animationDuration=(3+Math.random()*4)+'s'; effectsLayer.appendChild(l); } }
+  function startComets() { clearWeather(); for(let i=0;i<8;i++){ const c=document.createElement('div'); c.className='comet weather-particle'; c.style.left=Math.random()*90+'%'; c.style.top=Math.random()*30+'%'; c.style.animationDuration=(1.5+Math.random()*1.5)+'s'; effectsLayer.appendChild(c); } }
   function setWeather(type, durationMs) {
     clearWeather();
-    if (type === 'snow') startSnow();
-    else if (type === 'rain') startRain();
-    else if (type === 'leaves') startLeaves();
-    else if (type === 'comets') startComets();
-    else return;
-
-    currentWeather = type;
-
-    weatherTimeout = setTimeout(() => {
-      clearWeather();
-      currentWeather = null;
-      scheduleNextWeather();
-    }, durationMs);
+    if (type==='snow') startSnow(); else if(type==='rain') startRain(); else if(type==='leaves') startLeaves(); else if(type==='comets') startComets(); else return;
+    weatherTimeout = setTimeout(() => { clearWeather(); scheduleNextWeather(); }, durationMs);
   }
-
   function scheduleNextWeather() {
-    const delay = (3600000 + Math.random() * 7200000);
+    const delay = 3600000 + Math.random()*7200000;
     setTimeout(() => {
-      const r = Math.random();
-      let type;
-      if (r < 0.1) {
-        type = 'comets';
-      } else if (r < 0.4) {
-        type = 'snow';
-      } else if (r < 0.7) {
-        type = 'rain';
-      } else {
-        type = 'leaves';
-      }
-
-      let durationMs;
-      if (type === 'comets') {
-        durationMs = 120000 + Math.random() * 60000;
-      } else {
-        durationMs = 300000 + Math.random() * 300000;
-      }
-
-      setWeather(type, durationMs);
+      const r = Math.random(); let type;
+      if(r<0.1) type='comets'; else if(r<0.4) type='snow'; else if(r<0.7) type='rain'; else type='leaves';
+      const dur = type==='comets' ? 120000+Math.random()*60000 : 300000+Math.random()*300000;
+      setWeather(type, dur);
     }, delay);
   }
+  setTimeout(scheduleNextWeather, 10000);
 
-  setTimeout(() => {
-    scheduleNextWeather();
-  }, 10000);
-
-  // ================= 4. DVD-ЗАСТАВКА (медленнее) =================
+  // ---------- DVD-ЗАСТАВКА ----------
   let inactivityTimer;
   function resetInactivity() {
     clearTimeout(inactivityTimer);
-    const dvd = document.getElementById('dvd-logo');
-    if (dvd) dvd.remove();
+    const dvd = document.getElementById('dvd-logo'); if(dvd) dvd.remove();
     inactivityTimer = setTimeout(() => {
-      const logo = document.createElement('div');
-      logo.id = 'dvd-logo';
-      logo.textContent = 'Купи пиксель';
+      const logo = document.createElement('div'); logo.id='dvd-logo'; logo.textContent='Купи пиксель';
       logo.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#ff0; color:#000; padding:10px; font-family:monospace; z-index:600; border-radius:5px;';
       document.body.appendChild(logo);
-      let x = Math.random() * window.innerWidth;
-      let y = Math.random() * window.innerHeight;
-      let dx = 1.2, dy = 1.2;   // <-- скорость уменьшена
+      let x = Math.random()*window.innerWidth, y = Math.random()*window.innerHeight;
+      let dx = 1.2, dy = 1.2;
       function animate() {
         x += dx; y += dy;
-        if (x <= 0 || x + logo.offsetWidth >= window.innerWidth) { dx *= -1; checkCorner(x,y); }
-        if (y <= 0 || y + logo.offsetHeight >= window.innerHeight) { dy *= -1; checkCorner(x,y); }
-        logo.style.left = x + 'px';
-        logo.style.top = y + 'px';
-        if (document.getElementById('dvd-logo')) requestAnimationFrame(animate);
+        if(x<=0 || x+logo.offsetWidth>=window.innerWidth) { dx*=-1; checkCorner(x,y); }
+        if(y<=0 || y+logo.offsetHeight>=window.innerHeight) { dy*=-1; checkCorner(x,y); }
+        logo.style.left=x+'px'; logo.style.top=y+'px';
+        if(document.getElementById('dvd-logo')) requestAnimationFrame(animate);
       }
       function checkCorner(x,y) {
-        if ((x <= 1 || x + logo.offsetWidth >= window.innerWidth-1) && (y <= 1 || y + logo.offsetHeight >= window.innerHeight-1)) {
-          const msg = document.createElement('div');
-          msg.textContent = 'Точно в угол!';
-          Object.assign(msg.style, {
-            position: 'fixed', top: '20%', left: '50%', transform: 'translateX(-50%)',
-            color: '#ff0', background: 'rgba(0,0,0,0.8)', padding: '0.3rem 1rem',
-            borderRadius: '5px', zIndex: 700, fontWeight: 'bold', pointerEvents: 'none'
-          });
-          document.body.appendChild(msg);
-          setTimeout(() => msg.remove(), 1000);
+        if((x<=1||x+logo.offsetWidth>=window.innerWidth-1) && (y<=1||y+logo.offsetHeight>=window.innerHeight-1)) {
+          const msg = document.createElement('div'); msg.textContent='Точно в угол!';
+          Object.assign(msg.style, { position:'fixed',top:'20%',left:'50%',transform:'translateX(-50%)',color:'#ff0',background:'rgba(0,0,0,0.8)',padding:'0.3rem 1rem',borderRadius:'5px',zIndex:700,fontWeight:'bold',pointerEvents:'none' });
+          document.body.appendChild(msg); setTimeout(()=>msg.remove(),1000);
         }
       }
       animate();
-      window.addEventListener('mousemove', () => logo.remove(), { once: true });
+      window.addEventListener('mousemove', ()=>logo.remove(), { once:true });
     }, 30000);
   }
   window.addEventListener('mousemove', resetInactivity);
   window.addEventListener('keydown', resetInactivity);
   resetInactivity();
-
 })();
-</script>
-
+</script>            
+        
 </body>
 </html>
