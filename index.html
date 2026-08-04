@@ -259,9 +259,9 @@ window.canvas = canvas;
 window.soldPixels = soldPixels;
 window.redraw = redraw;
   </script>
-     <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + ВСЕ ПАСХАЛКИ ========== -->
+  <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + ВСЕ ПАСХАЛКИ ========== -->
 <style>
-  #effects-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; overflow: hidden; }
+  #effects-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; overflow: hidden; }
   #easter-input-container { position: fixed; top: 15px; left: 15px; z-index: 9999; display: flex; align-items: center; background: rgba(0,0,0,0.7); border-radius: 20px; padding: 5px 10px; backdrop-filter: blur(5px); box-shadow: 0 0 10px rgba(0,255,0,0.3); }
   #easter-input-container .icon { font-size: 18px; margin-right: 5px; opacity: 0.8; }
   #easter-input { background: transparent; border: none; color: #0f0; font-family: monospace; font-size: 14px; width: 120px; outline: none; }
@@ -280,27 +280,213 @@ window.redraw = redraw;
   @keyframes leafall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(720deg); } }
   @keyframes cometFall { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-80px, 80vh) scale(0.2); opacity: 0; } }
 
-  /* Стили для шляпы и Импалы */
-  .heisenberg-hat .hat-crown { width:150px; height:100px; background:linear-gradient(175deg, #3a3a3a 5%, #1a1a1a 50%, #0d0d0d 95%); border-radius:40% 40% 0 0 / 50% 50% 0 0; margin:0 auto; position:relative; top:-20px; }
-  .heisenberg-hat .hat-band { position:absolute; bottom:25px; width:100%; height:18px; background:linear-gradient(180deg, #b8860b, #8b6508 50%, #5c4305); }
-  .heisenberg-hat .hat-brim { width:240px; height:50px; background:radial-gradient(ellipse at center, #2a2a2a 0%, #111 80%); border-radius:50%; margin:0 auto; }
+  /* Шляпа Хайзенберга (цельная) */
+  .heisenberg-hat {
+    width: 200px; height: 100px;
+    background: linear-gradient(to bottom, #2a2a2a 0%, #1a1a1a 50%, #0d0d0d 100%);
+    border-radius: 50% / 30%;
+    box-shadow: 0 15px 25px rgba(0,0,0,0.6);
+    position: relative;
+    margin: 0 auto;
+  }
+  .heisenberg-hat::after {
+    content: '';
+    position: absolute;
+    top: 35%;
+    left: 0;
+    width: 100%;
+    height: 16px;
+    background: linear-gradient(180deg, #b8860b, #8b6508 50%, #5c4305);
+    border-radius: 2px;
+  }
 
-  .impala-container { position:fixed; z-index:500; top:50%; left:-400px; transform:translateY(-50%); animation:impala-drive 5s linear forwards; }
-  @keyframes impala-drive { from { left:-400px; } to { left:110%; } }
-  .impala { display:flex; align-items:center; }
-  .impala-front-bumper { width:30px; height:60px; background:linear-gradient(90deg, #aaa, #ddd 30%, #fff 50%, #ddd 70%, #888); border-radius:10px 0 0 10px; }
-  .impala-rear-bumper { width:25px; height:55px; background:linear-gradient(90deg, #888, #ddd 30%, #fff 50%, #ccc 70%, #777); border-radius:0 10px 10px 0; }
-  .impala-grill { width:40px; height:50px; background:linear-gradient(180deg, #222, #000); border-radius:5px 0 0 5px; display:flex; flex-direction:column; justify-content:space-evenly; padding:5px; }
-  .headlight { width:12px; height:12px; background:radial-gradient(circle, #fff 20%, #ffd700 60%, #aa8800 100%); border-radius:50%; }
-  .impala-body { width:320px; height:90px; background:linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%); border-radius:5px 40px 15px 5px / 30px 60px 20px 30px; display:flex; align-items:center; padding-left:15px; }
-  .impala-windows { display:flex; gap:8px; }
-  .window { height:35px; background:linear-gradient(180deg, #7ec8e3 0%, #2c5f7a 100%); border-radius:8px 8px 3px 3px; }
-  .window-front { width:55px; } .window-rear { width:65px; } .window-back { width:50px; height:30px; border-radius:3px 15px 3px 3px; }
-  .wheel { width:32px; height:32px; background:radial-gradient(circle at 35% 35%, #eee, #444 60%, #111 100%); border-radius:50%; position:absolute; bottom:-15px; }
-  .wheel-front { left:50px; } .wheel-rear { right:60px; }
+  /* Покебол */
+  .pokeball {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(to bottom, #ff3b3b 50%, #ffffff 50%);
+    border: 4px solid #222;
+    position: relative;
+    margin: auto;
+  }
+  .pokeball::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px; height: 20px;
+    background: #fff;
+    border: 3px solid #222;
+    border-radius: 50%;
+  }
 
-  @keyframes runRight { from { left:-50px; } to { left:110%; } }
-  @keyframes tardisFade { 0%{opacity:0;transform:translate(-50%,-50%) scale(0);} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.2);} 100%{opacity:0;transform:translate(-50%,-50%) scale(1);} }
+  /* Пирамидоголовый */
+  .pyramid-head {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .pyramid-body {
+    width: 60px; height: 100px;
+    background: #777;
+    margin-top: -10px;
+  }
+  .pyramid-triangle {
+    width: 0; height: 0;
+    border-left: 40px solid transparent;
+    border-right: 40px solid transparent;
+    border-bottom: 60px solid #b22222;
+  }
+
+  /* Пикачу */
+  .pikachu-container {
+    position: fixed;
+    top: 50%; left: -120px;
+    transform: translateY(-50%);
+    z-index: 500;
+    animation: runRight 4s linear forwards;
+    cursor: pointer;
+  }
+  .pikachu-head {
+    width: 80px; height: 80px;
+    background: #ffd700;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 4px 0 #cc9900;
+  }
+  .pikachu-ear-left, .pikachu-ear-right {
+    position: absolute;
+    top: -30px;
+    width: 0; height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 35px solid #222;
+  }
+  .pikachu-ear-left { left: 5px; transform: rotate(-15deg); }
+  .pikachu-ear-right { right: 5px; transform: rotate(15deg); }
+  .pikachu-eye {
+    position: absolute;
+    top: 25px;
+    width: 10px; height: 10px;
+    background: #222;
+    border-radius: 50%;
+  }
+  .eye-left { left: 20px; }
+  .eye-right { right: 20px; }
+  .pikachu-cheek {
+    position: absolute;
+    top: 45px;
+    width: 15px; height: 10px;
+    background: #ff0000;
+    border-radius: 50%;
+  }
+  .cheek-left { left: 5px; }
+  .cheek-right { right: 5px; }
+  .pikachu-mouth {
+    position: absolute;
+    top: 55px; left: 50%;
+    transform: translateX(-50%);
+    width: 10px; height: 6px;
+    border-bottom: 2px solid #222;
+    border-radius: 0 0 10px 10px;
+  }
+
+  /* Кубик Марио */
+  .mario-block {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px; height: 80px;
+    background: #f5a623;
+    border: 4px solid #8b4513;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: white;
+    text-shadow: 2px 2px 0 #000;
+    cursor: pointer;
+    z-index: 500;
+  }
+  .mario-coin {
+    position: absolute;
+    width: 30px; height: 30px;
+    background: gold;
+    border-radius: 50%;
+    animation: coinBounce 0.5s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes coinBounce {
+    0% { transform: translateY(0) scale(0.5); opacity: 1; }
+    100% { transform: translateY(-80px) scale(1); opacity: 0; }
+  }
+
+  /* ТАРДИС */
+  .tardis-box {
+    width: 100px; height: 140px;
+    background: #1a3b5c;
+    border: 4px solid #0d2137;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-family: 'Arial', sans-serif;
+    font-size: 10px;
+    text-align: center;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+  .tardis-box .windows {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 10px 0;
+  }
+  .tardis-box .window-row {
+    display: flex;
+    gap: 5px;
+  }
+  .tardis-box .window-pane {
+    width: 20px; height: 20px;
+    background: #87ceeb;
+    border: 2px solid white;
+  }
+
+  /* Пентаграмма Supernatural */
+  .pentagram {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 350px; height: 350px;
+    animation: pentagramPulse 2s infinite;
+  }
+  @keyframes pentagramPulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+  }
+  .pentagram svg {
+    width: 100%;
+    height: 100%;
+  }
+  .pentagram-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 15px black;
+    font-family: 'Times New Roman', serif;
+    letter-spacing: 3px;
+  }
 </style>
 
 <div id="effects-layer"></div>
@@ -315,7 +501,6 @@ window.redraw = redraw;
   const effectsLayer = document.getElementById('effects-layer');
   const easterInput = document.getElementById('easter-input');
 
-  // ---------- ПАСХАЛКИ ----------
   const canvas = window.canvas;
   if (!canvas) { console.warn('canvas не найден'); return; }
   const ctx = canvas.getContext('2d');
@@ -361,7 +546,7 @@ window.redraw = redraw;
     easterEggs.push({ name, combo: combo.toUpperCase(), action });
   }
 
-  // Обработка лупы
+  // Лупа
   let inputTimer;
   easterInput.addEventListener('input', function() {
     clearTimeout(inputTimer);
@@ -392,9 +577,7 @@ window.redraw = redraw;
   }
 
   // ================= ПАСХАЛКИ =================
-  // Все функции теперь только действие, без проверок canActivate
-
-  // Матрица
+  // matrix
   function triggerMatrixRain() {
     const matrixCanvas = document.createElement('canvas');
     matrixCanvas.width = canvas.width; matrixCanvas.height = canvas.height;
@@ -419,23 +602,42 @@ window.redraw = redraw;
   }
   addEasterEgg('matrix', 'MATRIX', triggerMatrixRain);
 
-  // Портал Блич
+  // bleach – бабочки разлетаются
   function triggerBleachPortal() {
-    const portal = document.createElement('div');
-    portal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:400;';
-    document.body.appendChild(portal);
-    for (let i=0; i<30; i++) {
-      const butterfly = document.createElement('div'); butterfly.textContent = '🦋';
-      butterfly.style.cssText = `position:absolute; left:${Math.random()*100}%; top:${Math.random()*100}%; font-size:20px; animation: fly 2s linear infinite;`;
-      portal.appendChild(butterfly);
+    const count = 30;
+    for (let i = 0; i < count; i++) {
+      const butterfly = document.createElement('div');
+      butterfly.textContent = '🦋';
+      butterfly.style.cssText = `
+        position: fixed;
+        left: ${Math.random() * 100}%;
+        top: ${Math.random() * 100}%;
+        font-size: 24px;
+        transition: transform 2s, opacity 2s;
+        z-index: 500;
+        pointer-events: none;
+      `;
+      document.body.appendChild(butterfly);
+      // Запускаем движение через небольшой таймаут
+      setTimeout(() => {
+        butterfly.style.transform = `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`;
+        butterfly.style.opacity = '0';
+      }, 100);
+      // Удаляем через 2.5 секунды
+      setTimeout(() => butterfly.remove(), 2500);
     }
-    ctx.save(); ctx.fillStyle = 'rgba(0,100,255,0.5)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    setTimeout(() => { portal.remove(); ctx.restore(); safeRedraw(); }, 3000);
-    showMessage('Врата Сенкаймон открыты', '#00f');
+    // Синий оттенок холста
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,100,255,0.5)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    setTimeout(() => {
+      ctx.restore();
+      safeRedraw();
+    }, 3000);
   }
   addEasterEgg('bleach', 'BLEACH', triggerBleachPortal);
 
-  // Змейка
+  // snake – без изменений
   function startSnake() {
     const snakeCanvas = document.createElement('canvas');
     snakeCanvas.width = canvas.width; snakeCanvas.height = canvas.height;
@@ -495,92 +697,169 @@ window.redraw = redraw;
   }
   addEasterEgg('snake', 'SNAKE', startSnake);
 
-  // Silent Hill
-  function silentHill() { showMessage('Пирамидоголовый приближается...', '#f00', 5000); }
+  // silent / pyramid
+  function silentHill() {
+    const ph = document.createElement('div');
+    ph.className = 'pyramid-head';
+    ph.innerHTML = `
+      <div class="pyramid-triangle"></div>
+      <div class="pyramid-body"></div>
+    `;
+    document.body.appendChild(ph);
+    showMessage('Пирамидоголовый приближается...', '#f00', 5000);
+    setTimeout(() => ph.remove(), 6000);
+  }
   addEasterEgg('silenthill', 'SILENT', silentHill);
   addEasterEgg('silenthill', 'PYRAMID', silentHill);
 
-  // Покемоны
+  // pikachu
   function pikachuRun() {
-    const pika = document.createElement('div'); pika.textContent = '⚡🐱';
-    pika.style.cssText = 'position:fixed; top:50%; left:-50px; font-size:40px; z-index:500; animation: runRight 4s linear forwards;';
+    const pika = document.createElement('div');
+    pika.className = 'pikachu-container';
+    pika.innerHTML = `
+      <div class="pikachu-head">
+        <div class="pikachu-ear-left"></div>
+        <div class="pikachu-ear-right"></div>
+        <div class="pikachu-eye eye-left"></div>
+        <div class="pikachu-eye eye-right"></div>
+        <div class="pikachu-cheek cheek-left"></div>
+        <div class="pikachu-cheek cheek-right"></div>
+        <div class="pikachu-mouth"></div>
+      </div>
+    `;
     document.body.appendChild(pika);
-    pika.addEventListener('click', () => showMessage('Pika-pika!', '#ff0'));
+    pika.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showMessage('Pika-pika!', '#ff0');
+    });
     setTimeout(() => pika.remove(), 4000);
   }
   addEasterEgg('pikachu', 'PIKACHU', pikachuRun);
 
+  // pokeball
   function pokeball() {
-    const ball = document.createElement('div'); ball.textContent = '🔴⚪';
-    ball.style.cssText = 'position:fixed; top:50%; left:50%; font-size:30px; z-index:500;';
+    const ball = document.createElement('div');
+    ball.className = 'pokeball';
+    ball.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:500;';
     document.body.appendChild(ball);
     setTimeout(() => ball.remove(), 3000);
   }
   addEasterEgg('pokeball', 'POKEBALL', pokeball);
 
-  // Mario / Luigi (просто сообщения)
-  addEasterEgg('mario', 'MARIO', () => { showMessage('Марио!','#f00',2000); });
-  addEasterEgg('luigi', 'LUIGI', () => { showMessage('Луиджи!','#0f0',2000); });
+  // mario block
+  function marioBlock() {
+    const block = document.createElement('div');
+    block.className = 'mario-block';
+    block.textContent = '?';
+    let hits = 0;
+    block.addEventListener('click', function(e) {
+      e.stopPropagation();
+      hits++;
+      // Создаём монетку
+      const coin = document.createElement('div');
+      coin.className = 'mario-coin';
+      coin.style.left = '50%';
+      coin.style.top = '50%';
+      coin.style.transform = 'translate(-50%, -50%)';
+      block.appendChild(coin);
+      setTimeout(() => coin.remove(), 500);
 
-  // Ведьмак
-  addEasterEgg('igni', 'IGNI', () => { document.body.style.cursor='url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Ccircle cx=\'16\' cy=\'16\' r=\'10\' fill=\'orange\'/%3E%3C/svg%3E") 16 16, auto'; setTimeout(()=>document.body.style.cursor='',5000); });
-  addEasterEgg('aard', 'AARD', () => { showMessage('Aard!','#0ff',2000); });
-  addEasterEgg('witcher', 'WITCHER', () => { showMessage('Заплатите чеканной монетой','silver',3000); });
+      if (hits >= 5) {
+        block.remove();
+      }
+    });
+    document.body.appendChild(block);
+  }
+  addEasterEgg('mario', 'MARIO', marioBlock);
 
-  // Доктор Кто
+  // luigi удалён
+
+  // igni с пламенем 30 сек
+  addEasterEgg('igni', 'IGNI', () => {
+    document.body.style.cursor = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Cpolygon points=\'2,2 30,16 16,16 20,24 14,24 16,16 2,16\' fill=\'%23ff4500\' stroke=\'%23ff0\' stroke-width=\'1.5\'/%3E%3Cpolygon points=\'2,2 10,10 2,10\' fill=\'%23ff0\'/%3E%3C/svg%3E") 16 16, auto';
+    setTimeout(() => document.body.style.cursor = '', 30000);
+  });
+
+  // aard
+  addEasterEgg('aard', 'AARD', () => showMessage('Aard!','#0ff',2000));
+  // witcher
+  addEasterEgg('witcher', 'WITCHER', () => showMessage('Заплатите чеканной монетой','silver',3000));
+
+  // tardis
   addEasterEgg('tardis', 'TARDIS', () => {
-    const box = document.createElement('div'); box.textContent = '📞';
-    box.style.cssText = 'position:fixed; top:50%; left:50%; font-size:80px; z-index:500; animation: tardisFade 2s forwards;';
+    const box = document.createElement('div');
+    box.className = 'tardis-box';
+    box.innerHTML = `
+      <div>POLICE</div>
+      <div>BOX</div>
+      <div class="windows">
+        <div class="window-row">
+          <div class="window-pane"></div><div class="window-pane"></div>
+        </div>
+        <div class="window-row">
+          <div class="window-pane"></div><div class="window-pane"></div>
+        </div>
+      </div>
+    `;
+    box.style.cssText += 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); animation: tardisFade 2s forwards; z-index:500;';
     document.body.appendChild(box);
     setTimeout(() => box.remove(), 2000);
   });
 
-  // Гарри Поттер
+  // Гарри Поттер lumos/nox – переключатель
+  let lumosActive = false;
   addEasterEgg('lumos', 'LUMOS', () => {
-    ctx.save(); ctx.fillStyle = 'rgba(255,215,0,0.3)'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    setTimeout(() => { ctx.restore(); safeRedraw(); }, 2000);
+    if (lumosActive) return;
+    lumosActive = true;
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,215,0,0.3)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
   });
-  addEasterEgg('nox', 'NOX', () => { safeRedraw(); showMessage('Nox!', '#aaa'); });
+  addEasterEgg('nox', 'NOX', () => {
+    if (!lumosActive) return;
+    lumosActive = false;
+    ctx.restore();
+    safeRedraw();
+    showMessage('Nox!', '#aaa');
+  });
 
   // Шляпа Хайзенберга
   addEasterEgg('heisenberg', 'HEISENBERG', () => {
-    const hat = document.createElement('div'); hat.className = 'heisenberg-hat';
-    hat.innerHTML = `<div class="hat-crown"><div class="hat-band"></div></div><div class="hat-brim"></div>`;
-    hat.style.cssText = 'position:fixed; top:40%; left:50%; transform:translate(-50%,-50%); z-index:1000; cursor:pointer;';
+    const hat = document.createElement('div');
+    hat.className = 'heisenberg-hat';
+    hat.style.cssText = 'position:fixed; top:40%; left:50%; transform:translate(-50%, -50%); z-index:1000;';
     document.body.appendChild(hat);
     setTimeout(() => hat.remove(), 5000);
   });
 
-  // Импала
+  // Supernatural – пентаграмма с надписью
   addEasterEgg('impala', 'SUPERNATURAL', () => {
-    const impala = document.createElement('div'); impala.className = 'impala-container';
-    impala.innerHTML = `
-      <div class="impala">
-        <div class="impala-front-bumper"></div>
-        <div class="impala-grill"><div class="headlight"></div>${Array(5).fill('<div class="grill-line"></div>').join('')}</div>
-        <div class="impala-body">
-          <div class="impala-windows">
-            <div class="window window-front"></div>
-            <div class="window window-rear"></div>
-            <div class="window window-back"></div>
-          </div>
-        </div>
-        <div class="impala-rear-bumper"></div>
-        <div class="wheel wheel-front"></div>
-        <div class="wheel wheel-rear"></div>
-      </div>
+    const pentagram = document.createElement('div');
+    pentagram.className = 'pentagram';
+    pentagram.innerHTML = `
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <clipPath id="circle">
+            <circle cx="100" cy="100" r="90"/>
+          </clipPath>
+        </defs>
+        <circle cx="100" cy="100" r="90" fill="none" stroke="#ffd700" stroke-width="3"/>
+        <polygon points="100,10 120,80 190,80 130,125 150,195 100,155 50,195 70,125 10,80 80,80"
+                 fill="none" stroke="#ffd700" stroke-width="4" clip-path="url(#circle)"/>
+      </svg>
+      <div class="pentagram-text">SUPERNATURAL</div>
     `;
-    document.body.appendChild(impala);
-    setTimeout(() => impala.remove(), 5000);
-    showMessage('Driver picks the music, shotgun shuts his cakehole', '#fff', 4000);
+    document.body.appendChild(pentagram);
+    setTimeout(() => pentagram.remove(), 4000);
   });
 
-  // Мини-тир BIT
+  // bit – улучшен счетчик
   function startBitGame() {
     let score = 0, timeLeft = 30;
     const scoreEl = document.createElement('div');
-    scoreEl.style.cssText = 'position:fixed; top:20px; left:20px; color:white; background:black; padding:5px 10px; z-index:1000; font-family:monospace;';
-    scoreEl.textContent = 'Очки: 0'; document.body.appendChild(scoreEl);
+    scoreEl.style.cssText = 'position:fixed; top:20px; left:20px; color:white; background:black; padding:5px 10px; z-index:1000; font-family:monospace; font-size:18px;';
+    scoreEl.textContent = `Попаданий: 0 | Время: 30`;
+    document.body.appendChild(scoreEl);
     const gameInterval = setInterval(() => {
       if (timeLeft <= 0) {
         clearInterval(gameInterval); clearInterval(spawnInterval);
@@ -588,10 +867,11 @@ window.redraw = redraw;
         scoreEl.remove();
         const best = localStorage.getItem('bitRecord') || 0;
         if (score > best) localStorage.setItem('bitRecord', score);
-        showMessage(`Игра окончена! Счёт: ${score}. Рекорд: ${localStorage.getItem('bitRecord')}`, '#ff0', 3000);
+        showMessage(`Игра окончена! Попаданий: ${score}. Рекорд: ${localStorage.getItem('bitRecord')}`, '#ff0', 3000);
         return;
       }
-      timeLeft--; scoreEl.textContent = `Очки: ${score} | Время: ${timeLeft}`;
+      timeLeft--;
+      scoreEl.textContent = `Попаданий: ${score} | Время: ${timeLeft}`;
     }, 1000);
     const spawnInterval = setInterval(() => {
       const target = document.createElement('div'); target.className = 'bit-target';
@@ -599,7 +879,7 @@ window.redraw = redraw;
       target.style.left = Math.random() * (container.offsetWidth - 20) + 'px';
       target.style.top = Math.random() * (container.offsetHeight - 20) + 'px';
       container.appendChild(target);
-      target.addEventListener('click', (e) => { e.stopPropagation(); score++; target.remove(); });
+      target.addEventListener('click', (e) => { e.stopPropagation(); score++; });
       setTimeout(() => target.remove(), 2000);
     }, 800);
     setTimeout(() => {
@@ -625,8 +905,8 @@ window.redraw = redraw;
     clockEl.innerHTML = `${dateStr}<br>${timeStr} MSK`;
   }
   setInterval(updateClock, 1000); updateClock();
-   
-// ---------- НОЧНОЙ РЕЖИМ ----------
+
+  // ---------- НОЧНОЙ РЕЖИМ ----------
   function checkNightMode() {
     const now = new Date();
     const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
@@ -691,6 +971,8 @@ window.redraw = redraw;
   resetInactivity();
 })();
 </script>
+              
+          
   
 </body>
 </html>
