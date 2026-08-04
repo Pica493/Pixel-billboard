@@ -386,34 +386,7 @@ window.redraw = redraw;
     }
     return false;
   }
-
-  // Konami с клавиатуры
-  let inputBuffer = [], bufferClearTimer;
-  window.addEventListener('keydown', function(e) {
-    if (e.target === easterInput) return;
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    inputBuffer.push(e.key.toUpperCase());
-    clearTimeout(bufferClearTimer);
-    bufferClearTimer = setTimeout(() => { inputBuffer = []; }, 2000);
-    if (inputBuffer.length > 30) inputBuffer = inputBuffer.slice(-20);
-    if (checkKonami()) {
-      if (canActivate('konami')) { setActivated('konami'); triggerMatrixRain(); inputBuffer = []; }
-    }
-  });
-
-  function checkKonami() {
-    const code = ['ARROWUP','ARROWUP','ARROWDOWN','ARROWDOWN','ARROWLEFT','ARROWRIGHT','ARROWLEFT','ARROWRIGHT','KEYB','KEYA'];
-    if (inputBuffer.length < 10) return false;
-    const tail = inputBuffer.slice(-10).map(k => {
-      if (k === 'UP') return 'ARROWUP';
-      if (k === 'DOWN') return 'ARROWDOWN';
-      if (k === 'LEFT') return 'ARROWLEFT';
-      if (k === 'RIGHT') return 'ARROWRIGHT';
-      return k;
-    });
-    return tail.join(',') === code.join(',');
-  }
-
+  
   // Сама Матрица
   function triggerMatrixRain() {
     const matrixCanvas = document.createElement('canvas');
@@ -439,7 +412,6 @@ window.redraw = redraw;
   }
 
   addEasterEgg('matrix', 'MATRIX', triggerMatrixRain);
-  addEasterEgg('matrix', 'KONAMI', triggerMatrixRain);
 
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
