@@ -259,8 +259,7 @@ window.canvas = canvas;
 window.soldPixels = soldPixels;
 window.redraw = redraw;
   </script>
- <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + МАТРИЦА ========== -->
-<!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + ВСЕ ПАСХАЛКИ ========== -->
+     <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + ВСЕ ПАСХАЛКИ ========== -->
 <style>
   #effects-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; overflow: hidden; }
   #easter-input-container { position: fixed; top: 15px; left: 15px; z-index: 9999; display: flex; align-items: center; background: rgba(0,0,0,0.7); border-radius: 20px; padding: 5px 10px; backdrop-filter: blur(5px); box-shadow: 0 0 10px rgba(0,255,0,0.3); }
@@ -281,7 +280,7 @@ window.redraw = redraw;
   @keyframes leafall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(720deg); } }
   @keyframes cometFall { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-80px, 80vh) scale(0.2); opacity: 0; } }
 
-  /* Стили для новых пасхалок (шляпа, импала и т.д.) */
+  /* Стили для шляпы и Импалы */
   .heisenberg-hat .hat-crown { width:150px; height:100px; background:linear-gradient(175deg, #3a3a3a 5%, #1a1a1a 50%, #0d0d0d 95%); border-radius:40% 40% 0 0 / 50% 50% 0 0; margin:0 auto; position:relative; top:-20px; }
   .heisenberg-hat .hat-band { position:absolute; bottom:25px; width:100%; height:18px; background:linear-gradient(180deg, #b8860b, #8b6508 50%, #5c4305); }
   .heisenberg-hat .hat-brim { width:240px; height:50px; background:radial-gradient(ellipse at center, #2a2a2a 0%, #111 80%); border-radius:50%; margin:0 auto; }
@@ -382,15 +381,20 @@ window.redraw = redraw;
   function activateCombo(combo) {
     for (let egg of easterEggs) {
       if (combo.includes(egg.combo)) {
-        if (canActivate(egg.name)) { setActivated(egg.name); egg.action(); return true; }
+        if (canActivate(egg.name)) {
+          setActivated(egg.name);
+          egg.action();
+          return true;
+        }
       }
     }
     return false;
   }
 
   // ================= ПАСХАЛКИ =================
+  // Все функции теперь только действие, без проверок canActivate
 
-  // Матрица (уже была)
+  // Матрица
   function triggerMatrixRain() {
     const matrixCanvas = document.createElement('canvas');
     matrixCanvas.width = canvas.width; matrixCanvas.height = canvas.height;
@@ -417,7 +421,6 @@ window.redraw = redraw;
 
   // Портал Блич
   function triggerBleachPortal() {
-    if (!canActivate('bleach')) return; setActivated('bleach');
     const portal = document.createElement('div');
     portal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:400;';
     document.body.appendChild(portal);
@@ -434,7 +437,6 @@ window.redraw = redraw;
 
   // Змейка
   function startSnake() {
-    if (!canActivate('snake')) return; setActivated('snake');
     const snakeCanvas = document.createElement('canvas');
     snakeCanvas.width = canvas.width; snakeCanvas.height = canvas.height;
     snakeCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:250;';
@@ -494,16 +496,12 @@ window.redraw = redraw;
   addEasterEgg('snake', 'SNAKE', startSnake);
 
   // Silent Hill
-  function silentHill() {
-    if (!canActivate('silenthill')) return; setActivated('silenthill');
-    showMessage('Пирамидоголовый приближается...', '#f00', 5000);
-  }
+  function silentHill() { showMessage('Пирамидоголовый приближается...', '#f00', 5000); }
   addEasterEgg('silenthill', 'SILENT', silentHill);
   addEasterEgg('silenthill', 'PYRAMID', silentHill);
 
   // Покемоны
   function pikachuRun() {
-    if (!canActivate('pikachu')) return; setActivated('pikachu');
     const pika = document.createElement('div'); pika.textContent = '⚡🐱';
     pika.style.cssText = 'position:fixed; top:50%; left:-50px; font-size:40px; z-index:500; animation: runRight 4s linear forwards;';
     document.body.appendChild(pika);
@@ -513,7 +511,6 @@ window.redraw = redraw;
   addEasterEgg('pikachu', 'PIKACHU', pikachuRun);
 
   function pokeball() {
-    if (!canActivate('pokeball')) return; setActivated('pokeball');
     const ball = document.createElement('div'); ball.textContent = '🔴⚪';
     ball.style.cssText = 'position:fixed; top:50%; left:50%; font-size:30px; z-index:500;';
     document.body.appendChild(ball);
@@ -521,18 +518,17 @@ window.redraw = redraw;
   }
   addEasterEgg('pokeball', 'POKEBALL', pokeball);
 
-  // Mario / Luigi
-  addEasterEgg('mario', 'MARIO', () => { if(canActivate('mario')){setActivated('mario');showMessage('Марио!','#f00',2000);} });
-  addEasterEgg('luigi', 'LUIGI', () => { if(canActivate('luigi')){setActivated('luigi');showMessage('Луиджи!','#0f0',2000);} });
+  // Mario / Luigi (просто сообщения)
+  addEasterEgg('mario', 'MARIO', () => { showMessage('Марио!','#f00',2000); });
+  addEasterEgg('luigi', 'LUIGI', () => { showMessage('Луиджи!','#0f0',2000); });
 
   // Ведьмак
-  addEasterEgg('igni', 'IGNI', () => { if(canActivate('igni')){setActivated('igni');document.body.style.cursor='url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Ccircle cx=\'16\' cy=\'16\' r=\'10\' fill=\'orange\'/%3E%3C/svg%3E") 16 16, auto';setTimeout(()=>document.body.style.cursor='',5000);} });
-  addEasterEgg('aard', 'AARD', () => { if(canActivate('aard')){setActivated('aard');showMessage('Aard!','#0ff',2000);} });
-  addEasterEgg('witcher', 'WITCHER', () => { if(canActivate('witcher')){setActivated('witcher');showMessage('Заплатите чеканной монетой','silver',3000);} });
+  addEasterEgg('igni', 'IGNI', () => { document.body.style.cursor='url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Ccircle cx=\'16\' cy=\'16\' r=\'10\' fill=\'orange\'/%3E%3C/svg%3E") 16 16, auto'; setTimeout(()=>document.body.style.cursor='',5000); });
+  addEasterEgg('aard', 'AARD', () => { showMessage('Aard!','#0ff',2000); });
+  addEasterEgg('witcher', 'WITCHER', () => { showMessage('Заплатите чеканной монетой','silver',3000); });
 
   // Доктор Кто
   addEasterEgg('tardis', 'TARDIS', () => {
-    if (!canActivate('tardis')) return; setActivated('tardis');
     const box = document.createElement('div'); box.textContent = '📞';
     box.style.cssText = 'position:fixed; top:50%; left:50%; font-size:80px; z-index:500; animation: tardisFade 2s forwards;';
     document.body.appendChild(box);
@@ -541,15 +537,13 @@ window.redraw = redraw;
 
   // Гарри Поттер
   addEasterEgg('lumos', 'LUMOS', () => {
-    if (canActivate('lumos')) { setActivated('lumos'); ctx.save(); ctx.fillStyle = 'rgba(255,215,0,0.3)'; ctx.fillRect(0,0,canvas.width,canvas.height); setTimeout(() => { ctx.restore(); safeRedraw(); }, 2000); }
+    ctx.save(); ctx.fillStyle = 'rgba(255,215,0,0.3)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    setTimeout(() => { ctx.restore(); safeRedraw(); }, 2000);
   });
-  addEasterEgg('nox', 'NOX', () => {
-    if (canActivate('nox')) { setActivated('nox'); safeRedraw(); showMessage('Nox!', '#aaa'); }
-  });
+  addEasterEgg('nox', 'NOX', () => { safeRedraw(); showMessage('Nox!', '#aaa'); });
 
   // Шляпа Хайзенберга
   addEasterEgg('heisenberg', 'HEISENBERG', () => {
-    if (!canActivate('heisenberg')) return; setActivated('heisenberg');
     const hat = document.createElement('div'); hat.className = 'heisenberg-hat';
     hat.innerHTML = `<div class="hat-crown"><div class="hat-band"></div></div><div class="hat-brim"></div>`;
     hat.style.cssText = 'position:fixed; top:40%; left:50%; transform:translate(-50%,-50%); z-index:1000; cursor:pointer;';
@@ -559,7 +553,6 @@ window.redraw = redraw;
 
   // Импала
   addEasterEgg('impala', 'SUPERNATURAL', () => {
-    if (!canActivate('impala')) return; setActivated('impala');
     const impala = document.createElement('div'); impala.className = 'impala-container';
     impala.innerHTML = `
       <div class="impala">
@@ -584,7 +577,6 @@ window.redraw = redraw;
 
   // Мини-тир BIT
   function startBitGame() {
-    if (!canActivate('bitgame')) return; setActivated('bitgame');
     let score = 0, timeLeft = 30;
     const scoreEl = document.createElement('div');
     scoreEl.style.cssText = 'position:fixed; top:20px; left:20px; color:white; background:black; padding:5px 10px; z-index:1000; font-family:monospace;';
@@ -633,8 +625,8 @@ window.redraw = redraw;
     clockEl.innerHTML = `${dateStr}<br>${timeStr} MSK`;
   }
   setInterval(updateClock, 1000); updateClock();
-
-  // ---------- НОЧНОЙ РЕЖИМ ----------
+   
+// ---------- НОЧНОЙ РЕЖИМ ----------
   function checkNightMode() {
     const now = new Date();
     const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
@@ -700,6 +692,5 @@ window.redraw = redraw;
 })();
 </script>
   
-        
 </body>
 </html>
