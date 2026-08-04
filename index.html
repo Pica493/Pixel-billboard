@@ -102,7 +102,7 @@
   </style>
 </head>
 <body>
-  <h1>Пиксельный миллион</h1>
+  <h1>PixelBillboard</h1>
   <div class="subtitle">Купи пиксель навсегда. 1 пиксель = 50 ₽. Минимальный блок 10×10 (5000 ₽).</div>
   <div class="stats">
     <div>Продано: <span id="sold-count">0</span> пикселей</div>
@@ -260,6 +260,8 @@ window.soldPixels = soldPixels;
 window.redraw = redraw;
   </script>
   <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + ВСЕ ПАСХАЛКИ ========== -->
+
+  <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + ВСЕ ПАСХАЛКИ ========== -->
 <style>
   #effects-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; overflow: hidden; }
   #easter-input-container { position: fixed; top: 15px; left: 15px; z-index: 9999; display: flex; align-items: center; background: rgba(0,0,0,0.7); border-radius: 20px; padding: 5px 10px; backdrop-filter: blur(5px); box-shadow: 0 0 10px rgba(0,255,0,0.3); }
@@ -280,202 +282,85 @@ window.redraw = redraw;
   @keyframes leafall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(720deg); } }
   @keyframes cometFall { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-80px, 80vh) scale(0.2); opacity: 0; } }
 
-  /* Шляпа Хайзенберга (цельная) */
+  /* Исправленная шляпа Хайзенберга (поля + тулья) */
   .heisenberg-hat {
-    width: 200px; height: 100px;
-    background: linear-gradient(to bottom, #2a2a2a 0%, #1a1a1a 50%, #0d0d0d 100%);
-    border-radius: 50% / 30%;
-    box-shadow: 0 15px 25px rgba(0,0,0,0.6);
     position: relative;
+    width: 240px;
+    height: 140px;
     margin: 0 auto;
   }
-  .heisenberg-hat::after {
-    content: '';
+  .hat-brim {
+    width: 240px;
+    height: 40px;
+    background: radial-gradient(ellipse at center, #2a2a2a 0%, #111 80%);
+    border-radius: 50%;
     position: absolute;
-    top: 35%;
-    left: 0;
+    bottom: 0;
+  }
+  .hat-crown {
+    width: 140px;
+    height: 110px;
+    background: linear-gradient(175deg, #3a3a3a 5%, #1a1a1a 50%, #0d0d0d 95%);
+    border-radius: 45% 45% 0 0 / 60% 60% 0 0;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: inset 0 -15px 20px rgba(0,0,0,0.6);
+  }
+  .hat-band {
+    position: absolute;
+    bottom: 25px;
     width: 100%;
     height: 16px;
     background: linear-gradient(180deg, #b8860b, #8b6508 50%, #5c4305);
-    border-radius: 2px;
   }
 
-  /* Покебол */
-  .pokeball {
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    background: linear-gradient(to bottom, #ff3b3b 50%, #ffffff 50%);
-    border: 4px solid #222;
-    position: relative;
-    margin: auto;
-  }
-  .pokeball::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 20px; height: 20px;
-    background: #fff;
-    border: 3px solid #222;
-    border-radius: 50%;
-  }
-
-  /* Пирамидоголовый */
-  .pyramid-head {
-    position: fixed;
-    bottom: 20px; right: 20px;
-    z-index: 500;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .pyramid-body {
-    width: 60px; height: 100px;
-    background: #777;
-    margin-top: -10px;
-  }
-  .pyramid-triangle {
-    width: 0; height: 0;
-    border-left: 40px solid transparent;
-    border-right: 40px solid transparent;
-    border-bottom: 60px solid #b22222;
-  }
-
-  /* Пикачу */
+  /* Пикачу и анимация */
   .pikachu-container {
     position: fixed;
-    top: 50%; left: -120px;
+    top: 50%;
+    left: -120px;
     transform: translateY(-50%);
     z-index: 500;
     animation: runRight 4s linear forwards;
     cursor: pointer;
   }
-  .pikachu-head {
-    width: 80px; height: 80px;
-    background: #ffd700;
-    border-radius: 50%;
-    position: relative;
-    box-shadow: 0 4px 0 #cc9900;
-  }
-  .pikachu-ear-left, .pikachu-ear-right {
-    position: absolute;
-    top: -30px;
-    width: 0; height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-bottom: 35px solid #222;
-  }
+  @keyframes runRight { from { left: -120px; } to { left: calc(100% + 120px); } }
+  .pikachu-head { width: 80px; height: 80px; background: #ffd700; border-radius: 50%; position: relative; box-shadow: 0 4px 0 #cc9900; }
+  .pikachu-ear-left, .pikachu-ear-right { position: absolute; top: -30px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 35px solid #222; }
   .pikachu-ear-left { left: 5px; transform: rotate(-15deg); }
   .pikachu-ear-right { right: 5px; transform: rotate(15deg); }
-  .pikachu-eye {
-    position: absolute;
-    top: 25px;
-    width: 10px; height: 10px;
-    background: #222;
-    border-radius: 50%;
-  }
-  .eye-left { left: 20px; }
-  .eye-right { right: 20px; }
-  .pikachu-cheek {
-    position: absolute;
-    top: 45px;
-    width: 15px; height: 10px;
-    background: #ff0000;
-    border-radius: 50%;
-  }
-  .cheek-left { left: 5px; }
-  .cheek-right { right: 5px; }
-  .pikachu-mouth {
-    position: absolute;
-    top: 55px; left: 50%;
-    transform: translateX(-50%);
-    width: 10px; height: 6px;
-    border-bottom: 2px solid #222;
-    border-radius: 0 0 10px 10px;
-  }
+  .pikachu-eye { position: absolute; top: 25px; width: 10px; height: 10px; background: #222; border-radius: 50%; }
+  .eye-left { left: 20px; } .eye-right { right: 20px; }
+  .pikachu-cheek { position: absolute; top: 45px; width: 15px; height: 10px; background: #ff0000; border-radius: 50%; }
+  .cheek-left { left: 5px; } .cheek-right { right: 5px; }
+  .pikachu-mouth { position: absolute; top: 55px; left: 50%; transform: translateX(-50%); width: 10px; height: 6px; border-bottom: 2px solid #222; border-radius: 0 0 10px 10px; }
+
+  /* Покебол */
+  .pokeball { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(to bottom, #ff3b3b 50%, #ffffff 50%); border: 4px solid #222; position: relative; margin: auto; }
+  .pokeball::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: #fff; border: 3px solid #222; border-radius: 50%; }
 
   /* Кубик Марио */
-  .mario-block {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80px; height: 80px;
-    background: #f5a623;
-    border: 4px solid #8b4513;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-    color: white;
-    text-shadow: 2px 2px 0 #000;
-    cursor: pointer;
-    z-index: 500;
-  }
-  .mario-coin {
-    position: absolute;
-    width: 30px; height: 30px;
-    background: gold;
-    border-radius: 50%;
-    animation: coinBounce 0.5s ease-out forwards;
-    pointer-events: none;
-  }
-  @keyframes coinBounce {
-    0% { transform: translateY(0) scale(0.5); opacity: 1; }
-    100% { transform: translateY(-80px) scale(1); opacity: 0; }
-  }
+  .mario-block { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: #f5a623; border: 4px solid #8b4513; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; text-shadow: 2px 2px 0 #000; cursor: pointer; z-index: 500; }
+  .mario-coin { position: absolute; width: 30px; height: 30px; background: gold; border-radius: 50%; animation: coinBounce 0.5s ease-out forwards; pointer-events: none; }
+  @keyframes coinBounce { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-80px) scale(1); opacity: 0; } }
 
   /* ТАРДИС */
-  .tardis-box {
-    width: 100px; height: 140px;
-    background: #1a3b5c;
-    border: 4px solid #0d2137;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    color: white;
-    font-family: 'Arial', sans-serif;
-    font-size: 10px;
-    text-align: center;
-    padding: 5px;
-    box-sizing: border-box;
-  }
-  .tardis-box .windows {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin: 10px 0;
-  }
-  .tardis-box .window-row {
-    display: flex;
-    gap: 5px;
-  }
-  .tardis-box .window-pane {
-    width: 20px; height: 20px;
-    background: #87ceeb;
-    border: 2px solid white;
-  }
+  .tardis-box { width: 100px; height: 140px; background: #1a3b5c; border: 4px solid #0d2137; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; color: white; font-family: 'Arial', sans-serif; font-size: 10px; text-align: center; padding: 5px; box-sizing: border-box; }
+  .tardis-box .windows { display: flex; flex-direction: column; gap: 5px; margin: 10px 0; }
+  .tardis-box .window-row { display: flex; gap: 5px; }
+  .tardis-box .window-pane { width: 20px; height: 20px; background: #87ceeb; border: 2px solid white; }
 
-  /* Пентаграмма Supernatural */
+  /* Пентаграмма с синим пламенем */
   .pentagram {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1000;
     width: 350px; height: 350px;
-    animation: pentagramPulse 2s infinite;
   }
-  @keyframes pentagramPulse {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
-  }
-  .pentagram svg {
-    width: 100%;
-    height: 100%;
-  }
+  .pentagram svg { width: 100%; height: 100%; }
   .pentagram-text {
     position: absolute;
     top: 50%; left: 50%;
@@ -486,6 +371,49 @@ window.redraw = redraw;
     text-shadow: 0 0 15px black;
     font-family: 'Times New Roman', serif;
     letter-spacing: 3px;
+    animation: textFlicker 0.8s infinite;
+  }
+  @keyframes textFlicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+  .blue-flame {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(0,100,255,0.4) 0%, transparent 70%);
+    animation: flamePulse 1.5s infinite;
+  }
+  @keyframes flamePulse {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0.7; }
+  }
+
+  /* Портал Bleach */
+  .bleach-portal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0.7) 70%, transparent 100%);
+    border-radius: 50%;
+    z-index: 500;
+    animation: portalOpen 0.5s ease-out;
+    box-shadow: 0 0 40px 10px rgba(0,0,0,0.8);
+  }
+  @keyframes portalOpen {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  }
+  .bleach-butterfly {
+    position: fixed;
+    font-size: 24px;
+    z-index: 600;
+    pointer-events: none;
+    transition: transform 2s, opacity 2s;
   }
 </style>
 
@@ -602,42 +530,50 @@ window.redraw = redraw;
   }
   addEasterEgg('matrix', 'MATRIX', triggerMatrixRain);
 
-  // bleach – бабочки разлетаются
+  // bleach – портал + разлетающиеся бабочки
   function triggerBleachPortal() {
-    const count = 30;
-    for (let i = 0; i < count; i++) {
+    // Создаём портал
+    const portal = document.createElement('div');
+    portal.className = 'bleach-portal';
+    document.body.appendChild(portal);
+    setTimeout(() => portal.remove(), 5000);
+
+    // Запускаем бабочек из центра портала
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    for (let i = 0; i < 35; i++) {
       const butterfly = document.createElement('div');
       butterfly.textContent = '🦋';
-      butterfly.style.cssText = `
-        position: fixed;
-        left: ${Math.random() * 100}%;
-        top: ${Math.random() * 100}%;
-        font-size: 24px;
-        transition: transform 2s, opacity 2s;
-        z-index: 500;
-        pointer-events: none;
-      `;
+      butterfly.className = 'bleach-butterfly';
+      butterfly.style.left = centerX + 'px';
+      butterfly.style.top = centerY + 'px';
+      butterfly.style.transform = 'translate(-50%, -50%)';
       document.body.appendChild(butterfly);
-      // Запускаем движение через небольшой таймаут
+
+      // Случайное направление разлёта
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = 200 + Math.random() * 300;
+      const dx = Math.cos(angle) * distance;
+      const dy = Math.sin(angle) * distance;
+
       setTimeout(() => {
-        butterfly.style.transform = `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)`;
+        butterfly.style.transition = 'transform 1.5s ease-out, opacity 1.5s';
+        butterfly.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
         butterfly.style.opacity = '0';
-      }, 100);
-      // Удаляем через 2.5 секунды
+      }, 300);
+
       setTimeout(() => butterfly.remove(), 2500);
     }
+
     // Синий оттенок холста
     ctx.save();
     ctx.fillStyle = 'rgba(0,100,255,0.5)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    setTimeout(() => {
-      ctx.restore();
-      safeRedraw();
-    }, 3000);
+    setTimeout(() => { ctx.restore(); safeRedraw(); }, 3000);
   }
   addEasterEgg('bleach', 'BLEACH', triggerBleachPortal);
 
-  // snake – без изменений
+  // snake
   function startSnake() {
     const snakeCanvas = document.createElement('canvas');
     snakeCanvas.width = canvas.width; snakeCanvas.height = canvas.height;
@@ -697,22 +633,7 @@ window.redraw = redraw;
   }
   addEasterEgg('snake', 'SNAKE', startSnake);
 
-  // silent / pyramid
-  function silentHill() {
-    const ph = document.createElement('div');
-    ph.className = 'pyramid-head';
-    ph.innerHTML = `
-      <div class="pyramid-triangle"></div>
-      <div class="pyramid-body"></div>
-    `;
-    document.body.appendChild(ph);
-    showMessage('Пирамидоголовый приближается...', '#f00', 5000);
-    setTimeout(() => ph.remove(), 6000);
-  }
-  addEasterEgg('silenthill', 'SILENT', silentHill);
-  addEasterEgg('silenthill', 'PYRAMID', silentHill);
-
-  // pikachu
+  // pikachu (исправлен, добавлена анимация)
   function pikachuRun() {
     const pika = document.createElement('div');
     pika.className = 'pikachu-container';
@@ -732,7 +653,8 @@ window.redraw = redraw;
       e.stopPropagation();
       showMessage('Pika-pika!', '#ff0');
     });
-    setTimeout(() => pika.remove(), 4000);
+    // Удаляем после окончания анимации
+    pika.addEventListener('animationend', () => pika.remove());
   }
   addEasterEgg('pikachu', 'PIKACHU', pikachuRun);
 
@@ -755,7 +677,6 @@ window.redraw = redraw;
     block.addEventListener('click', function(e) {
       e.stopPropagation();
       hits++;
-      // Создаём монетку
       const coin = document.createElement('div');
       coin.className = 'mario-coin';
       coin.style.left = '50%';
@@ -763,10 +684,7 @@ window.redraw = redraw;
       coin.style.transform = 'translate(-50%, -50%)';
       block.appendChild(coin);
       setTimeout(() => coin.remove(), 500);
-
-      if (hits >= 5) {
-        block.remove();
-      }
+      if (hits >= 5) block.remove();
     });
     document.body.appendChild(block);
   }
@@ -780,9 +698,7 @@ window.redraw = redraw;
     setTimeout(() => document.body.style.cursor = '', 30000);
   });
 
-  // aard
   addEasterEgg('aard', 'AARD', () => showMessage('Aard!','#0ff',2000));
-  // witcher
   addEasterEgg('witcher', 'WITCHER', () => showMessage('Заплатите чеканной монетой','silver',3000));
 
   // tardis
@@ -823,20 +739,27 @@ window.redraw = redraw;
     showMessage('Nox!', '#aaa');
   });
 
-  // Шляпа Хайзенберга
+  // Шляпа Хайзенберга (исправлена)
   addEasterEgg('heisenberg', 'HEISENBERG', () => {
     const hat = document.createElement('div');
     hat.className = 'heisenberg-hat';
+    hat.innerHTML = `
+      <div class="hat-crown">
+        <div class="hat-band"></div>
+      </div>
+      <div class="hat-brim"></div>
+    `;
     hat.style.cssText = 'position:fixed; top:40%; left:50%; transform:translate(-50%, -50%); z-index:1000;';
     document.body.appendChild(hat);
     setTimeout(() => hat.remove(), 5000);
   });
 
-  // Supernatural – пентаграмма с надписью
+  // Supernatural – пентаграмма с синим пламенем и мерцанием
   addEasterEgg('impala', 'SUPERNATURAL', () => {
     const pentagram = document.createElement('div');
     pentagram.className = 'pentagram';
     pentagram.innerHTML = `
+      <div class="blue-flame"></div>
       <svg viewBox="0 0 200 200">
         <defs>
           <clipPath id="circle">
@@ -971,8 +894,7 @@ window.redraw = redraw;
   resetInactivity();
 })();
 </script>
-              
-          
+                 
   
 </body>
 </html>
