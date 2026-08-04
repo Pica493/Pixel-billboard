@@ -789,129 +789,164 @@ window.redraw = redraw;
     else document.body.classList.remove('night-mode');
   }
   setInterval(checkNightMode, 60000); checkNightMode();
+  
+       // ---------- ПОГОДА (синхронизированная по МСК) ----------
+let weatherTimeout;
+let currentOlaf = null;
 
-  // ---------- ПОГОДА ----------
-  let weatherTimeout;
-  let currentOlaf = null; // переменная для снеговика
-
-  function clearWeather() {
-    effectsLayer.querySelectorAll('.weather-particle').forEach(el => el.remove());
-    // Удаляем снеговика, если он есть
-    if (currentOlaf) {
-      currentOlaf.remove();
-      currentOlaf = null;
-    }
+function clearWeather() {
+  effectsLayer.querySelectorAll('.weather-particle').forEach(el => el.remove());
+  if (currentOlaf) {
+    currentOlaf.remove();
+    currentOlaf = null;
   }
+}
 
-  function startSnow() {
-    clearWeather();
-    for (let i = 0; i < 50; i++) {
-      const f = document.createElement('div');
-      f.className = 'snowflake weather-particle';
-      f.style.left = Math.random() * 100 + '%';
-      f.style.animationDuration = (2 + Math.random() * 3) + 's';
-      effectsLayer.appendChild(f);
-    }
-    // Снеговик Олаф (с вероятностью 30%, появляется через 2 секунды)
-    if (Math.random() < 0.3) {
-      setTimeout(() => {
-        if (currentOlaf) return; // уже есть
-        const olaf = document.createElement('div');
-        olaf.className = 'olaf';
-        olaf.title = 'Олаф';
-        olaf.textContent = '⛄';
-        document.body.appendChild(olaf);
-        currentOlaf = olaf;
-      }, 2000);
-    }
+function startSnow() {
+  clearWeather();
+  for (let i = 0; i < 50; i++) {
+    const f = document.createElement('div');
+    f.className = 'snowflake weather-particle';
+    f.style.left = Math.random() * 100 + '%';
+    f.style.animationDuration = (2 + Math.random() * 3) + 's';
+    effectsLayer.appendChild(f);
   }
-
-  function startRain() {
-    clearWeather();
-    for (let i = 0; i < 40; i++) {
-      const d = document.createElement('div');
-      d.className = 'raindrop weather-particle';
-      d.style.left = Math.random() * 100 + '%';
-      d.style.animationDuration = (1 + Math.random() * 1.5) + 's';
-      effectsLayer.appendChild(d);
-    }
-  }
-
-  function startLeaves() {
-    clearWeather();
-    for (let i = 0; i < 25; i++) {
-      const l = document.createElement('div');
-      l.className = 'leaf weather-particle';
-      l.style.left = Math.random() * 100 + '%';
-      l.style.animationDuration = (3 + Math.random() * 4) + 's';
-      effectsLayer.appendChild(l);
-    }
-    // Большой особый лист снизу справа (держится 30 секунд)
+  if (Math.random() < 0.3) {
     setTimeout(() => {
-      const special = document.createElement('div');
-      special.className = 'special-leaf';
-      special.title = 'Нажми, чтобы получить Расенган';
-      document.body.appendChild(special);
-      let timeoutId = setTimeout(() => {
-        special.remove();
-      }, 30000);
-
-      special.addEventListener('click', function onClick() {
-        clearTimeout(timeoutId);
-        // Улетает
-        special.style.transition = 'transform 0.5s ease-out, opacity 0.5s';
-        special.style.transform = 'translate(100px, -100px) rotate(720deg)';
-        special.style.opacity = '0';
-        setTimeout(() => special.remove(), 500);
-        // Расенган-курсор на 10 секунд
-        document.body.classList.add('rasengan-cursor');
-        setTimeout(() => {
-          document.body.classList.remove('rasengan-cursor');
-        }, 10000);
-      }, { once: true });
-    }, 5000);
+      if (currentOlaf) return;
+      const olaf = document.createElement('div');
+      olaf.className = 'olaf';
+      olaf.title = 'Олаф';
+      olaf.textContent = '⛄';
+      document.body.appendChild(olaf);
+      currentOlaf = olaf;
+    }, 2000);
   }
+}
 
-  function startComets() {
-    clearWeather();
-    for (let i = 0; i < 8; i++) {
-      const c = document.createElement('div');
-      c.className = 'comet weather-particle';
-      c.style.left = Math.random() * 90 + '%';
-      c.style.top = Math.random() * 30 + '%';
-      c.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
-      effectsLayer.appendChild(c);
+function startRain() {
+  clearWeather();
+  for (let i = 0; i < 40; i++) {
+    const d = document.createElement('div');
+    d.className = 'raindrop weather-particle';
+    d.style.left = Math.random() * 100 + '%';
+    d.style.animationDuration = (1 + Math.random() * 1.5) + 's';
+    effectsLayer.appendChild(d);
+  }
+}
+
+function startLeaves() {
+  clearWeather();
+  for (let i = 0; i < 25; i++) {
+    const l = document.createElement('div');
+    l.className = 'leaf weather-particle';
+    l.style.left = Math.random() * 100 + '%';
+    l.style.animationDuration = (3 + Math.random() * 4) + 's';
+    effectsLayer.appendChild(l);
+  }
+  setTimeout(() => {
+    const special = document.createElement('div');
+    special.className = 'special-leaf';
+    special.title = 'Нажми, чтобы получить Расенган';
+    document.body.appendChild(special);
+    let timeoutId = setTimeout(() => special.remove(), 30000);
+    special.addEventListener('click', function onClick() {
+      clearTimeout(timeoutId);
+      special.style.transition = 'transform 0.5s ease-out, opacity 0.5s';
+      special.style.transform = 'translate(100px, -100px) rotate(720deg)';
+      special.style.opacity = '0';
+      setTimeout(() => special.remove(), 500);
+      document.body.classList.add('rasengan-cursor');
+      setTimeout(() => document.body.classList.remove('rasengan-cursor'), 10000);
+    }, { once: true });
+  }, 5000);
+}
+
+function startComets() {
+  clearWeather();
+  for (let i = 0; i < 8; i++) {
+    const c = document.createElement('div');
+    c.className = 'comet weather-particle';
+    c.style.left = Math.random() * 90 + '%';
+    c.style.top = Math.random() * 30 + '%';
+    c.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+    effectsLayer.appendChild(c);
+  }
+}
+
+// Генератор псевдослучайных чисел на основе строки (дня)
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
+
+// Получить расписание интервалов для конкретного дня
+function getDaySchedule(date) {
+  const dayKey = date.toISOString().slice(0, 10); // YYYY-MM-DD
+  const seed = hashCode(dayKey);
+  // Интервалы: от 1 до 3 часов каждый
+  const intervals = [];
+  let currentTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).getTime();
+  const endOfDay = currentTime + 24 * 60 * 60 * 1000;
+  while (currentTime < endOfDay) {
+    const duration = (60 + (seed % 180)) * 60 * 1000; // 1–3 часа в миллисекундах
+    const typeIndex = (seed + intervals.length) % 4; // 0: snow, 1: rain, 2: leaves, 3: comets
+    const types = ['snow', 'rain', 'leaves', 'comets'];
+    intervals.push({
+      start: currentTime,
+      end: currentTime + duration,
+      type: types[typeIndex]
+    });
+    currentTime += duration;
+  }
+  return intervals;
+}
+
+// Найти текущий интервал и установить погоду
+function applyWeatherByTime() {
+  const now = new Date();
+  const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+  const schedule = getDaySchedule(msk);
+  const nowTime = msk.getTime();
+  let currentInterval = null;
+
+  for (let interval of schedule) {
+    if (nowTime >= interval.start && nowTime < interval.end) {
+      currentInterval = interval;
+      break;
     }
   }
 
-  function setWeather(type, durationMs) {
-    clearWeather();
-    if (type === 'snow') startSnow();
-    else if (type === 'rain') startRain();
-    else if (type === 'leaves') startLeaves();
-    else if (type === 'comets') startComets();
-    else return;
+  if (!currentInterval) {
+    // Если не нашли (например, сразу после полуночи), берём первый интервал
+    currentInterval = schedule[0];
+  }
+
+  clearWeather();
+  // Запускаем эффект
+  if (currentInterval.type === 'snow') startSnow();
+  else if (currentInterval.type === 'rain') startRain();
+  else if (currentInterval.type === 'leaves') startLeaves();
+  else if (currentInterval.type === 'comets') startComets();
+
+  // Устанавливаем таймер на окончание интервала
+  const timeLeft = currentInterval.end - nowTime;
+  if (timeLeft > 0) {
+    clearTimeout(weatherTimeout);
     weatherTimeout = setTimeout(() => {
-      clearWeather();
-      scheduleNextWeather();
-    }, durationMs);
+      applyWeatherByTime(); // рекурсивно обновить погоду на следующий интервал
+    }, timeLeft);
   }
+}
 
-  function scheduleNextWeather() {
-    const delay = 3600000 + Math.random() * 7200000;
-    setTimeout(() => {
-      const r = Math.random();
-      let type;
-      if (r < 0.1) type = 'comets';
-      else if (r < 0.4) type = 'snow';
-      else if (r < 0.7) type = 'rain';
-      else type = 'leaves';
-      const dur = type === 'comets' ? 120000 + Math.random() * 60000 : 300000 + Math.random() * 300000;
-      setWeather(type, dur);
-    }, delay);
-  }
-  setTimeout(scheduleNextWeather, 10000);
-
+// Запускаем синхронизированную погоду при загрузке
+applyWeatherByTime();
+  
   // ---------- DVD-ЗАСТАВКА ----------
   let inactivityTimer;
   function resetInactivity() {
