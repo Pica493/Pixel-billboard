@@ -790,8 +790,9 @@ window.redraw = redraw;
   }
   setInterval(checkNightMode, 60000); checkNightMode();
   
-       // ---------- ПОГОДА (синхронизированная по МСК) ----------
-let weatherTimeout;
+  // ---------- ПОГОДА (короткие эффекты 6–10 мин, пауза 1–3 часа, единая по МСК) ----------
+let weatherTimeout = null;      // таймер окончания текущего эффекта
+let nextEffectTimeout = null;   // таймер начала следующего эффекта
 let currentOlaf = null;
 
 function clearWeather() {
@@ -800,6 +801,10 @@ function clearWeather() {
     currentOlaf.remove();
     currentOlaf = null;
   }
+  clearTimeout(weatherTimeout);
+  clearTimeout(nextEffectTimeout);
+  weatherTimeout = null;
+  nextEffectTimeout = null;
 }
 
 function startSnow() {
@@ -874,79 +879,134 @@ function startComets() {
   }
 }
 
-// Генератор псевдослучайных чисел на основе строки (дня)
+// Псевдослучайное число на основе строки
 function hashCode(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash |= 0; // Convert to 32bit integer
+    hash |= 0;
   }
   return Math.abs(hash);
 }
 
-// Получить расписание интервалов для конкретного дня
+// Генерация расписания для конкретного дня (по МСК)
 function getDaySchedule(date) {
   const dayKey = date.toISOString().slice(0, 10); // YYYY-MM-DD
   const seed = hashCode(dayKey);
-  // Интервалы: от 1 до 3 часов каждый
   const intervals = [];
   let currentTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).getTime();
   const endOfDay = currentTime + 24 * 60 * 60 * 1000;
+
+  // Начальное смещение первого эффекта: 1–3 часа от полуночи
+  const firstDelay = (60 + (seed % 180)) * 60 * 1000; // 1–3 часа в мс
+  currentTime += firstDelay;
+
   while (currentTime < endOfDay) {
-    const duration = (60 + (seed % 180)) * 60 * 1000; // 1–3 часа в миллисекундах
-    const typeIndex = (seed + intervals.length) % 4; // 0: snow, 1: rain, 2: leaves, 3: comets
+    // Длительность эффекта: 6–10 минут
+    const duration = (6 + (seed % 5)) * 60 * 1000; // 6–10 мин в мс
+    // Тип погоды: 0=snow, 1=rain, 2=leaves, 3=comets
     const types = ['snow', 'rain', 'leaves', 'comets'];
+    const typeIndex = (seed + intervals.length) % 4;
     intervals.push({
       start: currentTime,
       end: currentTime + duration,
       type: types[typeIndex]
     });
-    currentTime += duration;
+
+    // Следующий эффект начнётся через 1–3 часа после конца текущего
+    const pause = (60 + ((seed * (intervals.length + 1)) % 180)) * 60 * 1000; // 1–3 часа
+    currentTime = currentTime + duration + pause;
   }
   return intervals;
 }
 
-// Найти текущий интервал и установить погоду
+// Найти текущий интервал и применить погоду
 function applyWeatherByTime() {
+  clearTimeout(weatherTimeout);
+  clearTimeout(nextEffectTimeout);
+
   const now = new Date();
   const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
   const schedule = getDaySchedule(msk);
   const nowTime = msk.getTime();
-  let currentInterval = null;
 
-  for (let interval of schedule) {
+  let activeInterval = null;
+  let nextInterval = null;
+
+  for (let i = 0; i < schedule.length; i++) {
+    const interval = schedule[i];
     if (nowTime >= interval.start && nowTime < interval.end) {
-      currentInterval = interval;
+      activeInterval = interval;
+      nextInterval = schedule[i + 1] || null;
+      break;
+    } else if (nowTime < interval.start) {
+      nextInterval = interval;
       break;
     }
   }
 
-  if (!currentInterval) {
-    // Если не нашли (например, сразу после полуночи), берём первый интервал
-    currentInterval = schedule[0];
-  }
+  if (activeInterval) {
+    // Мы внутри эффекта – запускаем его на оставшееся время
+    const type = activeInterval.type;
+    clearWeather();
+    if (type === 'snow') startSnow();
+    else if (type === 'rain') startRain();
+    else if (type === 'leaves') startLeaves();
+    else if (type === 'comets') startComets();
 
-  clearWeather();
-  // Запускаем эффект
-  if (currentInterval.type === 'snow') startSnow();
-  else if (currentInterval.type === 'rain') startRain();
-  else if (currentInterval.type === 'leaves') startLeaves();
-  else if (currentInterval.type === 'comets') startComets();
-
-  // Устанавливаем таймер на окончание интервала
-  const timeLeft = currentInterval.end - nowTime;
-  if (timeLeft > 0) {
-    clearTimeout(weatherTimeout);
-    weatherTimeout = setTimeout(() => {
-      applyWeatherByTime(); // рекурсивно обновить погоду на следующий интервал
-    }, timeLeft);
+    const timeLeft = activeInterval.end - nowTime;
+    if (timeLeft > 0) {
+      weatherTimeout = setTimeout(() => {
+        // Эффект закончился, надо запланировать следующий
+        scheduleNextEffect(nextInterval);
+      }, timeLeft);
+    }
+  } else if (nextInterval) {
+    // Сейчас перерыв, ждём начала следующего эффекта
+    const timeToNext = nextInterval.start - nowTime;
+    if (timeToNext > 0) {
+      nextEffectTimeout = setTimeout(() => {
+        applyWeatherByTime(); // перезапустит уже внутри эффекта
+      }, timeToNext);
+    }
+  } else {
+    // День закончился, ждём полуночи
+    const nextDay = new Date(msk.getFullYear(), msk.getMonth(), msk.getDate() + 1);
+    const msToMidnight = nextDay.getTime() - nowTime;
+    nextEffectTimeout = setTimeout(() => {
+      applyWeatherByTime();
+    }, msToMidnight);
   }
 }
 
-// Запускаем синхронизированную погоду при загрузке
+// Функция, вызываемая после окончания эффекта, если есть следующий интервал
+function scheduleNextEffect(nextInterval) {
+  clearWeather();
+  if (!nextInterval) {
+    // Последний эффект дня закончился, ждём полуночи
+    const now = new Date();
+    const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+    const nextDay = new Date(msk.getFullYear(), msk.getMonth(), msk.getDate() + 1);
+    const msToMidnight = nextDay.getTime() - msk.getTime();
+    nextEffectTimeout = setTimeout(() => applyWeatherByTime(), msToMidnight);
+    return;
+  }
+  // До следующего эффекта перерыв, просто ждём
+  const now = new Date();
+  const msk = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Moscow' }));
+  const nowTime = msk.getTime();
+  const timeToNext = nextInterval.start - nowTime;
+  if (timeToNext > 0) {
+    nextEffectTimeout = setTimeout(() => applyWeatherByTime(), timeToNext);
+  } else {
+    applyWeatherByTime(); // уже пора
+  }
+}
+
+// Запускаем погоду при загрузке страницы
 applyWeatherByTime();
-  
+      
   // ---------- DVD-ЗАСТАВКА ----------
   let inactivityTimer;
   function resetInactivity() {
