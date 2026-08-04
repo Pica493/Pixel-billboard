@@ -259,8 +259,7 @@ window.canvas = canvas;
 window.soldPixels = soldPixels;
 window.redraw = redraw;
   </script>
-  <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + ВСЕ ПАСХАЛКИ ========== -->
-
+  
   <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + ВСЕ ПАСХАЛКИ ========== -->
 <style>
   #effects-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; overflow: hidden; }
@@ -282,50 +281,46 @@ window.redraw = redraw;
   @keyframes leafall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(720deg); } }
   @keyframes cometFall { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-80px, 80vh) scale(0.2); opacity: 0; } }
 
-  /* Исправленная шляпа Хайзенберга (поля + тулья) */
-  .heisenberg-hat {
-    position: relative;
-    width: 240px;
-    height: 140px;
-    margin: 0 auto;
-  }
-  .hat-brim {
-    width: 240px;
-    height: 40px;
-    background: radial-gradient(ellipse at center, #2a2a2a 0%, #111 80%);
-    border-radius: 50%;
-    position: absolute;
-    bottom: 0;
-  }
-  .hat-crown {
-    width: 140px;
-    height: 110px;
-    background: linear-gradient(175deg, #3a3a3a 5%, #1a1a1a 50%, #0d0d0d 95%);
-    border-radius: 45% 45% 0 0 / 60% 60% 0 0;
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    box-shadow: inset 0 -15px 20px rgba(0,0,0,0.6);
-  }
-  .hat-band {
-    position: absolute;
-    bottom: 25px;
-    width: 100%;
-    height: 16px;
-    background: linear-gradient(180deg, #b8860b, #8b6508 50%, #5c4305);
+  /* Снеговик Олаф */
+  .olaf {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 400;
+    font-size: 40px;
+    cursor: default;
+    pointer-events: auto;
   }
 
-  /* Пикачу и анимация */
-  .pikachu-container {
+  /* Большой лист (особый) */
+  .special-leaf {
     position: fixed;
-    top: 50%;
-    left: -120px;
-    transform: translateY(-50%);
-    z-index: 500;
-    animation: runRight 4s linear forwards;
+    bottom: 20px;
+    right: 20px;
+    z-index: 400;
+    width: 30px;
+    height: 30px;
+    background: #f90;
+    border-radius: 50% 0;
     cursor: pointer;
+    pointer-events: auto;
+    transform: rotate(45deg);
+    transition: transform 0.5s, opacity 0.5s;
   }
+
+  /* Курсор-расенган */
+  body.rasengan-cursor {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' stroke='%2300f' stroke-width='3' fill='none' stroke-dasharray='8 4'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2300f'/%3E%3C/svg%3E") 16 16, auto;
+  }
+
+  /* Шляпа Хайзенберга */
+  .heisenberg-hat { position: relative; width: 240px; height: 140px; margin: 0 auto; }
+  .hat-brim { width: 240px; height: 40px; background: radial-gradient(ellipse at center, #2a2a2a 0%, #111 80%); border-radius: 50%; position: absolute; bottom: 0; }
+  .hat-crown { width: 140px; height: 110px; background: linear-gradient(175deg, #3a3a3a 5%, #1a1a1a 50%, #0d0d0d 95%); border-radius: 45% 45% 0 0 / 60% 60% 0 0; position: absolute; top: 0; left: 50%; transform: translateX(-50%); box-shadow: inset 0 -15px 20px rgba(0,0,0,0.6); }
+  .hat-band { position: absolute; bottom: 25px; width: 100%; height: 16px; background: linear-gradient(180deg, #b8860b, #8b6508 50%, #5c4305); }
+
+  /* Пикачу */
+  .pikachu-container { position: fixed; top: 50%; left: -120px; transform: translateY(-50%); z-index: 500; animation: runRight 4s linear forwards; cursor: pointer; }
   @keyframes runRight { from { left: -120px; } to { left: calc(100% + 120px); } }
   .pikachu-head { width: 80px; height: 80px; background: #ffd700; border-radius: 50%; position: relative; box-shadow: 0 4px 0 #cc9900; }
   .pikachu-ear-left, .pikachu-ear-right { position: absolute; top: -30px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 35px solid #222; }
@@ -341,7 +336,7 @@ window.redraw = redraw;
   .pokeball { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(to bottom, #ff3b3b 50%, #ffffff 50%); border: 4px solid #222; position: relative; margin: auto; }
   .pokeball::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: #fff; border: 3px solid #222; border-radius: 50%; }
 
-  /* Кубик Марио */
+  /* Марио */
   .mario-block { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: #f5a623; border: 4px solid #8b4513; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; text-shadow: 2px 2px 0 #000; cursor: pointer; z-index: 500; }
   .mario-coin { position: absolute; width: 30px; height: 30px; background: gold; border-radius: 50%; animation: coinBounce 0.5s ease-out forwards; pointer-events: none; }
   @keyframes coinBounce { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-80px) scale(1); opacity: 0; } }
@@ -352,69 +347,22 @@ window.redraw = redraw;
   .tardis-box .window-row { display: flex; gap: 5px; }
   .tardis-box .window-pane { width: 20px; height: 20px; background: #87ceeb; border: 2px solid white; }
 
-  /* Пентаграмма с синим пламенем */
-  .pentagram {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    width: 350px; height: 350px;
-  }
+  /* Пентаграмма Supernatural */
+  .pentagram { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 350px; height: 350px; }
   .pentagram svg { width: 100%; height: 100%; }
-  .pentagram-text {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 32px;
-    font-weight: bold;
-    color: #ffd700;
-    text-shadow: 0 0 15px black;
-    font-family: 'Times New Roman', serif;
-    letter-spacing: 3px;
-    animation: textFlicker 0.8s infinite;
-  }
-  @keyframes textFlicker {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
-  }
-  .blue-flame {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background: radial-gradient(circle, rgba(0,100,255,0.4) 0%, transparent 70%);
-    animation: flamePulse 1.5s infinite;
-  }
-  @keyframes flamePulse {
-    0% { transform: scale(0.9); opacity: 0.7; }
-    50% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(0.9); opacity: 0.7; }
-  }
+  .pentagram-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; font-weight: bold; color: #ffd700; text-shadow: 0 0 15px black; font-family: 'Times New Roman', serif; letter-spacing: 3px; animation: textFlicker 0.8s infinite; }
+  @keyframes textFlicker { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+  .blue-flame { position: absolute; width: 100%; height: 100%; pointer-events: none; background: radial-gradient(circle, rgba(0,100,255,0.4) 0%, transparent 70%); animation: flamePulse 1.5s infinite; }
+  @keyframes flamePulse { 0% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.7; } }
 
   /* Портал Bleach */
-  .bleach-portal {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0.7) 70%, transparent 100%);
-    border-radius: 50%;
-    z-index: 500;
-    animation: portalOpen 0.5s ease-out;
-    box-shadow: 0 0 40px 10px rgba(0,0,0,0.8);
-  }
-  @keyframes portalOpen {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  }
-  .bleach-butterfly {
-    position: fixed;
-    font-size: 24px;
-    z-index: 600;
-    pointer-events: none;
-    transition: transform 2s, opacity 2s;
-  }
+  .bleach-portal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; background: radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0.7) 70%, transparent 100%); border-radius: 50%; z-index: 500; animation: portalOpen 0.5s ease-out; box-shadow: 0 0 40px 10px rgba(0,0,0,0.8); }
+  @keyframes portalOpen { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+  .bleach-butterfly { position: fixed; font-size: 24px; z-index: 600; pointer-events: none; transition: transform 2s, opacity 2s; }
+
+  /* Aard сдувание пикселей */
+  @keyframes pixelBlowDown { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
+  .pixel-particle { position: absolute; width: 4px; height: 4px; background: white; pointer-events: none; z-index: 400; animation: pixelBlowDown 0.8s ease-in forwards; }
 </style>
 
 <div id="effects-layer"></div>
@@ -532,13 +480,11 @@ window.redraw = redraw;
 
   // bleach – портал + разлетающиеся бабочки
   function triggerBleachPortal() {
-    // Создаём портал
     const portal = document.createElement('div');
     portal.className = 'bleach-portal';
     document.body.appendChild(portal);
     setTimeout(() => portal.remove(), 5000);
 
-    // Запускаем бабочек из центра портала
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
     for (let i = 0; i < 35; i++) {
@@ -550,7 +496,6 @@ window.redraw = redraw;
       butterfly.style.transform = 'translate(-50%, -50%)';
       document.body.appendChild(butterfly);
 
-      // Случайное направление разлёта
       const angle = Math.random() * 2 * Math.PI;
       const distance = 200 + Math.random() * 300;
       const dx = Math.cos(angle) * distance;
@@ -565,7 +510,6 @@ window.redraw = redraw;
       setTimeout(() => butterfly.remove(), 2500);
     }
 
-    // Синий оттенок холста
     ctx.save();
     ctx.fillStyle = 'rgba(0,100,255,0.5)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -633,7 +577,7 @@ window.redraw = redraw;
   }
   addEasterEgg('snake', 'SNAKE', startSnake);
 
-  // pikachu (исправлен, добавлена анимация)
+  // pikachu
   function pikachuRun() {
     const pika = document.createElement('div');
     pika.className = 'pikachu-container';
@@ -653,7 +597,6 @@ window.redraw = redraw;
       e.stopPropagation();
       showMessage('Pika-pika!', '#ff0');
     });
-    // Удаляем после окончания анимации
     pika.addEventListener('animationend', () => pika.remove());
   }
   addEasterEgg('pikachu', 'PIKACHU', pikachuRun);
@@ -690,15 +633,29 @@ window.redraw = redraw;
   }
   addEasterEgg('mario', 'MARIO', marioBlock);
 
-  // luigi удалён
-
-  // igni с пламенем 30 сек
+  // igni
   addEasterEgg('igni', 'IGNI', () => {
     document.body.style.cursor = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Cpolygon points=\'2,2 30,16 16,16 20,24 14,24 16,16 2,16\' fill=\'%23ff4500\' stroke=\'%23ff0\' stroke-width=\'1.5\'/%3E%3Cpolygon points=\'2,2 10,10 2,10\' fill=\'%23ff0\'/%3E%3C/svg%3E") 16 16, auto';
     setTimeout(() => document.body.style.cursor = '', 30000);
   });
 
-  addEasterEgg('aard', 'AARD', () => showMessage('Aard!','#0ff',2000));
+  // aard (сдувание пикселей)
+  addEasterEgg('aard', 'AARD', () => {
+    for (let i = 0; i < 200; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'pixel-particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.top = Math.random() * 30 + '%';
+      particle.style.animationDelay = Math.random() * 0.5 + 's';
+      document.body.appendChild(particle);
+      setTimeout(() => particle.remove(), 1500);
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    showMessage('Aard! Пиксели сдуло!', '#0ff', 2000);
+    setTimeout(() => safeRedraw(), 2000);
+  });
+
+  // witcher
   addEasterEgg('witcher', 'WITCHER', () => showMessage('Заплатите чеканной монетой','silver',3000));
 
   // tardis
@@ -722,7 +679,7 @@ window.redraw = redraw;
     setTimeout(() => box.remove(), 2000);
   });
 
-  // Гарри Поттер lumos/nox – переключатель
+  // Гарри Поттер lumos/nox
   let lumosActive = false;
   addEasterEgg('lumos', 'LUMOS', () => {
     if (lumosActive) return;
@@ -739,22 +696,17 @@ window.redraw = redraw;
     showMessage('Nox!', '#aaa');
   });
 
-  // Шляпа Хайзенберга (исправлена)
+  // Шляпа Хайзенберга
   addEasterEgg('heisenberg', 'HEISENBERG', () => {
     const hat = document.createElement('div');
     hat.className = 'heisenberg-hat';
-    hat.innerHTML = `
-      <div class="hat-crown">
-        <div class="hat-band"></div>
-      </div>
-      <div class="hat-brim"></div>
-    `;
+    hat.innerHTML = `<div class="hat-crown"><div class="hat-band"></div></div><div class="hat-brim"></div>`;
     hat.style.cssText = 'position:fixed; top:40%; left:50%; transform:translate(-50%, -50%); z-index:1000;';
     document.body.appendChild(hat);
     setTimeout(() => hat.remove(), 5000);
   });
 
-  // Supernatural – пентаграмма с синим пламенем и мерцанием
+  // Supernatural
   addEasterEgg('impala', 'SUPERNATURAL', () => {
     const pentagram = document.createElement('div');
     pentagram.className = 'pentagram';
@@ -776,7 +728,7 @@ window.redraw = redraw;
     setTimeout(() => pentagram.remove(), 4000);
   });
 
-  // bit – улучшен счетчик
+  // bit
   function startBitGame() {
     let score = 0, timeLeft = 30;
     const scoreEl = document.createElement('div');
@@ -840,22 +792,121 @@ window.redraw = redraw;
 
   // ---------- ПОГОДА ----------
   let weatherTimeout;
-  function clearWeather() { effectsLayer.querySelectorAll('.weather-particle').forEach(el => el.remove()); }
-  function startSnow() { clearWeather(); for(let i=0;i<50;i++){ const f=document.createElement('div'); f.className='snowflake weather-particle'; f.style.left=Math.random()*100+'%'; f.style.animationDuration=(2+Math.random()*3)+'s'; effectsLayer.appendChild(f); } }
-  function startRain() { clearWeather(); for(let i=0;i<40;i++){ const d=document.createElement('div'); d.className='raindrop weather-particle'; d.style.left=Math.random()*100+'%'; d.style.animationDuration=(1+Math.random()*1.5)+'s'; effectsLayer.appendChild(d); } }
-  function startLeaves() { clearWeather(); for(let i=0;i<25;i++){ const l=document.createElement('div'); l.className='leaf weather-particle'; l.style.left=Math.random()*100+'%'; l.style.animationDuration=(3+Math.random()*4)+'s'; effectsLayer.appendChild(l); } }
-  function startComets() { clearWeather(); for(let i=0;i<8;i++){ const c=document.createElement('div'); c.className='comet weather-particle'; c.style.left=Math.random()*90+'%'; c.style.top=Math.random()*30+'%'; c.style.animationDuration=(1.5+Math.random()*1.5)+'s'; effectsLayer.appendChild(c); } }
+  let currentOlaf = null; // переменная для снеговика
+
+  function clearWeather() {
+    effectsLayer.querySelectorAll('.weather-particle').forEach(el => el.remove());
+    // Удаляем снеговика, если он есть
+    if (currentOlaf) {
+      currentOlaf.remove();
+      currentOlaf = null;
+    }
+  }
+
+  function startSnow() {
+    clearWeather();
+    for (let i = 0; i < 50; i++) {
+      const f = document.createElement('div');
+      f.className = 'snowflake weather-particle';
+      f.style.left = Math.random() * 100 + '%';
+      f.style.animationDuration = (2 + Math.random() * 3) + 's';
+      effectsLayer.appendChild(f);
+    }
+    // Снеговик Олаф (с вероятностью 30%, появляется через 2 секунды)
+    if (Math.random() < 0.3) {
+      setTimeout(() => {
+        if (currentOlaf) return; // уже есть
+        const olaf = document.createElement('div');
+        olaf.className = 'olaf';
+        olaf.title = 'Олаф';
+        olaf.textContent = '⛄';
+        document.body.appendChild(olaf);
+        currentOlaf = olaf;
+      }, 2000);
+    }
+  }
+
+  function startRain() {
+    clearWeather();
+    for (let i = 0; i < 40; i++) {
+      const d = document.createElement('div');
+      d.className = 'raindrop weather-particle';
+      d.style.left = Math.random() * 100 + '%';
+      d.style.animationDuration = (1 + Math.random() * 1.5) + 's';
+      effectsLayer.appendChild(d);
+    }
+  }
+
+  function startLeaves() {
+    clearWeather();
+    for (let i = 0; i < 25; i++) {
+      const l = document.createElement('div');
+      l.className = 'leaf weather-particle';
+      l.style.left = Math.random() * 100 + '%';
+      l.style.animationDuration = (3 + Math.random() * 4) + 's';
+      effectsLayer.appendChild(l);
+    }
+    // Большой особый лист снизу справа (держится 30 секунд)
+    setTimeout(() => {
+      const special = document.createElement('div');
+      special.className = 'special-leaf';
+      special.title = 'Нажми, чтобы получить Расенган';
+      document.body.appendChild(special);
+      let timeoutId = setTimeout(() => {
+        special.remove();
+      }, 30000);
+
+      special.addEventListener('click', function onClick() {
+        clearTimeout(timeoutId);
+        // Улетает
+        special.style.transition = 'transform 0.5s ease-out, opacity 0.5s';
+        special.style.transform = 'translate(100px, -100px) rotate(720deg)';
+        special.style.opacity = '0';
+        setTimeout(() => special.remove(), 500);
+        // Расенган-курсор на 10 секунд
+        document.body.classList.add('rasengan-cursor');
+        setTimeout(() => {
+          document.body.classList.remove('rasengan-cursor');
+        }, 10000);
+      }, { once: true });
+    }, 5000);
+  }
+
+  function startComets() {
+    clearWeather();
+    for (let i = 0; i < 8; i++) {
+      const c = document.createElement('div');
+      c.className = 'comet weather-particle';
+      c.style.left = Math.random() * 90 + '%';
+      c.style.top = Math.random() * 30 + '%';
+      c.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+      effectsLayer.appendChild(c);
+    }
+  }
+
   function setWeather(type, durationMs) {
     clearWeather();
-    if (type==='snow') startSnow(); else if(type==='rain') startRain(); else if(type==='leaves') startLeaves(); else if(type==='comets') startComets(); else return;
-    weatherTimeout = setTimeout(() => { clearWeather(); scheduleNextWeather(); }, durationMs);
+    if (type === 'snow') startSnow();
+    else if (type === 'rain') startRain();
+    else if (type === 'leaves') startLeaves();
+    else if (type === 'comets') startComets();
+    else return;
+    weatherTimeout = setTimeout(() => {
+      clearWeather();
+      scheduleNextWeather();
+    }, durationMs);
   }
+
   function scheduleNextWeather() {
-    const delay = 3600000 + Math.random()*7200000;
+    const delay = 3600000 + Math.random() * 7200000;
     setTimeout(() => {
-      const r = Math.random(); let type;
-      if(r<0.1) type='comets'; else if(r<0.4) type='snow'; else if(r<0.7) type='rain'; else type='leaves';
-      const dur = type==='comets' ? 120000+Math.random()*60000 : 300000+Math.random()*300000;
+      const r = Math.random();
+      let type;
+      if (r < 0.1) type = 'comets';
+      else if (r < 0.4) type = 'snow';
+      else if (r < 0.7) type = 'rain';
+      else type = 'leaves';
+      const dur = type === 'comets' ? 120000 + Math.random() * 60000 : 300000 + Math.random() * 300000;
       setWeather(type, dur);
     }, delay);
   }
@@ -865,28 +916,29 @@ window.redraw = redraw;
   let inactivityTimer;
   function resetInactivity() {
     clearTimeout(inactivityTimer);
-    const dvd = document.getElementById('dvd-logo'); if(dvd) dvd.remove();
+    const dvd = document.getElementById('dvd-logo'); if (dvd) dvd.remove();
     inactivityTimer = setTimeout(() => {
-      const logo = document.createElement('div'); logo.id='dvd-logo'; logo.textContent='Купи пиксель';
+      const logo = document.createElement('div'); logo.id = 'dvd-logo'; logo.textContent = 'Купи пиксель';
       logo.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#ff0; color:#000; padding:10px; font-family:monospace; z-index:600; border-radius:5px;';
       document.body.appendChild(logo);
-      let x = Math.random()*window.innerWidth, y = Math.random()*window.innerHeight, dx = 1.2, dy = 1.2;
+      let x = Math.random() * window.innerWidth, y = Math.random() * window.innerHeight, dx = 1.2, dy = 1.2;
       function animate() {
         x += dx; y += dy;
-        if(x<=0 || x+logo.offsetWidth>=window.innerWidth) { dx*=-1; checkCorner(x,y); }
-        if(y<=0 || y+logo.offsetHeight>=window.innerHeight) { dy*=-1; checkCorner(x,y); }
-        logo.style.left=x+'px'; logo.style.top=y+'px';
-        if(document.getElementById('dvd-logo')) requestAnimationFrame(animate);
+        if (x <= 0 || x + logo.offsetWidth >= window.innerWidth) { dx *= -1; checkCorner(x, y); }
+        if (y <= 0 || y + logo.offsetHeight >= window.innerHeight) { dy *= -1; checkCorner(x, y); }
+        logo.style.left = x + 'px';
+        logo.style.top = y + 'px';
+        if (document.getElementById('dvd-logo')) requestAnimationFrame(animate);
       }
-      function checkCorner(x,y) {
-        if((x<=1||x+logo.offsetWidth>=window.innerWidth-1) && (y<=1||y+logo.offsetHeight>=window.innerHeight-1)) {
-          const msg = document.createElement('div'); msg.textContent='Точно в угол!';
-          Object.assign(msg.style, { position:'fixed',top:'20%',left:'50%',transform:'translateX(-50%)',color:'#ff0',background:'rgba(0,0,0,0.8)',padding:'0.3rem 1rem',borderRadius:'5px',zIndex:700,fontWeight:'bold',pointerEvents:'none' });
-          document.body.appendChild(msg); setTimeout(()=>msg.remove(),1000);
+      function checkCorner(x, y) {
+        if ((x <= 1 || x + logo.offsetWidth >= window.innerWidth - 1) && (y <= 1 || y + logo.offsetHeight >= window.innerHeight - 1)) {
+          const msg = document.createElement('div'); msg.textContent = 'Точно в угол!';
+          Object.assign(msg.style, { position: 'fixed', top: '20%', left: '50%', transform: 'translateX(-50%)', color: '#ff0', background: 'rgba(0,0,0,0.8)', padding: '0.3rem 1rem', borderRadius: '5px', zIndex: 700, fontWeight: 'bold', pointerEvents: 'none' });
+          document.body.appendChild(msg); setTimeout(() => msg.remove(), 1000);
         }
       }
       animate();
-      window.addEventListener('mousemove', ()=>logo.remove(), { once:true });
+      window.addEventListener('mousemove', () => logo.remove(), { once: true });
     }, 30000);
   }
   window.addEventListener('mousemove', resetInactivity);
