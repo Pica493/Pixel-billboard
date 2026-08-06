@@ -1153,7 +1153,284 @@ applyWeatherByTime();
 })();
 </script>
   <!-- ========== ПРОФИЛЬ И МАГАЗИН (v2 stable) ========== -->
+<!-- ========== ПРОФИЛЬ И МАГАЗИН (v2 stable) ========== -->
+<style>
+  #profile-btn, #shop-btn {
+    position: fixed;
+    top: 15px;
+    background: #222;
+    color: #eee;
+    border: 2px solid #4caf50;
+    border-radius: 20px;
+    padding: 5px 15px;
+    cursor: pointer;
+    z-index: 99999;
+    font-size: 14px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    backdrop-filter: blur(5px);
+  }
+  #profile-btn { left: 160px; }
+  #shop-btn { left: 260px; }
 
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 200000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal.active { display: flex; }
+  .modal-content {
+    background: #1a1a2e;
+    border: 2px solid #4caf50;
+    border-radius: 15px;
+    padding: 20px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .avatar-grid, .frame-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    gap: 8px;
+    margin: 10px 0;
+  }
+  .avatar-item, .frame-item {
+    width: 45px; height: 45px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid #444;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 28px;
+    background: #0d0d1a;
+  }
+  .avatar-item.owned { border-color: #ffd700; }
+  .frame-preview {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+</style>
+
+<button id="profile-btn">👤 Профиль</button>
+<button id="shop-btn">🛒 Магазин</button>
+
+<div id="profile-modal" class="modal">
+  <div class="modal-content">
+    <h2>Профиль</h2>
+    <div style="display:flex; align-items:center; gap:15px; margin:10px 0;">
+      <div id="profile-avatar-preview" class="frame-preview" style="font-size:40px; width:60px; height:60px;"></div>
+      <div>
+        <div id="profile-nickname" style="font-size:1.5em; font-weight:bold;">Player</div>
+        <div style="color:#aaa;">Монеты: <span id="profile-coins">0</span> 🪙</div>
+      </div>
+    </div>
+    <button id="change-nickname-btn">✏️ Сменить ник (200 монет)</button>
+    <h3>Рекорды</h3>
+    <div>🐍 Змейка: <span id="rec-snake">0</span></div>
+    <div>🎯 Бит: <span id="rec-bit">0</span></div>
+    <button id="close-profile" style="margin-top:10px;">Закрыть</button>
+  </div>
+</div>
+
+<div id="shop-modal" class="modal">
+  <div class="modal-content">
+    <h2>Магазин</h2>
+    <div>Ваши монеты: <span id="shop-coins">0</span> 🪙</div>
+    <h3>Аватары</h3>
+    <div class="avatar-grid" id="avatar-list"></div>
+    <h3>Рамки</h3>
+    <div class="frame-grid" id="frame-list"></div>
+    <button id="close-shop" style="margin-top:10px;">Закрыть</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const AVATARS = [
+    { id: 'default', emoji: '🙂', name: 'Смайлик', price: 0 },
+    { id: 'astronaut', emoji: '👩‍🚀', name: 'Космонавт', price: 80 },
+    { id: 'superhero', emoji: '🦸', name: 'Супергерой', price: 100 },
+    { id: 'wizard', emoji: '🧙', name: 'Маг', price: 120 },
+    { id: 'vampire', emoji: '🧛', name: 'Вампир', price: 130 },
+    { id: 'mermaid', emoji: '🧜‍♀️', name: 'Русалка', price: 110 },
+    { id: 'elf', emoji: '🧝', name: 'Эльф', price: 90 },
+    { id: 'zombie', emoji: '🧟', name: 'Зомби', price: 100 },
+    { id: 'genie', emoji: '🧞', name: 'Джинн', price: 150 },
+    { id: 'rockstar', emoji: '👩‍🎤', name: 'Рокер', price: 80 },
+    { id: 'ninja', emoji: '🥷', name: 'Ниндзя', price: 120 },
+    { id: 'villain', emoji: '🦹', name: 'Злодей', price: 110 },
+    { id: 'cook', emoji: '👩‍🍳', name: 'Повар', price: 70 },
+    { id: 'mechanic', emoji: '👩‍🔧', name: 'Механик', price: 60 },
+    { id: 'programmer', emoji: '👩‍💻', name: 'Программист', price: 80 },
+    { id: 'artist', emoji: '👩‍🎨', name: 'Художник', price: 70 },
+    { id: 'firefighter', emoji: '👩‍🚒', name: 'Пожарный', price: 90 },
+    { id: 'pilot', emoji: '👩‍✈️', name: 'Пилот', price: 100 },
+    { id: 'judge', emoji: '👩‍⚖️', name: 'Судья', price: 120 },
+    { id: 'superman', emoji: '🦸‍♂️', name: 'Супермен', price: 150 },
+    { id: 'superwoman', emoji: '🦸‍♀️', name: 'Супергероиня', price: 150 },
+    { id: 'elf_m', emoji: '🧝‍♂️', name: 'Эльф-м', price: 90 },
+    { id: 'elf_f', emoji: '🧝‍♀️', name: 'Эльфийка', price: 90 },
+    { id: 'vamp_m', emoji: '🧛‍♂️', name: 'Вампир-м', price: 130 },
+    { id: 'vamp_f', emoji: '🧛‍♀️', name: 'Вампирша', price: 130 },
+    { id: 'wizard_m', emoji: '🧙‍♂️', name: 'Колдун', price: 120 },
+    { id: 'witch', emoji: '🧙‍♀️', name: 'Ведьма', price: 120 },
+    { id: 'zombie_m', emoji: '🧟‍♂️', name: 'Зомби-м', price: 100 },
+    { id: 'zombie_f', emoji: '🧟‍♀️', name: 'Зомби-ж', price: 100 },
+    { id: 'villain_m', emoji: '🦹‍♂️', name: 'Злодей-м', price: 110 },
+    { id: 'villain_f', emoji: '🦹‍♀️', name: 'Злодейка', price: 110 },
+    { id: 'robot', emoji: '🤖', name: 'Робот', price: 130 },
+    { id: 'alien', emoji: '👾', name: 'Инопланетянин', price: 140 },
+    { id: 'dragon', emoji: '🐲', name: 'Дракон', price: 150 },
+    { id: 'unicorn', emoji: '🦄', name: 'Единорог', price: 150 },
+    { id: 'cat', emoji: '🐱', name: 'Кот', price: 80 },
+    { id: 'fox', emoji: '🦊', name: 'Лис', price: 80 },
+    { id: 'wolf', emoji: '🐺', name: 'Волк', price: 90 },
+    { id: 'eagle', emoji: '🦅', name: 'Орёл', price: 100 },
+    { id: 'dino', emoji: '🦖', name: 'Динозавр', price: 110 },
+    { id: 'shark', emoji: '🦈', name: 'Акула', price: 120 },
+    { id: 'owl', emoji: '🦉', name: 'Сова', price: 90 },
+    { id: 'bat', emoji: '🦇', name: 'Летучая мышь', price: 100 },
+    { id: 'crystal', emoji: '💎', name: 'Кристалл', price: 140 },
+    { id: 'ghost', emoji: '👻', name: 'Призрак', price: 100 },
+    { id: 'skull', emoji: '💀', name: 'Череп', price: 110 }
+  ];
+
+  const FRAMES = [
+    { id: 'none', name: 'Без рамки', css: '', price: 0 },
+    { id: 'gold', name: 'Золотая', css: 'border:3px solid gold; box-shadow:0 0 10px gold;', price: 200 },
+    { id: 'neon', name: 'Неон', css: 'border:3px solid #0ff; box-shadow:0 0 15px #0ff;', price: 200 },
+    { id: 'fire', name: 'Огонь', css: 'border:3px solid #f90; box-shadow:0 0 15px #f60, inset 0 0 10px #f90;', price: 250 },
+    { id: 'ice', name: 'Лёд', css: 'border:3px solid #6cf; box-shadow:0 0 15px #6cf;', price: 200 },
+    { id: 'matrix', name: 'Матрица', css: 'border:3px solid #0f0; box-shadow:0 0 15px #0f0; background:#000;', price: 250 },
+    { id: 'pixel', name: 'Пиксельная', css: 'border:4px solid #555; border-image: repeating-linear-gradient(45deg, #555, #555 4px, #222 4px, #222 8px) 4;', price: 150 },
+    { id: 'steel', name: 'Сталь', css: 'border:3px solid #ccc; background: linear-gradient(180deg, #aaa, #666);', price: 130 },
+    { id: 'hearts', name: 'Сердечки', css: 'border:3px solid #f66; box-shadow:0 0 10px #f99;', price: 160 },
+    { id: 'stars', name: 'Звёзды', css: 'border:3px solid #ffd700; box-shadow:0 0 15px #ffd700;', price: 220 }
+  ];
+
+  const DEFAULT = {
+    nickname: 'Player',
+    coins: 0,
+    inventory: ['default', 'none'],
+    equipped: { avatar: 'default', frame: 'none' },
+    records: { snake: 0, bit: 0 },
+    nicknameChanges: 0,
+    lastDaily: null
+  };
+
+  let profile = JSON.parse(localStorage.getItem('pixelProfile')) || {...DEFAULT};
+  function save() { localStorage.setItem('pixelProfile', JSON.stringify(profile)); }
+
+  if (profile.lastDaily !== new Date().toDateString()) {
+    profile.coins += 5;
+    profile.lastDaily = new Date().toDateString();
+    save();
+  }
+
+  window.addCoins = function(amount) {
+    profile.coins += amount;
+    save();
+    updateUI();
+  };
+
+  window.updateRecord = function(game, score) {
+    if (score > (profile.records[game]||0)) {
+      profile.records[game] = score;
+      save();
+      return true;
+    }
+    return false;
+  };
+
+  function updateUI() {
+    document.getElementById('profile-coins').textContent = profile.coins;
+    document.getElementById('shop-coins').textContent = profile.coins;
+    document.getElementById('profile-nickname').textContent = profile.nickname;
+    document.getElementById('rec-snake').textContent = profile.records.snake;
+    document.getElementById('rec-bit').textContent = profile.records.bit;
+
+    const av = AVATARS.find(a => a.id === profile.equipped.avatar) || AVATARS[0];
+    const preview = document.getElementById('profile-avatar-preview');
+    preview.textContent = av.emoji;
+    preview.className = 'frame-preview';
+    const frame = FRAMES.find(f => f.id === profile.equipped.frame);
+    if (frame && frame.css) preview.style.cssText = frame.css + 'font-size:40px; width:60px; height:60px; display:flex; align-items:center; justify-content:center;';
+    else preview.style.cssText = 'font-size:40px; width:60px; height:60px; display:flex; align-items:center; justify-content:center;';
+  }
+
+  function populateShop() {
+    const ag = document.getElementById('avatar-list');
+    const fg = document.getElementById('frame-list');
+    ag.innerHTML = ''; fg.innerHTML = '';
+    AVATARS.forEach(a => {
+      const d = document.createElement('div');
+      d.className = 'avatar-item' + (profile.inventory.includes(a.id)?' owned':'');
+      d.textContent = a.emoji;
+      d.title = a.name + ' (' + a.price + '🪙)';
+      d.onclick = () => buy('avatar', a);
+      ag.appendChild(d);
+    });
+    FRAMES.forEach(f => {
+      const d = document.createElement('div');
+      d.className = 'frame-item';
+      if (f.css) d.style.cssText = f.css;
+      d.innerHTML = '<div class="frame-preview">🙂</div>';
+      d.title = f.name + ' (' + f.price + '🪙)';
+      d.onclick = () => buy('frame', f);
+      if (profile.inventory.includes(f.id)) d.classList.add('owned');
+      fg.appendChild(d);
+    });
+  }
+
+  function buy(type, item) {
+    if (profile.inventory.includes(item.id)) {
+      profile.equipped[type] = item.id;
+      save(); updateUI(); alert('Экипировано: ' + item.name);
+      return;
+    }
+    if (profile.coins < item.price) { alert('Мало монет!'); return; }
+    profile.coins -= item.price;
+    profile.inventory.push(item.id);
+    profile.equipped[type] = item.id;
+    save(); updateUI(); populateShop();
+    alert('Куплено: ' + item.name);
+  }
+
+  document.getElementById('change-nickname-btn').onclick = () => {
+    const cost = profile.nicknameChanges === 0 ? 0 : 200;
+    if (cost > 0 && profile.coins < cost) { alert('Нужно 200 монет'); return; }
+    const n = prompt('Новый ник:', profile.nickname);
+    if (n && n.trim()) {
+      if (cost > 0) profile.coins -= cost;
+      profile.nickname = n.trim();
+      profile.nicknameChanges++;
+      save(); updateUI();
+    }
+  };
+
+  document.getElementById('profile-btn').onclick = () => {
+    document.getElementById('profile-modal').classList.add('active');
+    updateUI();
+  };
+  document.getElementById('shop-btn').onclick = () => {
+    document.getElementById('shop-modal').classList.add('active');
+    updateUI();
+    populateShop();
+  };
+  document.getElementById('close-profile').onclick = () => document.getElementById('profile-modal').classList.remove('active');
+  document.getElementById('close-shop').onclick = () => document.getElementById('shop-modal').classList.remove('active');
+
+  updateUI();
+  window.PixelProfile = { addCoins: window.addCoins, updateRecord: window.updateRecord };
+})();
+</script>
 
   
 </body>
