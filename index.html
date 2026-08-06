@@ -594,12 +594,7 @@ if (!snake) {
   gameOver = true;
   drawSnake();
 
-if (score > 0) {
-  const coinsEarned = Math.floor(score / 3);
-  window.addCoins(coinsEarned);
-  const isNewRecord = window.updateRecord('snake', score);
-  if (isNewRecord) window.addCoins(10);
-}
+
   
   showMessage('Нет места для змейки! Попробуй позже.', '#f00');
   setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
@@ -640,10 +635,28 @@ let gameInterval;
       if (gameOver) return;
       if (!(nextDirection.x === -direction.x && nextDirection.y === -direction.y)) direction = nextDirection;
       const head = snake[0], newHead = {x: head.x + direction.x, y: head.y + direction.y};
+      
+      
+      
       if (!isCellFree(newHead.x, newHead.y) || snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
-        gameOver = true; drawSnake(); clearInterval(gameInterval); setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
-        return;
-      }
+    gameOver = true;
+    // === НАЧИСЛЕНИЕ МОНЕТ ===
+    const snakeLength = snake.length;
+    const score = snakeLength - 3; // начальная длина 3
+    if (score > 0) {
+      const coinsEarned = Math.floor(score / 3);
+      window.addCoins(coinsEarned);
+      const isNewRecord = window.updateRecord('snake', score);
+      if (isNewRecord) window.addCoins(10);
+    }
+    drawSnake();
+    clearInterval(gameInterval);
+    setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+    return;
+}
+
+
+      
       snake.unshift(newHead);
       if (food && newHead.x === food.x && newHead.y === food.y) {
         food = spawnFood();
