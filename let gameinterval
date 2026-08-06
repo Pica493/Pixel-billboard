@@ -885,7 +885,7 @@ let gameInterval;
     }
   }, 31000);
 }
-  
+  addEasterEgg('bitgame', 'BIT', startBitGame);
 
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
