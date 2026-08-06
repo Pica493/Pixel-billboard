@@ -593,6 +593,14 @@ if (!snake) {
   // Если совсем нет свободного места, показываем сообщение и выходим
   gameOver = true;
   drawSnake();
+
+if (score > 0) {
+  const coinsEarned = Math.floor(score / 3);
+  window.addCoins(coinsEarned);
+  const isNewRecord = window.updateRecord('snake', score);
+  if (isNewRecord) window.addCoins(10);
+}
+  
   showMessage('Нет места для змейки! Попробуй позже.', '#f00');
   setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
   return;
@@ -820,6 +828,14 @@ let gameInterval;
         scoreEl.remove();
         const best = localStorage.getItem('bitRecord') || 0;
         if (score > best) localStorage.setItem('bitRecord', score);
+
+// === НАЧИСЛЕНИЕ МОНЕТ ===
+const coinsEarned = Math.floor(score / 5);
+window.addCoins(coinsEarned);
+const isNewRecord = window.updateRecord('bit', score);
+if (isNewRecord) window.addCoins(10);
+// === КОНЕЦ НАЧИСЛЕНИЯ ===
+        
         showMessage(`Игра окончена! Попаданий: ${score}. Рекорд: ${localStorage.getItem('bitRecord')}`, '#ff0', 3000);
         return;
       }
@@ -1122,7 +1138,9 @@ applyWeatherByTime();
   resetInactivity();
 })();
 </script>
-                 
+
+
+  
   
 </body>
 </html>
