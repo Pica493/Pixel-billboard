@@ -482,7 +482,11 @@ window.redraw = redraw;
     }
   });
 
-  function activateCombo(combo) {
+  
+  window.activateCombo = function(combo) {
+
+
+    
     for (let egg of easterEggs) {
       if (combo.includes(egg.combo)) {
         if (canActivate(egg.name)) {
