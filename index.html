@@ -51,25 +51,6 @@
       height: auto;
       image-rendering: crisp-edges; /* для чёткости пикселей */
     }
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-      margin: 1rem 0;
-      font-size: 0.9rem;
-      color: #ccc;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .legend-free {
-      width: 16px; height: 16px; background: #fff; border: 1px solid #999;
-    }
-    .legend-sold {
-      width: 16px; height: 16px; background: repeating-linear-gradient(45deg, #ffcc00, #ffcc00 2px, #000 2px, #000 4px);
-    }
     .cta {
       margin: 1.5rem 0;
       text-align: center;
@@ -114,10 +95,13 @@
     <canvas id="pixel-canvas" width="1000" height="1000"></canvas>
     <div class="tooltip" id="tooltip"></div>
   </div>
-  <div class="legend">
-    <div class="legend-item"><div class="legend-free"></div> Свободный пиксель</div>
-    <div class="legend-item"><div class="legend-sold"></div> Проданный блок</div>
-  </div>
+  <div style="text-align: center; margin: 1.5rem 0;">
+  <a href="https://www.donationalerts.com/r/pixelbillboard" target="_blank" 
+     style="display: inline-block; background: #ff6b6b; color: #fff; padding: 12px 30px; 
+            border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1rem;">
+    💛 Поддержать проект
+  </a>
+</div>
   <div class="cta">
     <p>Хочешь разместить логотип? Напиши нам: <a href="mailto:pixelbillboard@mail.ru">PixelBillboard@mail.ru</a> или в Telegram: <a href="https://t.me/PixelBillboard_ru">PixelBillboard_ru</a></p>
   </div>
