@@ -406,6 +406,8 @@ window.redraw = redraw;
   /* Aard сдувание пикселей */
   @keyframes pixelBlowDown { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
   .pixel-particle { position: absolute; width: 4px; height: 4px; background: white; pointer-events: none; z-index: 400; animation: pixelBlowDown 0.8s ease-in forwards; }
+
+
 </style>
 
 <div id="effects-layer"></div>
@@ -465,39 +467,36 @@ window.redraw = redraw;
     easterEggs.push({ name, combo: combo.toUpperCase(), action });
   }
 
-  // Лупа
-  let inputTimer;
-  easterInput.addEventListener('input', function() {
-    clearTimeout(inputTimer);
-    const val = easterInput.value.trim().toUpperCase();
-    if (val.length > 0) {
-      inputTimer = setTimeout(() => { activateCombo(val); easterInput.value = ''; }, 800);
-    }
-  });
-  easterInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      clearTimeout(inputTimer);
-      const val = easterInput.value.trim().toUpperCase();
-      if (val.length > 0) { activateCombo(val); easterInput.value = ''; }
-    }
-  });
-
-  
-  window.activateCombo = function(combo) {
-
-
-    
-    for (let egg of easterEggs) {
-      if (combo.includes(egg.combo)) {
-        if (canActivate(egg.name)) {
-          setActivated(egg.name);
-          egg.action();
-          return true;
-        }
+  // Глобальная функция активации (должна быть объявлена до обработчиков)
+window.activateCombo = function(combo) {
+  for (let egg of easterEggs) {
+    if (combo.includes(egg.combo)) {
+      if (canActivate(egg.name)) {
+        setActivated(egg.name);
+        egg.action();
+        return true;
       }
     }
-    return false;
   }
+  return false;
+};
+
+// Лупа
+let inputTimer;
+easterInput.addEventListener('input', function() {
+  clearTimeout(inputTimer);
+  const val = easterInput.value.trim().toUpperCase();
+  if (val.length > 0) {
+    inputTimer = setTimeout(() => { window.activateCombo(val); easterInput.value = ''; }, 800);
+  }
+});
+easterInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    clearTimeout(inputTimer);
+    const val = easterInput.value.trim().toUpperCase();
+    if (val.length > 0) { window.activateCombo(val); easterInput.value = ''; }
+  }
+});
 
   // ================= ПАСХАЛКИ =================
   // matrix
