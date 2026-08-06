@@ -1166,7 +1166,6 @@ applyWeatherByTime();
   resetInactivity();
 })();
 </script>
-  <!-- ========== ПРОФИЛЬ И МАГАЗИН (v2 stable) ========== -->
 <!-- ========== ПРОФИЛЬ И МАГАЗИН (v2 stable) ========== -->
 <style>
   #profile-btn, #shop-btn {
