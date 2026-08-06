@@ -175,7 +175,64 @@
 
     // Инициализация
     redraw();
+    
+    
+// ===== ЦЕНТРАЛЬНЫЙ БЛОК: ЛОГОТИП TELEGRAM =====
+(function() {
+  // Создаём временный canvas для рисования логотипа
+  const bannerCanvas = document.createElement('canvas');
+  bannerCanvas.width = 500;
+  bannerCanvas.height = 500;
+  const bctx = bannerCanvas.getContext('2d');
 
+  // Фон
+  bctx.fillStyle = '#1a1a2e';
+  bctx.fillRect(0, 0, 500, 500);
+
+  // Рамка
+  bctx.strokeStyle = '#4caf50';
+  bctx.lineWidth = 10;
+  bctx.strokeRect(5, 5, 490, 490);
+
+  // Заголовок
+  bctx.fillStyle = '#ffffff';
+  bctx.font = 'bold 60px "Segoe UI", Arial, sans-serif';
+  bctx.textAlign = 'center';
+  bctx.fillText('PIXEL', 250, 180);
+  bctx.fillText('BILLBOARD', 250, 260);
+
+  // Ссылка на канал
+  bctx.fillStyle = '#4caf50';
+  bctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
+  bctx.fillText('@PixelBillboard_ru', 250, 340);
+
+  // Иконка телеграм (белый круг с самолётиком)
+  bctx.fillStyle = '#ffffff';
+  bctx.beginPath();
+  bctx.arc(250, 420, 25, 0, Math.PI * 2);
+  bctx.fill();
+  bctx.fillStyle = '#1a1a2e';
+  bctx.font = 'bold 30px sans-serif';
+  bctx.fillText('✈', 250, 432);
+
+  // Получаем base64 и добавляем блок
+  const bannerDataUrl = bannerCanvas.toDataURL('image/png');
+  soldPixels.push({
+    x: 250, y: 250,   // центр холста (1000-500)/2 = 250
+    w: 500, h: 500,
+    img: bannerDataUrl,
+    link: 'https://t.me/PixelBillboard_ru',
+    name: 'PixelBillboard Community'
+  });
+
+  // Обновляем счётчики и перерисовываем
+  updateStats();
+  redraw();
+})();
+
+
+
+    
     // Обработчик движения мыши для tooltip и подсветки
     canvas.addEventListener('mousemove', function(e) {
       const rect = canvas.getBoundingClientRect();
