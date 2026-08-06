@@ -848,7 +848,6 @@ let gameInterval;
       const coins = Math.floor(score / 5);
       if (coins > 0) window.addCoins(coins);
       if (window.updateRecord('bit', score)) window.addCoins(10);
-
       showMessage(`Игра окончена! Попаданий: ${score}. Рекорд: ${localStorage.getItem('bitRecord')}`, '#ff0', 3000);
       return;
     }
