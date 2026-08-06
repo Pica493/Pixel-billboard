@@ -825,58 +825,67 @@ let gameInterval;
   });
 
   // bit
-  function startBitGame() {
-    let score = 0, timeLeft = 30;
-    const scoreEl = document.createElement('div');
-    scoreEl.style.cssText = 'position:fixed; top:20px; left:20px; color:white; background:black; padding:5px 10px; z-index:1000; font-family:monospace; font-size:18px;';
-    scoreEl.textContent = `Попаданий: 0 | Время: 30`;
-    document.body.appendChild(scoreEl);
-    const gameInterval = setInterval(() => {
-
-if (timeLeft <= 0) {
-    clearInterval(gameInterval); clearInterval(spawnInterval);
-    document.querySelectorAll('.bit-target').forEach(el => el.remove());
-    scoreEl.remove();
-    const best = localStorage.getItem('bitRecord') || 0;
-    if (score > best) localStorage.setItem('bitRecord', score);
-
-    // === НАЧИСЛЕНИЕ МОНЕТ ===
-    const coins = Math.floor(score / 5);
-    if (coins > 0) window.addCoins(coins);
-    if (window.updateRecord('bit', score)) window.addCoins(10);
-
-    showMessage(`Игра окончена! Попаданий: ${score}. Рекорд: ${localStorage.getItem('bitRecord')}`, '#ff0', 3000);
-    return;
-}
-      
-      }
-      timeLeft--;
-      scoreEl.textContent = `Попаданий: ${score} | Время: ${timeLeft}`;
-    }, 1000);
-    const spawnInterval = setInterval(() => {
-      const target = document.createElement('div'); target.className = 'bit-target';
-      target.style.cssText = 'position:absolute; width:20px; height:20px; background:red; z-index:999; cursor:pointer;';
-      target.style.left = Math.random() * (container.offsetWidth - 20) + 'px';
-      target.style.top = Math.random() * (container.offsetHeight - 20) + 'px';
-      container.appendChild(target);
-      target.addEventListener('click', (e) => { e.stopPropagation(); score++; });
-      setTimeout(() => target.remove(), 2000);
-    }, 800);
-
-setTimeout(() => {
-    clearInterval(gameInterval); clearInterval(spawnInterval);
-    document.querySelectorAll('.bit-target').forEach(el => el.remove());
-    const finalScore = score; // score доступна?
-    if (finalScore > 0) {
-      const coins = Math.floor(finalScore / 5);
-      if (coins > 0) window.addCoins(coins);
-      if (window.updateRecord('bit', finalScore)) window.addCoins(10);
-    }
-    scoreEl.remove();
-}, 31000);
-
   
-  addEasterEgg('bitgame', 'BIT', startBitGame);
+  function startBitGame() {
+  let score = 0, timeLeft = 30;
+  const scoreEl = document.createElement('div');
+  scoreEl.style.cssText = 'position:fixed; top:20px; left:20px; color:white; background:black; padding:5px 10px; z-index:1000; font-family:monospace; font-size:18px;';
+  scoreEl.textContent = `Попаданий: 0 | Время: 30`;
+  document.body.appendChild(scoreEl);
+
+  let spawnInterval; // объявляем ДО использования
+
+  const gameInterval = setInterval(() => {
+    if (timeLeft <= 0) {
+      clearInterval(gameInterval);
+      clearInterval(spawnInterval);
+      document.querySelectorAll('.bit-target').forEach(el => el.remove());
+      scoreEl.remove();
+
+      const best = localStorage.getItem('bitRecord') || 0;
+      if (score > best) localStorage.setItem('bitRecord', score);
+
+      const coins = Math.floor(score / 5);
+      if (coins > 0) window.addCoins(coins);
+      if (window.updateRecord('bit', score)) window.addCoins(10);
+
+      showMessage(`Игра окончена! Попаданий: ${score}. Рекорд: ${localStorage.getItem('bitRecord')}`, '#ff0', 3000);
+      return;
+    }
+
+    timeLeft--;
+    scoreEl.textContent = `Попаданий: ${score} | Время: ${timeLeft}`;
+  }, 1000);
+
+  spawnInterval = setInterval(() => {
+    const target = document.createElement('div');
+    target.className = 'bit-target';
+    target.style.cssText = 'position:absolute; width:20px; height:20px; background:red; z-index:999; cursor:pointer;';
+    target.style.left = Math.random() * (container.offsetWidth - 20) + 'px';
+    target.style.top = Math.random() * (container.offsetHeight - 20) + 'px';
+    container.appendChild(target);
+    target.addEventListener('click', (e) => {
+      e.stopPropagation();
+      score++;
+    });
+    setTimeout(() => target.remove(), 2000);
+  }, 800);
+
+  // Запасное завершение через 31 секунду
+  setTimeout(() => {
+    if (timeLeft > 0) {
+      clearInterval(gameInterval);
+      clearInterval(spawnInterval);
+      document.querySelectorAll('.bit-target').forEach(el => el.remove());
+      scoreEl.remove();
+      const coins = Math.floor(score / 5);
+      if (coins > 0) window.addCoins(coins);
+      if (window.updateRecord('bit', score)) window.addCoins(10);
+      showMessage(`Игра окончена! Попаданий: ${score}. Рекорд: ${localStorage.getItem('bitRecord')}`, '#ff0', 3000);
+    }
+  }, 31000);
+}
+  
 
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
