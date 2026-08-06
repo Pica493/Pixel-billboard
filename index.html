@@ -568,8 +568,43 @@ window.redraw = redraw;
     container.appendChild(snakeCanvas);
     const sctx = snakeCanvas.getContext('2d');
     const CELL_SIZE = 10, COLS = canvas.width / CELL_SIZE, ROWS = canvas.height / CELL_SIZE;
-    let snake = [ {x: Math.floor(COLS/2), y: Math.floor(ROWS/2)}, {x: Math.floor(COLS/2)-1, y: Math.floor(ROWS/2)}, {x: Math.floor(COLS/2)-2, y: Math.floor(ROWS/2)} ];
-    let direction = {x: 1, y: 0}, nextDirection = {x: 1, y: 0}, food = spawnFood(), gameOver = false, gameInterval;
+   
+    
+    // Поиск случайного свободного места для старта (3 клетки в ряд по горизонтали)
+function findFreeStart() {
+  const maxAttempts = 200;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const startX = Math.floor(Math.random() * (COLS - 5)) + 2;
+    const startY = Math.floor(Math.random() * (ROWS - 2)) + 1;
+    const cells = [
+      {x: startX, y: startY},
+      {x: startX - 1, y: startY},
+      {x: startX - 2, y: startY}
+    ];
+    // Проверяем, что все три клетки свободны
+    const allFree = cells.every(cell => isCellFree(cell.x, cell.y));
+    if (allFree) return cells;
+  }
+  return null; // не нашли места
+}
+
+let snake = findFreeStart();
+if (!snake) {
+  // Если совсем нет свободного места, показываем сообщение и выходим
+  gameOver = true;
+  drawSnake();
+  showMessage('Нет места для змейки! Попробуй позже.', '#f00');
+  setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+  return;
+}
+
+let direction = {x: 1, y: 0};
+let nextDirection = {x: 1, y: 0};
+let food = spawnFood();
+let gameOver = false;
+let gameInterval;
+
+    
     function isCellFree(cellX, cellY) {
       const px = cellX * CELL_SIZE, py = cellY * CELL_SIZE;
       for (let block of window.soldPixels) {
