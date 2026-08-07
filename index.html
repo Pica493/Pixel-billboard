@@ -886,15 +886,21 @@ let gameInterval;
 }
   addEasterEgg('bitgame', 'BIT', startBitGame);
 
+  
 // ================= ТЕТРИС =================
 function startTetris() {
   if (!canActivate('tetris')) return;
   setActivated('tetris');
 
+  // Затемнение фона
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:99999;';
+  document.body.appendChild(overlay);
+
   const tetrisCanvas = document.createElement('canvas');
   tetrisCanvas.width = 300;
   tetrisCanvas.height = 600;
-  tetrisCanvas.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:500; background:#111; border:2px solid #fff;';
+  tetrisCanvas.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:100000; background:#111; border:2px solid #fff; box-shadow: 0 0 30px rgba(0,0,0,0.8);';
   document.body.appendChild(tetrisCanvas);
   const tctx = tetrisCanvas.getContext('2d');
 
@@ -1003,7 +1009,6 @@ function startTetris() {
 
   function draw() {
     tctx.clearRect(0, 0, tetrisCanvas.width, tetrisCanvas.height);
-    // Отрисовка доски
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLS; col++) {
         if (board[row][col]) {
@@ -1012,7 +1017,6 @@ function startTetris() {
         }
       }
     }
-    // Отрисовка текущей фигуры
     if (currentPiece && !gameOver) {
       for (let row = 0; row < currentPiece.length; row++) {
         for (let col = 0; col < currentPiece[0].length; col++) {
@@ -1023,7 +1027,6 @@ function startTetris() {
         }
       }
     }
-    // Текст
     tctx.fillStyle = '#fff';
     tctx.font = '14px monospace';
     tctx.fillText(`Уровень: ${level} | Линии: ${linesCleared}`, 10, tetrisCanvas.height - 10);
@@ -1032,7 +1035,6 @@ function startTetris() {
   function endGame() {
     gameOver = true;
     clearInterval(dropInterval);
-    // Начисление монет
     const coinsEarned = Math.floor(linesCleared / 5);
     if (coinsEarned > 0 && typeof window.addCoins === 'function') {
       window.addCoins(coinsEarned);
@@ -1041,17 +1043,16 @@ function startTetris() {
       const isNewRecord = window.updateRecord('tetris', linesCleared);
       if (isNewRecord) window.addCoins(10);
     }
-    // Сообщение
     if (typeof showMessage === 'function') {
       showMessage(`Тетрис окончен! Линий: ${linesCleared}. Монет: ${coinsEarned}`, '#0ff');
     }
     setTimeout(() => {
       tetrisCanvas.remove();
+      overlay.remove();
       if (typeof safeRedraw === 'function') safeRedraw();
     }, 2000);
   }
 
-  // Обработчик клавиш
   function handleKey(e) {
     if (gameOver) return;
     e.preventDefault();
@@ -1063,21 +1064,21 @@ function startTetris() {
   }
   window.addEventListener('keydown', handleKey);
 
-  // Старт
   spawnPiece();
   draw();
   dropInterval = setInterval(() => { if (!gameOver) moveDown(); }, 500);
 
-  // Автоочистка через 5 минут
   const cleanup = () => {
     clearInterval(dropInterval);
     window.removeEventListener('keydown', handleKey);
     if (tetrisCanvas.parentNode) tetrisCanvas.remove();
+    if (overlay.parentNode) overlay.remove();
     if (typeof safeRedraw === 'function') safeRedraw();
   };
   setTimeout(cleanup, 300000);
 }
 addEasterEgg('tetris', 'TETRIS', startTetris);
+
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
