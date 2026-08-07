@@ -886,15 +886,198 @@ let gameInterval;
 }
   addEasterEgg('bitgame', 'BIT', startBitGame);
 
-
-  // ================= ТЕТРИС =================
-
-// ================= ЗАГЛУШКА ТЕТРИСА =================
+// ================= ТЕТРИС =================
 function startTetris() {
-  alert('Тетрис запущен (заглушка)');
+  if (!canActivate('tetris')) return;
+  setActivated('tetris');
+
+  const tetrisCanvas = document.createElement('canvas');
+  tetrisCanvas.width = 300;
+  tetrisCanvas.height = 600;
+  tetrisCanvas.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:500; background:#111; border:2px solid #fff;';
+  document.body.appendChild(tetrisCanvas);
+  const tctx = tetrisCanvas.getContext('2d');
+
+  const COLS = 10, ROWS = 20, CELL = 30;
+  const tetrominos = [
+    [[1,1,1,1]], // I
+    [[1,1],[1,1]], // O
+    [[0,1,1],[1,1,0]], // S
+    [[1,1,0],[0,1,1]], // Z
+    [[1,0,0],[1,1,1]], // J
+    [[0,0,1],[1,1,1]], // L
+    [[0,1,0],[1,1,1]]  // T
+  ];
+  const colors = ['#0ff', '#ff0', '#0f0', '#f00', '#00f', '#f90', '#90f'];
+
+  let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+  let currentPiece, currentColor, currentX, currentY;
+  let linesCleared = 0, level = 1, gameOver = false;
+  let dropInterval;
+
+  function randomPiece() {
+    const idx = Math.floor(Math.random() * tetrominos.length);
+    return { shape: tetrominos[idx], color: colors[idx] };
+  }
+
+  function spawnPiece() {
+    const p = randomPiece();
+    currentPiece = p.shape;
+    currentColor = p.color;
+    currentX = Math.floor((COLS - currentPiece[0].length) / 2);
+    currentY = 0;
+    if (!isValid(currentX, currentY, currentPiece)) {
+      endGame();
+    }
+  }
+
+  function isValid(x, y, piece) {
+    for (let row = 0; row < piece.length; row++) {
+      for (let col = 0; col < piece[0].length; col++) {
+        if (piece[row][col]) {
+          const newX = x + col;
+          const newY = y + row;
+          if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && board[newY][newX])) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  function placePiece() {
+    for (let row = 0; row < currentPiece.length; row++) {
+      for (let col = 0; col < currentPiece[0].length; col++) {
+        if (currentPiece[row][col]) {
+          board[currentY + row][currentX + col] = currentColor;
+        }
+      }
+    }
+    clearLines();
+    spawnPiece();
+  }
+
+  function clearLines() {
+    let cleared = 0;
+    for (let row = ROWS - 1; row >= 0; row--) {
+      if (board[row].every(cell => cell !== 0)) {
+        board.splice(row, 1);
+        board.unshift(Array(COLS).fill(0));
+        cleared++;
+        row++; // проверить ту же строку снова
+      }
+    }
+    if (cleared > 0) {
+      linesCleared += cleared;
+      level = Math.floor(linesCleared / 10) + 1;
+      clearInterval(dropInterval);
+      dropInterval = setInterval(() => { if (!gameOver) moveDown(); }, Math.max(100, 500 - (level - 1) * 40));
+    }
+  }
+
+  function moveDown() {
+    if (isValid(currentX, currentY + 1, currentPiece)) {
+      currentY++;
+    } else {
+      placePiece();
+    }
+    draw();
+  }
+
+  function moveLeft() {
+    if (isValid(currentX - 1, currentY, currentPiece)) { currentX--; draw(); }
+  }
+  function moveRight() {
+    if (isValid(currentX + 1, currentY, currentPiece)) { currentX++; draw(); }
+  }
+  function rotate() {
+    const rotated = currentPiece[0].map((_, i) => currentPiece.map(row => row[i]).reverse());
+    if (isValid(currentX, currentY, rotated)) { currentPiece = rotated; draw(); }
+  }
+  function hardDrop() {
+    while (isValid(currentX, currentY + 1, currentPiece)) currentY++;
+    placePiece();
+    draw();
+  }
+
+  function draw() {
+    tctx.clearRect(0, 0, tetrisCanvas.width, tetrisCanvas.height);
+    // Отрисовка доски
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        if (board[row][col]) {
+          tctx.fillStyle = board[row][col];
+          tctx.fillRect(col * CELL, row * CELL, CELL - 1, CELL - 1);
+        }
+      }
+    }
+    // Отрисовка текущей фигуры
+    if (currentPiece && !gameOver) {
+      for (let row = 0; row < currentPiece.length; row++) {
+        for (let col = 0; col < currentPiece[0].length; col++) {
+          if (currentPiece[row][col]) {
+            tctx.fillStyle = currentColor;
+            tctx.fillRect((currentX + col) * CELL, (currentY + row) * CELL, CELL - 1, CELL - 1);
+          }
+        }
+      }
+    }
+    // Текст
+    tctx.fillStyle = '#fff';
+    tctx.font = '14px monospace';
+    tctx.fillText(`Уровень: ${level} | Линии: ${linesCleared}`, 10, tetrisCanvas.height - 10);
+  }
+
+  function endGame() {
+    gameOver = true;
+    clearInterval(dropInterval);
+    // Начисление монет
+    const coinsEarned = Math.floor(linesCleared / 5);
+    if (coinsEarned > 0 && typeof window.addCoins === 'function') {
+      window.addCoins(coinsEarned);
+    }
+    if (typeof window.updateRecord === 'function') {
+      const isNewRecord = window.updateRecord('tetris', linesCleared);
+      if (isNewRecord) window.addCoins(10);
+    }
+    // Сообщение
+    if (typeof showMessage === 'function') {
+      showMessage(`Тетрис окончен! Линий: ${linesCleared}. Монет: ${coinsEarned}`, '#0ff');
+    }
+    setTimeout(() => {
+      tetrisCanvas.remove();
+      if (typeof safeRedraw === 'function') safeRedraw();
+    }, 2000);
+  }
+
+  // Обработчик клавиш
+  function handleKey(e) {
+    if (gameOver) return;
+    e.preventDefault();
+    if (e.key === 'ArrowLeft') moveLeft();
+    else if (e.key === 'ArrowRight') moveRight();
+    else if (e.key === 'ArrowDown') moveDown();
+    else if (e.key === 'ArrowUp') rotate();
+    else if (e.key === ' ') hardDrop();
+  }
+  window.addEventListener('keydown', handleKey);
+
+  // Старт
+  spawnPiece();
+  draw();
+  dropInterval = setInterval(() => { if (!gameOver) moveDown(); }, 500);
+
+  // Автоочистка через 5 минут
+  const cleanup = () => {
+    clearInterval(dropInterval);
+    window.removeEventListener('keydown', handleKey);
+    if (tetrisCanvas.parentNode) tetrisCanvas.remove();
+    if (typeof safeRedraw === 'function') safeRedraw();
+  };
+  setTimeout(cleanup, 300000);
 }
 addEasterEgg('tetris', 'TETRIS', startTetris);
-  
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
