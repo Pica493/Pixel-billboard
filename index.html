@@ -886,6 +886,133 @@ let gameInterval;
 }
   addEasterEgg('bitgame', 'BIT', startBitGame);
 
+function startMemory() {
+  if (!canActivate('memory')) return;
+  setActivated('memory');
+
+  // Настройки игры
+  const EMOJIS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼']; // 8 пар
+  let cards = [...EMOJIS, ...EMOJIS];
+  let shuffled = cards.sort(() => Math.random() - 0.5);
+  let firstCard = null, secondCard = null;
+  let lockBoard = false;
+  let matchedPairs = 0;
+  let moves = 0;
+  let startTime = Date.now();
+  let timerInterval;
+
+  // Создаём контейнер игры
+  const gameContainer = document.createElement('div');
+  gameContainer.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:600; background:#1a1a2e; padding:20px; border-radius:15px; border:2px solid #4caf50; color:#fff; max-width:500px; width:90%; text-align:center;';
+  document.body.appendChild(gameContainer);
+
+  const header = document.createElement('div');
+  header.innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+    <span>🎯 Пары: <span id="moves-display">0</span>/8</span>
+    <span>⏱️ <span id="timer-display">0</span>с</span>
+  </div>`;
+  gameContainer.appendChild(header);
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin:15px 0;';
+  gameContainer.appendChild(grid);
+
+  // Закрыть игру
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕ Закрыть';
+  closeBtn.style.cssText = 'background:#ff4444; color:#fff; border:none; padding:5px 15px; border-radius:5px; cursor:pointer; margin-top:10px;';
+  gameContainer.appendChild(closeBtn);
+  closeBtn.onclick = () => {
+    clearInterval(timerInterval);
+    gameContainer.remove();
+  };
+
+  function renderCard(emoji, index) {
+    const card = document.createElement('div');
+    card.dataset.index = index;
+    card.dataset.emoji = emoji;
+    card.style.cssText = 'height:70px; background:#333; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer; transition:0.2s;';
+    card.textContent = '❓';
+    card.onclick = () => flipCard(card);
+    return card;
+  }
+
+  function flipCard(card) {
+    if (lockBoard || card === firstCard || card.classList.contains('matched')) return;
+    card.textContent = card.dataset.emoji;
+    card.style.background = '#4caf50';
+
+    if (!firstCard) {
+      firstCard = card;
+      return;
+    }
+    secondCard = card;
+    lockBoard = true;
+    moves++;
+    document.getElementById('moves-display').textContent = matchedPairs;
+
+    if (firstCard.dataset.emoji === secondCard.dataset.emoji) {
+      // Найдена пара
+      matchedPairs++;
+      document.getElementById('moves-display').textContent = matchedPairs;
+      firstCard.classList.add('matched');
+      secondCard.classList.add('matched');
+      firstCard.style.background = '#2e7d32';
+      secondCard.style.background = '#2e7d32';
+      resetBoard();
+      if (matchedPairs === 8) {
+        clearInterval(timerInterval);
+        const time = Math.floor((Date.now() - startTime) / 1000);
+        const coinsEarned = matchedPairs; // 8 монет за пары
+        window.addCoins(coinsEarned);
+        const isNewRecord = window.updateRecord('memory', time);
+        if (isNewRecord) window.addCoins(10);
+        setTimeout(() => {
+          alert(`🎉 Поздравляю! Все пары найдены за ${time} секунд!\nЗаработано монет: ${coinsEarned}${isNewRecord ? ' + 10 за рекорд!' : ''}`);
+          gameContainer.remove();
+        }, 500);
+      }
+    } else {
+      // Не совпали
+      setTimeout(() => {
+        firstCard.textContent = '❓';
+        firstCard.style.background = '#333';
+        secondCard.textContent = '❓';
+        secondCard.style.background = '#333';
+        resetBoard();
+      }, 800);
+    }
+  }
+
+  function resetBoard() {
+    firstCard = null;
+    secondCard = null;
+    lockBoard = false;
+  }
+
+  // Заполняем сетку карточками
+  shuffled.forEach((emoji, i) => {
+    const card = renderCard(emoji, i);
+    grid.appendChild(card);
+  });
+
+  // Запускаем таймер
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    document.getElementById('timer-display').textContent = elapsed;
+  }, 1000);
+
+  // Автоматическая очистка через 5 минут
+  setTimeout(() => {
+    if (gameContainer.parentNode) {
+      clearInterval(timerInterval);
+      gameContainer.remove();
+    }
+  }, 300000);
+}
+
+addEasterEgg('memory', 'MEMORY', startMemory);
+  
 
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
