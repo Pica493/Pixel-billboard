@@ -825,19 +825,6 @@ let gameInterval;
     setTimeout(() => pentagram.remove(), 4000);
   });
 
-
-// ================= МИКРО-ТЕСТ БАНКАЯ =================
-addEasterEgg('bankai', 'BANKAI', function() {
-  if (!canActivate('bankai')) return;
-  setActivated('bankai');
-
-  const testDiv = document.createElement('div');
-  testDiv.textContent = '🌸 TEST';
-  testDiv.style.cssText = 'position:fixed; top:50%; left:50%; background:#ff00ff; color:white; padding:10px; z-index:999999; font-size:20px; transform:translate(-50%, -50%);';
-  document.body.appendChild(testDiv);
-
-  setTimeout(() => testDiv.remove(), 2000);
-});
   
   // bit
   
