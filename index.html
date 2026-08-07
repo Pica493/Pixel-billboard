@@ -324,6 +324,13 @@ window.redraw = redraw;
   @keyframes leafall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(720deg); } }
   @keyframes cometFall { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-80px, 80vh) scale(0.2); opacity: 0; } }
 
+  /* Для Банкая */
+  @keyframes petalFall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0; }
+  }
+
+  
   /* Снеговик Олаф */
   .olaf {
     position: fixed;
@@ -887,83 +894,32 @@ let gameInterval;
   addEasterEgg('bitgame', 'BIT', startBitGame);
 
 
-// ================= БАНКАЙ (Сенбонзакура) =================
-function triggerBankai() {
+// ================= БАНКАЙ (упрощённый) =================
+addEasterEgg('bankai', 'BANKAI', function() {
   if (!canActivate('bankai')) return;
   setActivated('bankai');
 
-  // CSS-анимации
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes swordAppear {
-      0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    }
-    @keyframes petalFall {
-      0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-      100% { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0; }
-    }
-  `;
-  document.head.appendChild(style);
+  const petalCount = 200;
+  const w = window.innerWidth, h = window.innerHeight;
 
-  // Меч
-  const swordContainer = document.createElement('div');
-  swordContainer.style.cssText = `
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 80px; height: 80vh; max-height: 700px;
-    z-index: 300000; pointer-events: none;
-    display: flex; flex-direction: column; align-items: center;
-    animation: swordAppear 0.3s ease-out;
-  `;
-  document.body.appendChild(swordContainer);
-
-  const blade = document.createElement('div');
-  blade.style.cssText = 'width:12px; height:80%; background:linear-gradient(135deg,#e0e0e0,#fff 30%,#b0b0b0); border-radius:2px 2px 0 0; box-shadow:0 0 20px rgba(255,200,200,0.8);';
-  swordContainer.appendChild(blade);
-
-  const guard = document.createElement('div');
-  guard.style.cssText = 'width:50px; height:10px; background:#444; border-radius:3px; box-shadow:0 0 10px rgba(0,0,0,0.5);';
-  swordContainer.appendChild(guard);
-
-  const handle = document.createElement('div');
-  handle.style.cssText = 'width:16px; height:15%; background:#1a1a2e; border-radius:0 0 4px 4px; box-shadow:inset 0 0 10px #000;';
-  swordContainer.appendChild(handle);
-
-  // Через 1 секунду меч исчезает и появляются лепестки
-  setTimeout(() => {
-    swordContainer.remove();
-
-    const petalCount = 200;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-
-    for (let i = 0; i < petalCount; i++) {
-      const petal = document.createElement('div');
-      const size = 6 + Math.random() * 10;
-      petal.style.cssText = `
-        position: fixed; top: 50%; left: 50%; width: ${size}px; height: ${size}px;
-        background: #ffb6c1; border-radius: 50% 0 50% 50%;
-        transform: translate(-50%, -50%);
-        z-index: 299999; pointer-events: none;
-        animation: petalFall 4s ease-out forwards;
-        --x: ${(Math.random() - 0.5) * w * 1.5}px;
-        --y: ${(Math.random() - 0.5) * h * 1.5}px;
-        --r: ${Math.random() * 720 - 360}deg;
-      `;
-      document.body.appendChild(petal);
-      setTimeout(() => petal.remove(), 5000);
-    }
-  }, 1000);
-
-  // Убираем стили через 6 секунд
-  setTimeout(() => {
-    style.remove();
-    if (swordContainer.parentNode) swordContainer.remove();
-  }, 6000);
-}
-
-addEasterEgg('bankai', 'BANKAI', triggerBankai);
-
+  for (let i = 0; i < petalCount; i++) {
+    const petal = document.createElement('div');
+    const size = 6 + Math.random() * 10;
+    petal.style.cssText = `
+      position: fixed; top: 50%; left: 50%;
+      width: ${size}px; height: ${size}px;
+      background: #ffb6c1; border-radius: 50% 0 50% 50%;
+      transform: translate(-50%, -50%);
+      z-index: 299999; pointer-events: none;
+      animation: petalFall 4s ease-out forwards;
+      --x: ${(Math.random() - 0.5) * w * 1.5}px;
+      --y: ${(Math.random() - 0.5) * h * 1.5}px;
+      --r: ${Math.random() * 720 - 360}deg;
+    `;
+    document.body.appendChild(petal);
+    setTimeout(() => petal.remove(), 5000);
+  }
+});
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
