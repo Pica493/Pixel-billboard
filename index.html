@@ -1550,8 +1550,7 @@ const FRAMES = [
     document.getElementById('profile-nickname').textContent = profile.nickname;
     document.getElementById('rec-snake').textContent = profile.records.snake;
     document.getElementById('rec-bit').textContent = profile.records.bit;
-document.getElementById('rec-tetris').textContent = profile.records.tetris || 0;
-document.getElementById('rec-2048').textContent = profile.records['2048'] || 0;
+
 
     
     const av = AVATARS.find(a => a.id === profile.equipped.avatar) || AVATARS[0];
