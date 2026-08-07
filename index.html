@@ -888,7 +888,12 @@ let gameInterval;
 }
   addEasterEgg('bitgame', 'BIT', startBitGame);
 
-
+// ===== ТЕСТОВАЯ ПАСХАЛКА =====
+addEasterEgg('test', 'TEST', function() {
+  if (!canActivate('test')) return;
+  setActivated('test');
+  alert('🎉 Пасхалка работает!');
+});
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
