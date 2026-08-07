@@ -886,222 +886,180 @@ let gameInterval;
 }
   addEasterEgg('bitgame', 'BIT', startBitGame);
 
-// ================= ТЕТРИС (модальное окно) =================
+  // ================= 2048 (модальное окно) =================
 
   
-function startTetris() {
-  if (!canActivate('tetris')) return;
-  setActivated('tetris');
+function start2048() {
+  if (!canActivate('2048')) return;
+  setActivated('2048');
 
-  // Затемнённый фон
+  // Затемнение
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:200000; display:flex; align-items:center; justify-content:center;';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:200000;display:flex;align-items:center;justify-content:center;';
   document.body.appendChild(overlay);
 
   // Контейнер игры
   const gameContainer = document.createElement('div');
-  gameContainer.style.cssText = 'background:#1a1a2e; border:2px solid #4caf50; border-radius:15px; padding:15px; display:flex; flex-direction:column; align-items:center;';
+  gameContainer.style.cssText = 'background:#1a1a2e;border:2px solid #4caf50;border-radius:15px;padding:15px;display:flex;flex-direction:column;align-items:center;';
   overlay.appendChild(gameContainer);
 
-  // Холст для Тетриса
-  const tetrisCanvas = document.createElement('canvas');
-  tetrisCanvas.width = 300;
-  tetrisCanvas.height = 600;
-  tetrisCanvas.style.cssText = 'border:2px solid #fff; background:#111;';
-  gameContainer.appendChild(tetrisCanvas);
-  const tctx = tetrisCanvas.getContext('2d');
+  // Заголовок и счёт
+  const scoreDiv = document.createElement('div');
+  scoreDiv.style.cssText = 'color:#fff;font-family:monospace;font-size:20px;margin-bottom:10px;';
+  scoreDiv.textContent = 'Счёт: 0';
+  gameContainer.appendChild(scoreDiv);
 
-  // Информационная панель
-  const infoDiv = document.createElement('div');
-  infoDiv.style.cssText = 'color:#fff; font-family:monospace; font-size:14px; margin-top:10px; text-align:center;';
-  infoDiv.textContent = 'Уровень: 1 | Линии: 0';
-  gameContainer.appendChild(infoDiv);
+  // Игровое поле (таблица 4x4)
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,80px);grid-gap:5px;';
+  gameContainer.appendChild(grid);
 
   // Кнопка закрытия
   const closeBtn = document.createElement('button');
   closeBtn.textContent = '✕ Закрыть';
-  closeBtn.style.cssText = 'margin-top:10px; padding:5px 15px; background:#c00; color:#fff; border:none; border-radius:5px; cursor:pointer; font-family:sans-serif;';
+  closeBtn.style.cssText = 'margin-top:10px;padding:5px 15px;background:#c00;color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:sans-serif;';
   gameContainer.appendChild(closeBtn);
 
-  const COLS = 10, ROWS = 20, CELL = 30;
-  const tetrominos = [
-    [[1,1,1,1]], // I
-    [[1,1],[1,1]], // O
-    [[0,1,1],[1,1,0]], // S
-    [[1,1,0],[0,1,1]], // Z
-    [[1,0,0],[1,1,1]], // J
-    [[0,0,1],[1,1,1]], // L
-    [[0,1,0],[1,1,1]]  // T
-  ];
-  const colors = ['#0ff', '#ff0', '#0f0', '#f00', '#00f', '#f90', '#90f'];
+  let board = Array(4).fill().map(() => Array(4).fill(0));
+  let gameScore = 0, gameOver = false;
 
-  let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
-  let currentPiece, currentColor, currentX, currentY;
-  let linesCleared = 0, level = 1, gameOver = false;
-  let dropInterval;
-
-  function randomPiece() {
-    const idx = Math.floor(Math.random() * tetrominos.length);
-    return { shape: tetrominos[idx], color: colors[idx] };
+  function spawnTile() {
+    const empty = [];
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (board[r][c] === 0) empty.push({r, c});
+    if (empty.length === 0) return;
+    const {r, c} = empty[Math.floor(Math.random() * empty.length)];
+    board[r][c] = Math.random() < 0.9 ? 2 : 4;
   }
 
-  function spawnPiece() {
-    const p = randomPiece();
-    currentPiece = p.shape;
-    currentColor = p.color;
-    currentX = Math.floor((COLS - currentPiece[0].length) / 2);
-    currentY = 0;
-    if (!isValid(currentX, currentY, currentPiece)) {
-      endGame();
+  function drawBoard() {
+    grid.innerHTML = '';
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        const cell = document.createElement('div');
+        cell.style.cssText = 'width:80px;height:80px;background:#333;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;color:#fff;border-radius:5px;';
+        if (board[r][c] > 0) {
+          cell.textContent = board[r][c];
+          const hue = Math.log2(board[r][c]) * 15 % 360;
+          cell.style.background = `hsl(${hue}, 70%, 50%)`;
+        }
+        grid.appendChild(cell);
+      }
+    }
+    scoreDiv.textContent = `Счёт: ${gameScore}`;
+  }
+
+  function slide(row) {
+    let arr = row.filter(v => v);
+    for (let i = 0; i < arr.length - 1; i++) {
+      if (arr[i] === arr[i + 1]) {
+        arr[i] *= 2;
+        gameScore += arr[i];
+        arr.splice(i + 1, 1);
+        arr.push(0);
+      }
+    }
+    while (arr.length < 4) arr.push(0);
+    return arr;
+  }
+
+  function move(dir) {
+    let moved = false;
+    const oldBoard = board.map(row => [...row]);
+
+    if (dir === 'left' || dir === 'right') {
+      for (let r = 0; r < 4; r++) {
+        let row = board[r];
+        if (dir === 'right') row = row.reverse();
+        let newRow = slide(row);
+        if (dir === 'right') newRow = newRow.reverse();
+        if (board[r].join() !== newRow.join()) moved = true;
+        board[r] = newRow;
+      }
+    } else {
+      for (let c = 0; c < 4; c++) {
+        let col = [board[0][c], board[1][c], board[2][c], board[3][c]];
+        if (dir === 'down') col = col.reverse();
+        let newCol = slide(col);
+        if (dir === 'down') newCol = newCol.reverse();
+        for (let r = 0; r < 4; r++) {
+          if (board[r][c] !== newCol[r]) moved = true;
+          board[r][c] = newCol[r];
+        }
+      }
+    }
+
+    if (moved) {
+      spawnTile();
+      drawBoard();
+      if (isGameOver()) {
+        gameOver = true;
+        end2048();
+      }
     }
   }
 
-  function isValid(x, y, piece) {
-    for (let row = 0; row < piece.length; row++) {
-      for (let col = 0; col < piece[0].length; col++) {
-        if (piece[row][col]) {
-          const newX = x + col;
-          const newY = y + row;
-          if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && board[newY][newX])) {
-            return false;
-          }
-        }
-      }
+  function isGameOver() {
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+      if (board[r][c] === 0) return false;
+      if (c < 3 && board[r][c] === board[r][c + 1]) return false;
+      if (r < 3 && board[r][c] === board[r + 1][c]) return false;
     }
     return true;
   }
 
-  function placePiece() {
-    for (let row = 0; row < currentPiece.length; row++) {
-      for (let col = 0; col < currentPiece[0].length; col++) {
-        if (currentPiece[row][col]) {
-          board[currentY + row][currentX + col] = currentColor;
-        }
-      }
-    }
-    clearLines();
-    spawnPiece();
-  }
-
-  function clearLines() {
-    let cleared = 0;
-    for (let row = ROWS - 1; row >= 0; row--) {
-      if (board[row].every(cell => cell !== 0)) {
-        board.splice(row, 1);
-        board.unshift(Array(COLS).fill(0));
-        cleared++;
-        row++; // проверить ту же строку снова
-      }
-    }
-    if (cleared > 0) {
-      linesCleared += cleared;
-      level = Math.floor(linesCleared / 10) + 1;
-      clearInterval(dropInterval);
-      dropInterval = setInterval(() => { if (!gameOver) moveDown(); }, Math.max(100, 500 - (level - 1) * 40));
-    }
-  }
-
-  function moveDown() {
-    if (isValid(currentX, currentY + 1, currentPiece)) {
-      currentY++;
-    } else {
-      placePiece();
-    }
-    draw();
-  }
-
-  function moveLeft() {
-    if (isValid(currentX - 1, currentY, currentPiece)) { currentX--; draw(); }
-  }
-  function moveRight() {
-    if (isValid(currentX + 1, currentY, currentPiece)) { currentX++; draw(); }
-  }
-  function rotate() {
-    const rotated = currentPiece[0].map((_, i) => currentPiece.map(row => row[i]).reverse());
-    if (isValid(currentX, currentY, rotated)) { currentPiece = rotated; draw(); }
-  }
-  function hardDrop() {
-    while (isValid(currentX, currentY + 1, currentPiece)) currentY++;
-    placePiece();
-    draw();
-  }
-
-  function draw() {
-    tctx.clearRect(0, 0, tetrisCanvas.width, tetrisCanvas.height);
-    for (let row = 0; row < ROWS; row++) {
-      for (let col = 0; col < COLS; col++) {
-        if (board[row][col]) {
-          tctx.fillStyle = board[row][col];
-          tctx.fillRect(col * CELL, row * CELL, CELL - 1, CELL - 1);
-        }
-      }
-    }
-    if (currentPiece && !gameOver) {
-      for (let row = 0; row < currentPiece.length; row++) {
-        for (let col = 0; col < currentPiece[0].length; col++) {
-          if (currentPiece[row][col]) {
-            tctx.fillStyle = currentColor;
-            tctx.fillRect((currentX + col) * CELL, (currentY + row) * CELL, CELL - 1, CELL - 1);
-          }
-        }
-      }
-    }
-    infoDiv.textContent = `Уровень: ${level} | Линии: ${linesCleared}`;
-  }
-
-  function endGame() {
-    gameOver = true;
-    clearInterval(dropInterval);
-    const coinsEarned = Math.floor(linesCleared / 5);
-    if (coinsEarned > 0 && typeof window.addCoins === 'function') {
-      window.addCoins(coinsEarned);
-    }
+  function end2048() {
+    const maxTile = Math.max(...board.flat());
+    let coinsEarned = 0;
+    if (maxTile >= 1024) coinsEarned += Math.floor(maxTile / 1024);
+    if (coinsEarned > 0 && typeof window.addCoins === 'function') window.addCoins(coinsEarned);
     if (typeof window.updateRecord === 'function') {
-      const isNewRecord = window.updateRecord('tetris', linesCleared);
+      const isNewRecord = window.updateRecord('2048', maxTile);
       if (isNewRecord) window.addCoins(10);
     }
-    if (typeof showMessage === 'function') {
-      showMessage(`Тетрис окончен! Линий: ${linesCleared}. Монет: ${coinsEarned}`, '#0ff');
-    }
-    setTimeout(() => {
-      overlay.remove();
-      if (typeof safeRedraw === 'function') safeRedraw();
-    }, 2000);
+    if (typeof showMessage === 'function') showMessage(`Игра окончена! Макс. плитка: ${maxTile}. Монет: ${coinsEarned}`, '#ff0');
+    setTimeout(() => { overlay.remove(); if (typeof safeRedraw === 'function') safeRedraw(); }, 2000);
   }
 
-  // Управление
+  // Клавиатура
   function handleKey(e) {
     if (gameOver) return;
     e.preventDefault();
-    if (e.key === 'ArrowLeft') moveLeft();
-    else if (e.key === 'ArrowRight') moveRight();
-    else if (e.key === 'ArrowDown') moveDown();
-    else if (e.key === 'ArrowUp') rotate();
-    else if (e.key === ' ') hardDrop();
+    if (e.key === 'ArrowLeft') move('left');
+    else if (e.key === 'ArrowRight') move('right');
+    else if (e.key === 'ArrowUp') move('up');
+    else if (e.key === 'ArrowDown') move('down');
   }
   window.addEventListener('keydown', handleKey);
 
-  // Закрытие по кнопке
+  // Сенсорное управление
+  let touchX, touchY;
+  gameContainer.addEventListener('touchstart', e => {
+    touchX = e.touches[0].clientX; touchY = e.touches[0].clientY;
+  });
+  gameContainer.addEventListener('touchend', e => {
+    if (!touchX || !touchY) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    const dy = e.changedTouches[0].clientY - touchY;
+    if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'right' : 'left');
+    else move(dy > 0 ? 'down' : 'up');
+  });
+
   closeBtn.addEventListener('click', () => {
-    if (!gameOver) endGame();
+    if (!gameOver) end2048();
     else overlay.remove();
   });
 
-  // Старт игры
-  spawnPiece();
-  draw();
-  dropInterval = setInterval(() => { if (!gameOver) moveDown(); }, 500);
+  spawnTile(); spawnTile();
+  drawBoard();
 
   // Автоочистка через 5 минут
-  const cleanup = () => {
-    clearInterval(dropInterval);
+  setTimeout(() => {
     window.removeEventListener('keydown', handleKey);
     if (overlay.parentNode) overlay.remove();
-    if (typeof safeRedraw === 'function') safeRedraw();
-  };
-  setTimeout(cleanup, 300000);
+  }, 300000);
 }
-addEasterEgg('tetris', 'TETRIS', startTetris);
+addEasterEgg('2048', '2048', start2048);
+          
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
