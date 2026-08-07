@@ -452,7 +452,7 @@ window.redraw = redraw;
     setTimeout(() => msg.remove(), duration);
   }
 
-  const GLOBAL_COOLDOWN = 0, INDIVIDUAL_COOLDOWN = 0;
+  const GLOBAL_COOLDOWN = 1000, INDIVIDUAL_COOLDOWN = 5000;
   let lastGlobalActivation = 0, cooldowns = {};
   function canActivate(name) {
     const now = Date.now();
