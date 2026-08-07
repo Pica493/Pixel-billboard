@@ -324,16 +324,6 @@ window.redraw = redraw;
   @keyframes leafall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(720deg); } }
   @keyframes cometFall { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-80px, 80vh) scale(0.2); opacity: 0; } }
 
-
-// ===== ТЕСТОВАЯ ПАСХАЛКА =====
-addEasterEgg('test', 'TEST', function() {
-  if (!canActivate('test')) return;
-  setActivated('test');
-  alert('🎉 Пасхалка работает!');
-});
-
-
-  
   /* Снеговик Олаф */
   .olaf {
     position: fixed;
@@ -511,6 +501,16 @@ easterInput.addEventListener('keydown', function(e) {
 
 
   // ================= ПАСХАЛКИ =================
+
+
+// ===== ТЕСТОВАЯ ПАСХАЛКА =====
+addEasterEgg('test', 'TEST', function() {
+  if (!canActivate('test')) return;
+  setActivated('test');
+  alert('🎉 Пасхалка работает!');
+});
+
+  
   // matrix
   function triggerMatrixRain() {
     const matrixCanvas = document.createElement('canvas');
