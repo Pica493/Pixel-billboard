@@ -1681,9 +1681,13 @@ applyWeatherByTime();
       </div>
     </div>
     <button id="change-nickname-btn">✏️ Сменить ник (200 монет)</button>
+   
     <h3>Рекорды</h3>
-    <div>🐍 Змейка: <span id="rec-snake">0</span></div>
-    <div>🎯 Бит: <span id="rec-bit">0</span></div>
+<div>🐍 Змейка: <span id="rec-snake">0</span></div>
+<div>🎯 Бит: <span id="rec-bit">0</span></div>
+<div>🧱 Тетрис: <span id="rec-tetris">0</span> линий</div>
+<div>🔢 2048: <span id="rec-2048">0</span> макс. плитка</div>
+    
     <button id="close-profile" style="margin-top:10px;">Закрыть</button>
   </div>
 </div>
@@ -1870,7 +1874,10 @@ const FRAMES = [
     document.getElementById('profile-nickname').textContent = profile.nickname;
     document.getElementById('rec-snake').textContent = profile.records.snake;
     document.getElementById('rec-bit').textContent = profile.records.bit;
+document.getElementById('rec-tetris').textContent = profile.records.tetris || 0;
+document.getElementById('rec-2048').textContent = profile.records['2048'] || 0;
 
+    
     const av = AVATARS.find(a => a.id === profile.equipped.avatar) || AVATARS[0];
     const preview = document.getElementById('profile-avatar-preview');
     preview.textContent = av.emoji;
