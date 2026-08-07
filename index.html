@@ -826,54 +826,18 @@ let gameInterval;
   });
 
 
-// ================= БАНКАЙ (Сенбонзакура, через transition) =================
+// ================= МИКРО-ТЕСТ БАНКАЯ =================
 addEasterEgg('bankai', 'BANKAI', function() {
   if (!canActivate('bankai')) return;
   setActivated('bankai');
 
-  const petals = [];
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
+  const testDiv = document.createElement('div');
+  testDiv.textContent = '🌸 TEST';
+  testDiv.style.cssText = 'position:fixed; top:50%; left:50%; background:#ff00ff; color:white; padding:10px; z-index:999999; font-size:20px; transform:translate(-50%, -50%);';
+  document.body.appendChild(testDiv);
 
-  for (let i = 0; i < 200; i++) {
-    const petal = document.createElement('div');
-    const size = 6 + Math.random() * 10;
-    // Начальное положение — центр, прозрачность 1
-    petal.style.cssText = `
-      position: fixed;
-      left: ${centerX - size/2}px;
-      top: ${centerY - size/2}px;
-      width: ${size}px;
-      height: ${size}px;
-      background: #ffb6c1;
-      border-radius: 50% 0 50% 50%;
-      z-index: 299999;
-      pointer-events: none;
-      opacity: 1;
-      transition: all 4s ease-out;
-    `;
-    document.body.appendChild(petal);
-
-    // Случайные конечные координаты и поворот
-    const targetX = centerX + (Math.random() - 0.5) * window.innerWidth * 1.5;
-    const targetY = centerY + (Math.random() - 0.5) * window.innerHeight * 1.5;
-    const targetRotate = Math.random() * 720 - 360;
-
-    // Запускаем анимацию через небольшой таймаут (чтобы сработал transition)
-    setTimeout(() => {
-      petal.style.left = (targetX - size/2) + 'px';
-      petal.style.top = (targetY - size/2) + 'px';
-      petal.style.transform = `rotate(${targetRotate}deg)`;
-      petal.style.opacity = '0';
-    }, 50);
-
-    // Удаляем лепесток через 4.5 секунды
-    setTimeout(() => petal.remove(), 4500);
-  }
+  setTimeout(() => testDiv.remove(), 2000);
 });
-
-
-
   
   // bit
   
