@@ -886,12 +886,13 @@ let gameInterval;
 }
   addEasterEgg('bitgame', 'BIT', startBitGame);
 
+// игра Memory 
 function startMemory() {
   if (!canActivate('memory')) return;
   setActivated('memory');
 
   // Настройки игры
-  const EMOJIS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼']; // 8 пар
+  const EMOJIS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
   let cards = [...EMOJIS, ...EMOJIS];
   let shuffled = cards.sort(() => Math.random() - 0.5);
   let firstCard = null, secondCard = null;
@@ -901,10 +902,25 @@ function startMemory() {
   let startTime = Date.now();
   let timerInterval;
 
-  // Создаём контейнер игры
+  // Создаём контейнер внутри canvas-container (как змейка и бит)
   const gameContainer = document.createElement('div');
-  gameContainer.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:600; background:#1a1a2e; padding:20px; border-radius:15px; border:2px solid #4caf50; color:#fff; max-width:500px; width:90%; text-align:center;';
-  document.body.appendChild(gameContainer);
+  gameContainer.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 250;
+    background: #1a1a2e;
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid #4caf50;
+    color: #fff;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+  `;
+  container.appendChild(gameContainer); // <-- добавляем в container, не в body
 
   const header = document.createElement('div');
   header.innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
@@ -952,7 +968,6 @@ function startMemory() {
     document.getElementById('moves-display').textContent = matchedPairs;
 
     if (firstCard.dataset.emoji === secondCard.dataset.emoji) {
-      // Найдена пара
       matchedPairs++;
       document.getElementById('moves-display').textContent = matchedPairs;
       firstCard.classList.add('matched');
@@ -963,7 +978,7 @@ function startMemory() {
       if (matchedPairs === 8) {
         clearInterval(timerInterval);
         const time = Math.floor((Date.now() - startTime) / 1000);
-        const coinsEarned = matchedPairs; // 8 монет за пары
+        const coinsEarned = matchedPairs;
         window.addCoins(coinsEarned);
         const isNewRecord = window.updateRecord('memory', time);
         if (isNewRecord) window.addCoins(10);
@@ -973,7 +988,6 @@ function startMemory() {
         }, 500);
       }
     } else {
-      // Не совпали
       setTimeout(() => {
         firstCard.textContent = '❓';
         firstCard.style.background = '#333';
@@ -990,28 +1004,27 @@ function startMemory() {
     lockBoard = false;
   }
 
-  // Заполняем сетку карточками
   shuffled.forEach((emoji, i) => {
     const card = renderCard(emoji, i);
     grid.appendChild(card);
   });
 
-  // Запускаем таймер
   timerInterval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
     document.getElementById('timer-display').textContent = elapsed;
   }, 1000);
 
-  // Автоматическая очистка через 5 минут
-  setTimeout(() => {
+  // Автоочистка через 5 минут (как в змейке)
+  const cleanup = () => {
     if (gameContainer.parentNode) {
       clearInterval(timerInterval);
       gameContainer.remove();
     }
-  }, 300000);
+  };
+  setTimeout(cleanup, 300000);
 }
+  
 
-addEasterEgg('memory', 'MEMORY', startMemory);
   
 
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
