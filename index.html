@@ -1529,7 +1529,7 @@ applyWeatherByTime();
       <div id="profile-avatar-preview" class="frame-preview" style="font-size:40px; width:60px; height:60px;"></div>
       <div>
         <div id="profile-nickname" style="font-size:1.5em; font-weight:bold;">Player</div>
-        <div style="color:#aaa;">Монеты: <span id="profile-coins">0</span> 🪙</div>
+        <div style="color:#aaa;">Монеты: <span id="profile-coins">0</span> 💰</div>
       </div>
     </div>
     <button id="change-nickname-btn">✏️ Сменить ник (200 монет)</button>
@@ -1547,7 +1547,7 @@ applyWeatherByTime();
 <div id="shop-modal" class="modal">
   <div class="modal-content">
     <h2>Магазин</h2>
-    <div>Ваши монеты: <span id="shop-coins">0</span> 🪙</div>
+    <div>Ваши монеты: <span id="shop-coins">0</span> 💰</div>
     <h3>Аватары</h3>
     <div class="avatar-grid" id="avatar-list"></div>
     <h3>Рамки</h3>
@@ -1747,7 +1747,13 @@ document.getElementById('rec-2048').textContent = profile.records['2048'] || 0;
       const d = document.createElement('div');
       d.className = 'avatar-item' + (profile.inventory.includes(a.id)?' owned':'');
       d.textContent = a.emoji;
-      d.title = a.name + ' (' + a.price + '🪙)';
+     
+      const priceSpan = document.createElement('span');
+priceSpan.style.cssText = 'font-size:10px; color:#ffd700; display:block; text-align:center; margin-top:2px;';
+priceSpan.textContent = '💰' + a.price;
+d.appendChild(priceSpan);
+      
+      d.title = a.name + ' (' + a.price + '💰)';
       d.onclick = () => buy('avatar', a);
       ag.appendChild(d);
     });
@@ -1760,7 +1766,13 @@ if (f.id === 'stars-decor' || f.id === 'hearts-decor' || f.id === 'diamonds-deco
 }
       if (f.css) d.style.cssText = f.css;
       d.innerHTML = '<div class="frame-preview">🙂</div>';
-      d.title = f.name + ' (' + f.price + '🪙)';
+     
+      const priceSpan = document.createElement('span');
+priceSpan.style.cssText = 'font-size:10px; color:#ffd700; display:block; text-align:center; margin-top:2px;';
+priceSpan.textContent = '💰' + f.price;
+d.appendChild(priceSpan);
+      
+      d.title = f.name + ' (' + f.price + '💰)';
       d.onclick = () => buy('frame', f);
       if (profile.inventory.includes(f.id)) d.classList.add('owned');
       fg.appendChild(d);
