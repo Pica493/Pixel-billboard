@@ -1748,10 +1748,7 @@ document.getElementById('rec-2048').textContent = profile.records['2048'] || 0;
       d.className = 'avatar-item' + (profile.inventory.includes(a.id)?' owned':'');
       d.textContent = a.emoji;
      
-      const priceSpan = document.createElement('span');
-priceSpan.style.cssText = 'font-size:10px; color:#ffd700; display:block; text-align:center; margin-top:2px;';
-priceSpan.textContent = '💰' + a.price;
-d.appendChild(priceSpan);
+      
       
       d.title = a.name + ' (' + a.price + '💰)';
       d.onclick = () => buy('avatar', a);
@@ -1767,10 +1764,7 @@ if (f.id === 'stars-decor' || f.id === 'hearts-decor' || f.id === 'diamonds-deco
       if (f.css) d.style.cssText = f.css;
       d.innerHTML = '<div class="frame-preview">🙂</div>';
      
-      const priceSpan = document.createElement('span');
-priceSpan.style.cssText = 'font-size:10px; color:#ffd700; display:block; text-align:center; margin-top:2px;';
-priceSpan.textContent = '💰' + f.price;
-d.appendChild(priceSpan);
+      
       
       d.title = f.name + ' (' + f.price + '💰)';
       d.onclick = () => buy('frame', f);
