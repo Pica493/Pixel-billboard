@@ -887,7 +887,72 @@ let gameInterval;
 }
   addEasterEgg('bitgame', 'BIT', startBitGame);
 
+// ================= БАНКАЙ (Сенбонзакура, только JS) =================
+addEasterEgg('bankai', 'BANKAI', function() {
+  if (!canActivate('bankai')) return;
+  setActivated('bankai');
 
+  const petals = [];
+  const petalCount = 200;
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+  const startTime = performance.now();
+
+  // Создаём лепестки
+  for (let i = 0; i < petalCount; i++) {
+    const petal = document.createElement('div');
+    const size = 6 + Math.random() * 10;
+    petal.style.cssText = `
+      position: fixed;
+      left: ${centerX - size/2}px;
+      top: ${centerY - size/2}px;
+      width: ${size}px;
+      height: ${size}px;
+      background: #ffb6c1;
+      border-radius: 50% 0 50% 50%;
+      z-index: 299999;
+      pointer-events: none;
+    `;
+    document.body.appendChild(petal);
+
+    // Параметры движения
+    petals.push({
+      el: petal,
+      x: centerX,
+      y: centerY,
+      vx: (Math.random() - 0.5) * 400,  // px/s
+      vy: (Math.random() - 0.5) * 400,
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 200, // deg/s
+      size: size
+    });
+  }
+
+  // Анимация
+  function animate(now) {
+    const elapsed = (now - startTime) / 1000; // секунды
+    if (elapsed > 5) {
+      // Удаляем все лепестки и останавливаем анимацию
+      petals.forEach(p => p.el.remove());
+      return;
+    }
+
+    petals.forEach(p => {
+      p.x += p.vx * 0.016; // дельта времени ~16ms
+      p.y += p.vy * 0.016;
+      p.rotation += p.rotSpeed * 0.016;
+      const opacity = Math.max(0, 1 - elapsed / 5); // затухание
+      p.el.style.left = (p.x - p.size/2) + 'px';
+      p.el.style.top = (p.y - p.size/2) + 'px';
+      p.el.style.transform = `rotate(${p.rotation}deg)`;
+      p.el.style.opacity = opacity;
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+});
 
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
