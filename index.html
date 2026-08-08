@@ -1962,7 +1962,7 @@ addEasterEgg('sonic', 'SONIC', function() {
 });
 
 
-  // ================= БЭТМЕН: ЛЕТУЧИЕ МЫШИ ФОРМИРУЮТ НАДПИСЬ =================
+  // ================= БЭТМЕН: МЫШИ ФОРМИРУЮТ НАДПИСЬ =================
 addEasterEgg('batman', 'BATMAN', function() {
   const overlay = document.createElement('div');
   overlay.style.cssText = `
@@ -1973,34 +1973,34 @@ addEasterEgg('batman', 'BATMAN', function() {
   `;
   document.body.appendChild(overlay);
 
-  // Получаем координаты точек для надписи "BATMAN"
+  // Генерируем точки для контура букв
   const textCanvas = document.createElement('canvas');
   textCanvas.width = 600;
   textCanvas.height = 200;
   const tctx = textCanvas.getContext('2d');
   tctx.fillStyle = '#ffffff';
-  tctx.font = 'bold 120px Arial, sans-serif';
+  tctx.font = 'bold 130px "Arial Black", sans-serif';
   tctx.textAlign = 'center';
   tctx.textBaseline = 'middle';
   tctx.fillText('BATMAN', textCanvas.width/2, textCanvas.height/2);
 
   const imageData = tctx.getImageData(0, 0, textCanvas.width, textCanvas.height).data;
   const points = [];
-  const step = 3; // шаг сканирования
+  const step = 4;
   for (let y = 0; y < textCanvas.height; y += step) {
     for (let x = 0; x < textCanvas.width; x += step) {
-      const index = (y * textCanvas.width + x) * 4;
-      if (imageData[index] > 128) { // белый пиксель
+      const idx = (y * textCanvas.width + x) * 4;
+      if (imageData[idx] > 128) {
         points.push({
-          x: x - textCanvas.width/2, // координаты относительно центра текста
+          x: x - textCanvas.width/2,
           y: y - textCanvas.height/2
         });
       }
     }
   }
 
-  // Ограничим количество мышей до 80
-  const totalBats = Math.min(points.length, 80);
+  // Выбираем до 70 мышей
+  const totalBats = Math.min(points.length, 70);
   const selectedPoints = [];
   for (let i = 0; i < totalBats; i++) {
     const idx = Math.floor(Math.random() * points.length);
@@ -2012,8 +2012,7 @@ addEasterEgg('batman', 'BATMAN', function() {
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
-  // Создаём летучих мышей
-  selectedPoints.forEach((point, index) => {
+  selectedPoints.forEach((point) => {
     const bat = document.createElement('div');
     bat.textContent = '🦇';
     bat.style.cssText = `
@@ -2022,70 +2021,43 @@ addEasterEgg('batman', 'BATMAN', function() {
       z-index: 300001;
       pointer-events: none;
       transform: translate(-50%, -50%);
-      transition: none;
     `;
-    // Начальная позиция — за пределами экрана (случайная сторона)
+    // Стартовая позиция – случайная сторона
     let startX, startY;
     const side = Math.floor(Math.random() * 4);
     switch(side) {
-      case 0: // сверху
-        startX = Math.random() * window.innerWidth;
-        startY = -100;
-        break;
-      case 1: // справа
-        startX = window.innerWidth + 100;
-        startY = Math.random() * window.innerHeight;
-        break;
-      case 2: // снизу
-        startX = Math.random() * window.innerWidth;
-        startY = window.innerHeight + 100;
-        break;
-      case 3: // слева
-        startX = -100;
-        startY = Math.random() * window.innerHeight;
-        break;
+      case 0: startX = Math.random() * window.innerWidth; startY = -100; break;
+      case 1: startX = window.innerWidth + 100; startY = Math.random() * window.innerHeight; break;
+      case 2: startX = Math.random() * window.innerWidth; startY = window.innerHeight + 100; break;
+      case 3: startX = -100; startY = Math.random() * window.innerHeight; break;
     }
     bat.dataset.startX = startX;
     bat.dataset.startY = startY;
-    // Конечная точка (целевая) — смещённая относительно центра экрана
-    const endX = centerX + point.x;
-    const endY = centerY + point.y;
-    bat.dataset.endX = endX;
-    bat.dataset.endY = endY;
-    // Промежуточная точка (для кривой) — случайная в пределах экрана
-    const midX = Math.random() * window.innerWidth;
-    const midY = Math.random() * window.innerHeight;
-    bat.dataset.midX = midX;
-    bat.dataset.midY = midY;
-    // Параметры анимации
-    bat.dataset.t = 0; // прогресс от 0 до 1
-    bat.dataset.speed = 0.008 + Math.random() * 0.012; // разная скорость
-    bat.dataset.delay = Math.random() * 1.5; // задержка перед стартом (в секундах)
-    bat.dataset.elapsed = 0;
-
+    bat.dataset.endX = centerX + point.x;
+    bat.dataset.endY = centerY + point.y;
+    bat.dataset.midX = Math.random() * window.innerWidth;
+    bat.dataset.midY = Math.random() * window.innerHeight;
+    bat.dataset.t = 0;
+    bat.dataset.speed = 0.008 + Math.random() * 0.012;
+    bat.dataset.delay = Math.random() * 1.5;
     bat.style.left = startX + 'px';
     bat.style.top = startY + 'px';
     overlay.appendChild(bat);
     bats.push(bat);
   });
 
-  // Запускаем анимацию
   let startTime = null;
+  let settled = false;
   function animate(timestamp) {
     if (!startTime) startTime = timestamp;
-    const elapsedGlobal = (timestamp - startTime) / 1000; // в секундах
+    const elapsed = (timestamp - startTime) / 1000;
 
     let allSettled = true;
     bats.forEach(bat => {
       const delay = parseFloat(bat.dataset.delay);
-      if (elapsedGlobal < delay) {
-        allSettled = false;
-        return;
-      }
-      const elapsed = elapsedGlobal - delay;
+      if (elapsed < delay) { allSettled = false; return; }
       const t = Math.min(parseFloat(bat.dataset.t), 1);
-      if (t >= 1) return; // уже на месте
-
+      if (t >= 1) return;
       const startX = parseFloat(bat.dataset.startX);
       const startY = parseFloat(bat.dataset.startY);
       const midX = parseFloat(bat.dataset.midX);
@@ -2093,38 +2065,56 @@ addEasterEgg('batman', 'BATMAN', function() {
       const endX = parseFloat(bat.dataset.endX);
       const endY = parseFloat(bat.dataset.endY);
 
-      // Квадратичная кривая Безье: B(t) = (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
       const invT = 1 - t;
       const x = invT * invT * startX + 2 * invT * t * midX + t * t * endX;
       const y = invT * invT * startY + 2 * invT * t * midY + t * t * endY;
-
       bat.style.left = x + 'px';
       bat.style.top = y + 'px';
 
-      // Обновляем прогресс
       const newT = t + parseFloat(bat.dataset.speed);
       bat.dataset.t = Math.min(newT, 1);
       if (newT < 1) allSettled = false;
     });
 
-    if (allSettled) {
-      // Все мыши на месте, ждём немного и исчезаем
+    if (allSettled && !settled) {
+      settled = true;
+      // Заменяем мышей на текст
       setTimeout(() => {
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 800);
-      }, 2500);
+        bats.forEach(b => b.remove());
+        const title = document.createElement('div');
+        title.textContent = 'BATMAN';
+        title.style.cssText = `
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          font-family: 'Arial Black', sans-serif;
+          font-size: 100px;
+          color: #111;
+          text-shadow: 0 0 20px #ffd700, 0 0 40px #ffaa00;
+          letter-spacing: 8px;
+          z-index: 300002;
+          opacity: 0;
+          transition: opacity 0.5s;
+        `;
+        overlay.appendChild(title);
+        requestAnimationFrame(() => { title.style.opacity = '1'; });
+        // Исчезновение через 2 секунды
+        setTimeout(() => {
+          overlay.style.opacity = '0';
+          setTimeout(() => overlay.remove(), 800);
+        }, 2000);
+      }, 200);
       return;
     }
     requestAnimationFrame(animate);
   }
 
-  // Показываем оверлей и запускаем анимацию
   requestAnimationFrame(() => {
     overlay.style.opacity = '1';
     requestAnimationFrame(animate);
   });
 });
-  
+      
 
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
