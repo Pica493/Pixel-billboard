@@ -575,7 +575,13 @@ function startSnake() {
   snakeCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:250;';
   container.appendChild(snakeCanvas);
 
-  // Отключаем стандартное поведение для тач-событий
+// Блокировка клавиатуры на мобильных
+snakeCanvas.setAttribute('tabindex', '-1');
+snakeCanvas.style.userSelect = 'none';
+snakeCanvas.addEventListener('focus', (e) => { e.target.blur(); }, true);
+  
+
+// Отключаем стандартное поведение для тач-событий
   snakeCanvas.style.touchAction = 'none';
   snakeCanvas.addEventListener('touchmove', function(e) {
     e.preventDefault();
