@@ -1913,146 +1913,54 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
 
 
     
-   
-  
-  // ================= ШАРИНГАН (простой) =================
+  // ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО =================
+addEasterEgg('sonic', 'SONIC', function() {
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+  const ringSize = 200;
 
-  
-     // ================= ШАРИНГАН (Наруто) - статичный, с томоэ и дугами =================
-function startSharingan() {
-  if (!canActivate('sharingan')) return;
-  setActivated('sharingan');
+  const ring = document.createElement('div');
+  ring.style.cssText = `
+    position: fixed;
+    top: ${centerY - ringSize/2}px;
+    left: ${centerX - ringSize/2}px;
+    width: ${ringSize}px;
+    height: ${ringSize}px;
+    border: 12px solid gold;
+    border-radius: 50%;
+    box-shadow: 0 0 30px gold, 0 0 60px #ffd700, inset 0 0 20px rgba(255,215,0,0.5);
+    z-index: 300000;
+    pointer-events: none;
+    animation: ringSpin 2s linear infinite;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.5s, transform 0.5s;
+  `;
+  document.body.appendChild(ring);
 
-  // Затемнение фона
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:300000;display:flex;align-items:center;justify-content:center;';
-  document.body.appendChild(overlay);
+  // Анимация вращения
+  const style = document.createElement('style');
+  style.textContent = '@keyframes ringSpin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }';
+  document.head.appendChild(style);
 
-  const container = document.createElement('div');
-  container.style.cssText = 'position:relative;';
-  overlay.appendChild(container);
-
-  const canvas = document.createElement('canvas');
-  canvas.width = 400;
-  canvas.height = 400;
-  canvas.style.cssText = 'display:block;margin:auto;border-radius:50%;box-shadow:0 0 60px rgba(255,0,0,0.6);';
-  container.appendChild(canvas);
-
-  const ctx = canvas.getContext('2d');
-
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
-  const outerRadius = 150;        // внешний радиус красного круга
-  const innerRadius = 55;         // радиус чёрного зрачка
-  const tomoRadius = 28;          // размер томоэ
-  const tomoDistance = 90;        // расстояние томоэ от центра
-  const arcRadius = 32;           // радиус дуг между томоэ (от центра)
-  const arcWidth = 8;             // толщина дуг
-
-  // Рисует одно томоэ в виде запятой (классическая форма)
-  function drawTomoe(cx, cy, radius, rotation) {
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(rotation);
-
-    const r = radius;
-    // Форма запятой – комбинация двух дуг
-    ctx.beginPath();
-    // Начинаем с левой части
-    ctx.moveTo(-r * 0.5, 0);
-    // Верхняя дуга (выпуклая вверх)
-    ctx.bezierCurveTo(-r, -r * 0.9, -r * 0.9, -r, 0, -r);
-    // Правая дуга (выпуклая вправо)
-    ctx.bezierCurveTo(r * 0.9, -r, r, -r * 0.9, r * 0.5, 0);
-    // Нижняя дуга (выпуклая вниз)
-    ctx.bezierCurveTo(r, r * 0.9, r * 0.9, r, 0, r);
-    // Левая дуга (выпуклая влево)
-    ctx.bezierCurveTo(-r * 0.9, r, -r, r * 0.9, -r * 0.5, 0);
-    ctx.closePath();
-    ctx.fillStyle = '#000';
-    ctx.fill();
-    ctx.restore();
-  }
-
-  // Рисует закруглённую дугу между томоэ
-  function drawArc(cx, cy, radius, startAngle, endAngle, color, lineWidth) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, startAngle, endAngle);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = lineWidth;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // Рисуем статичный Шаринган
-  function drawStaticSharingan() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 1. Красный внешний круг (склера)
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, outerRadius, 0, Math.PI * 2);
-    ctx.fillStyle = '#cc0000';
-    ctx.fill();
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    // 2. Внутренний чёрный круг (зрачок)
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
-    ctx.fillStyle = '#000';
-    ctx.fill();
-
-    // 3. Три томоэ (без вращения, расположены под 0°, 120°, 240°)
-    const fixedAngle = 0; // можно изменить для поворота всего рисунка
-    for (let i = 0; i < 3; i++) {
-      const theta = fixedAngle + i * (2 * Math.PI / 3);
-      const tomoX = centerX + tomoDistance * Math.cos(theta);
-      const tomoY = centerY + tomoDistance * Math.sin(theta);
-      // Ориентируем томоэ наружу от центра
-      const rot = theta + Math.PI / 2;
-      drawTomoe(tomoX, tomoY, tomoRadius, rot);
-    }
-
-    // 4. Три закруглённые дуги между томоэ (чёрные, толщина 8px)
-    // Дуги расположены на окружности радиусом arcRadius от центра,
-    // между направлениями томоэ.
-    for (let i = 0; i < 3; i++) {
-      const startAngle = fixedAngle + i * (2 * Math.PI / 3) + 0.35; // смещение, чтобы дуга была между томоэ
-      const endAngle = fixedAngle + i * (2 * Math.PI / 3) + (2 * Math.PI / 3) - 0.35;
-      drawArc(centerX, centerY, arcRadius, startAngle, endAngle, '#000', arcWidth);
-    }
-  }
-
-  drawStaticSharingan();
-
-  // Закрытие по клику на фон
-  overlay.addEventListener('click', function(e) {
-    if (e.target === overlay) {
-      overlay.remove();
-    }
+  // Появление
+  requestAnimationFrame(() => {
+    ring.style.opacity = '1';
+    ring.style.transform = 'scale(1)';
   });
 
-  // Кнопка закрытия
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = '✕';
-  closeBtn.style.cssText = 'position:absolute;top:5px;right:5px;background:#c00;color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:24px;cursor:pointer;z-index:1;box-shadow:0 0 10px rgba(0,0,0,0.5);';
-  container.appendChild(closeBtn);
-  closeBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    overlay.remove();
-  });
-
-  // Автоматическое закрытие через 15 секунд
+  // Исчезновение через 4 секунды
   setTimeout(() => {
-    if (overlay.parentNode) overlay.remove();
-  }, 15000);
-}
-
-addEasterEgg('sharingan', 'SHARINGAN', startSharingan);
-
+    ring.style.opacity = '0';
+    ring.style.transform = 'scale(0)';
+    setTimeout(() => {
+      ring.remove();
+      style.remove();
+    }, 500);
+  }, 4000);
+});
+     
+    
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
