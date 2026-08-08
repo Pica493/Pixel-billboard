@@ -1145,54 +1145,63 @@ document.body.style.overflow = '';
 });
 
 
-// ================= ТЕТРИС (модальное окно, экономика, телефон) =================
+// ================= ТЕТРИС (компактный, с превью) =================
 addEasterEgg('tetris', 'TETRIS', function() {
-  // Создаём overlay
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:200000;display:flex;align-items:center;justify-content:center;';
   document.body.appendChild(overlay);
-
-  // Блокируем pull-to-refresh
-  overlay.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+  overlay.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
   const gameContainer = document.createElement('div');
-  gameContainer.style.cssText = 'background:#1a1a2e;border:2px solid #4caf50;border-radius:15px;padding:10px;display:flex;flex-direction:column;align-items:center;max-width:95vw;';
+  gameContainer.style.cssText = 'background:#1a1a2e;border:2px solid #4caf50;border-radius:15px;padding:15px;display:flex;flex-direction:column;align-items:center;max-width:95vw;';
   overlay.appendChild(gameContainer);
 
-  // Информация: уровень, линии, счёт
-  const infoDiv = document.createElement('div');
-  infoDiv.style.cssText = 'color:#fff;font-family:monospace;font-size:16px;margin-bottom:5px;text-align:center;';
-  infoDiv.textContent = 'Уровень: 1 | Линии: 0';
-  gameContainer.appendChild(infoDiv);
+  // Верхняя панель: очки и следующая фигура
+  const topPanel = document.createElement('div');
+  topPanel.style.cssText = 'display:flex;justify-content:space-between;width:100%;margin-bottom:10px;color:#fff;font-family:monospace;';
+  gameContainer.appendChild(topPanel);
 
-  // Холст для тетриса (адаптивный размер)
+  // Очки
+  const scoreDiv = document.createElement('div');
+  scoreDiv.innerHTML = 'Очки:<br><span id="tetris-score" style="font-size:20px;">0</span>';
+  topPanel.appendChild(scoreDiv);
+
+  // Превью следующей фигуры
+  const previewDiv = document.createElement('div');
+  previewDiv.innerHTML = 'Следующая:<br>';
+  const previewCanvas = document.createElement('canvas');
+  previewCanvas.width = 80; previewCanvas.height = 80;
+  previewCanvas.style.cssText = 'border:1px solid #fff;background:#111;';
+  previewDiv.appendChild(previewCanvas);
+  topPanel.appendChild(previewDiv);
+  const pctx = previewCanvas.getContext('2d');
+
+  // Игровое поле (уменьшено до 15 рядов)
+  const COLS = 10, ROWS = 15;
+  const cellSize = Math.min(30, Math.floor((window.innerWidth - 40) / COLS));
   const canvas = document.createElement('canvas');
-  const cellSize = Math.min(30, Math.floor((window.innerWidth - 40) / 10));
-  canvas.width = cellSize * 10;
-  canvas.height = cellSize * 20;
+  canvas.width = cellSize * COLS;
+  canvas.height = cellSize * ROWS;
   canvas.style.cssText = 'border:2px solid #fff;background:#111;';
   gameContainer.appendChild(canvas);
   const ctx = canvas.getContext('2d');
 
-  // Кнопки для телефона
+  // Кнопки управления
   const controls = document.createElement('div');
   controls.style.cssText = 'display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:10px;';
   gameContainer.appendChild(controls);
-
-  const btnLeft = document.createElement('button'); btnLeft.textContent = '◀'; 
-  const btnRight = document.createElement('button'); btnRight.textContent = '▶'; 
-  const btnDown = document.createElement('button'); btnDown.textContent = '▼'; 
-  const btnRotate = document.createElement('button'); btnRotate.textContent = '↻'; 
-  const btnHardDrop = document.createElement('button'); btnHardDrop.textContent = '⏬'; 
+  const btnLeft = document.createElement('button'); btnLeft.textContent = '◀';
+  const btnRight = document.createElement('button'); btnRight.textContent = '▶';
+  const btnDown = document.createElement('button'); btnDown.textContent = '▼';
+  const btnRotate = document.createElement('button'); btnRotate.textContent = '↻';
+  const btnHardDrop = document.createElement('button'); btnHardDrop.textContent = '⏬';
   const btnClose = document.createElement('button'); btnClose.textContent = '✕ Закрыть';
-
   [btnLeft, btnRight, btnDown, btnRotate, btnHardDrop, btnClose].forEach(b => {
     b.style.cssText = 'padding:10px 15px;background:#444;color:#fff;border:none;border-radius:5px;font-size:20px;cursor:pointer;';
     controls.appendChild(b);
   });
 
   // Игровые переменные
-  const COLS = 10, ROWS = 20;
   const tetrominos = [
     [[1,1,1,1]], [[1,1],[1,1]], [[0,1,1],[1,1,0]], [[1,1,0],[0,1,1]],
     [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]], [[0,1,0],[1,1,1]]
@@ -1201,35 +1210,56 @@ addEasterEgg('tetris', 'TETRIS', function() {
 
   let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
   let currentPiece, currentColor, currentX, currentY;
-  let linesCleared = 0, level = 1, gameOver = false, dropInterval;
+  let nextPiece, nextColor;
+  let linesCleared = 0, level = 1, score = 0, gameOver = false, dropInterval;
 
   function randomPiece() {
     const idx = Math.floor(Math.random() * tetrominos.length);
     return { shape: tetrominos[idx], color: colors[idx] };
   }
 
-  function spawnPiece() {
+  function nextPreview() {
     const p = randomPiece();
-    currentPiece = p.shape; currentColor = p.color;
+    nextPiece = p.shape; nextColor = p.color;
+    drawPreview();
+  }
+
+  function drawPreview() {
+    pctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    if (!nextPiece) return;
+    const shape = nextPiece;
+    const cols = shape[0].length, rows = shape.length;
+    const size = Math.min(20, Math.floor(60 / Math.max(cols, rows)));
+    const offsetX = (previewCanvas.width - cols * size) / 2;
+    const offsetY = (previewCanvas.height - rows * size) / 2;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++)
+      if (shape[r][c]) {
+        pctx.fillStyle = nextColor;
+        pctx.fillRect(offsetX + c * size, offsetY + r * size, size-1, size-1);
+      }
+  }
+
+  function spawnPiece() {
+    if (!nextPiece) nextPreview();
+    currentPiece = nextPiece; currentColor = nextColor;
+    nextPreview();
     currentX = Math.floor((COLS - currentPiece[0].length) / 2);
     currentY = 0;
     if (!isValid(currentX, currentY, currentPiece)) endGame();
   }
 
   function isValid(x, y, piece) {
-    for (let r = 0; r < piece.length; r++)
-      for (let c = 0; c < piece[0].length; c++)
-        if (piece[r][c]) {
-          const nx = x + c, ny = y + r;
-          if (nx < 0 || nx >= COLS || ny >= ROWS || (ny >= 0 && board[ny][nx])) return false;
-        }
+    for (let r = 0; r < piece.length; r++) for (let c = 0; c < piece[0].length; c++)
+      if (piece[r][c]) {
+        const nx = x + c, ny = y + r;
+        if (nx < 0 || nx >= COLS || ny >= ROWS || (ny >= 0 && board[ny][nx])) return false;
+      }
     return true;
   }
 
   function placePiece() {
-    for (let r = 0; r < currentPiece.length; r++)
-      for (let c = 0; c < currentPiece[0].length; c++)
-        if (currentPiece[r][c]) board[currentY + r][currentX + c] = currentColor;
+    for (let r = 0; r < currentPiece.length; r++) for (let c = 0; c < currentPiece[0].length; c++)
+      if (currentPiece[r][c]) board[currentY + r][currentX + c] = currentColor;
     clearLines(); spawnPiece();
   }
 
@@ -1244,6 +1274,7 @@ addEasterEgg('tetris', 'TETRIS', function() {
     if (cleared) {
       linesCleared += cleared;
       level = Math.floor(linesCleared / 10) + 1;
+      score += cleared * 10 * level;
       clearInterval(dropInterval);
       dropInterval = setInterval(() => { if (!gameOver) moveDown(); }, Math.max(100, 500 - (level-1)*40));
     }
@@ -1268,7 +1299,7 @@ addEasterEgg('tetris', 'TETRIS', function() {
           ctx.fillStyle = currentColor;
           ctx.fillRect((currentX+c)*cellSize, (currentY+r)*cellSize, cellSize-1, cellSize-1);
         }
-    infoDiv.textContent = `Уровень: ${level} | Линии: ${linesCleared}`;
+    document.getElementById('tetris-score').textContent = score;
   }
 
   function endGame() {
@@ -1287,25 +1318,17 @@ addEasterEgg('tetris', 'TETRIS', function() {
   }
   window.addEventListener('keydown', handleKey);
 
-  // Привязка кнопок
-  btnLeft.addEventListener('click', moveLeft);
-  btnRight.addEventListener('click', moveRight);
-  btnDown.addEventListener('click', moveDown);
-  btnRotate.addEventListener('click', rotate);
-  btnHardDrop.addEventListener('click', hardDrop);
-  btnClose.addEventListener('click', () => { if (!gameOver) endGame(); else overlay.remove(); });
+  btnLeft.onclick = moveLeft; btnRight.onclick = moveRight; btnDown.onclick = moveDown;
+  btnRotate.onclick = rotate; btnHardDrop.onclick = hardDrop;
+  btnClose.onclick = () => { if (!gameOver) endGame(); else overlay.remove(); };
 
-  spawnPiece(); draw();
+  nextPreview(); spawnPiece(); draw();
   dropInterval = setInterval(() => { if (!gameOver) moveDown(); }, 500);
 
-  // Автоочистка через 5 минут
-  setTimeout(() => {
-    clearInterval(dropInterval);
-    window.removeEventListener('keydown', handleKey);
-    if (overlay.parentNode) overlay.remove();
-  }, 300000);
+  setTimeout(() => { clearInterval(dropInterval); window.removeEventListener('keydown', handleKey); overlay.remove(); }, 300000);
 });
-
+  
+  
 // ================= MEMORY (Мемори) =================
 addEasterEgg('memory', 'MEMORY', function() {
   // Модальное окно
