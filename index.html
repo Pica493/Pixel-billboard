@@ -583,17 +583,46 @@ function startSnake() {
   snakeCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:250;';
   container.appendChild(snakeCanvas);
 
-// Блокировка клавиатуры на мобильных
-snakeCanvas.setAttribute('tabindex', '-1');
-snakeCanvas.style.userSelect = 'none';
-snakeCanvas.addEventListener('focus', (e) => { e.target.blur(); }, true);
-  
-
-// Отключаем стандартное поведение для тач-событий
+  // ===== МАКСИМАЛЬНАЯ БЛОКИРОВКА КЛАВИАТУРЫ =====
+  snakeCanvas.setAttribute('tabindex', '-1');
+  snakeCanvas.setAttribute('inputmode', 'none');
+  snakeCanvas.style.userSelect = 'none';
+  snakeCanvas.style.webkitUserSelect = 'none';
+  snakeCanvas.style.touchCallout = 'none';
   snakeCanvas.style.touchAction = 'none';
-  snakeCanvas.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-  }, { passive: false });
+  snakeCanvas.style.pointerEvents = 'auto';
+
+  // Блокируем фокус мгновенно и с задержкой
+  snakeCanvas.addEventListener('focus', function(e) {
+    e.target.blur();
+  }, true);
+
+  // Блокируем все события, которые могут вызвать фокус
+  const blockEvents = ['touchstart', 'touchmove', 'touchend', 'pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'selectstart', 'contextmenu'];
+  blockEvents.forEach(function(evt) {
+    snakeCanvas.addEventListener(evt, function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (document.activeElement === snakeCanvas) {
+        snakeCanvas.blur();
+      }
+    }, { passive: false });
+  });
+
+  // Дополнительно: блокируем focusin/focusout
+  snakeCanvas.addEventListener('focusin', function(e) { e.preventDefault(); e.stopPropagation(); }, true);
+  snakeCanvas.addEventListener('focusout', function(e) { e.preventDefault(); e.stopPropagation(); }, true);
+
+  // Отключаем контекстное меню и выделение
+  snakeCanvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  snakeCanvas.addEventListener('selectstart', function(e) { e.preventDefault(); });
+
+  // Снимаем фокус при любом касании, если всё же появился
+  snakeCanvas.addEventListener('touchstart', function(e) {
+    if (document.activeElement === snakeCanvas) {
+      snakeCanvas.blur();
+    }
+  }, { passive: true });
 
   const sctx = snakeCanvas.getContext('2d');
   const CELL_SIZE = 10,
@@ -620,19 +649,18 @@ snakeCanvas.addEventListener('focus', (e) => { e.target.blur(); }, true);
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    if (absDx < 10 && absDy < 10) return; // игнорируем случайные касания
+    if (absDx < 10 && absDy < 10) return;
 
     if (absDx > absDy) {
-      // горизонтальный свайп
       nextDirection = dx > 0 ? { x: 1, y: 0 } : { x: -1, y: 0 };
     } else {
-      // вертикальный свайп
       nextDirection = dy > 0 ? { x: 0, y: 1 } : { x: 0, y: -1 };
     }
     touchStartX = null;
     touchStartY = null;
   }, { passive: false });
 
+    
   // ---------- ЛОГИКА ИГРЫ ----------
   function findFreeStart() {
     const maxAttempts = 200;
