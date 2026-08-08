@@ -1912,9 +1912,9 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
 
 
 
-    // ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (2D, как в игре) =================
+// ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (широкое, объёмное) =================
 addEasterEgg('sonic', 'SONIC', function() {
-  const size = 180;
+  const size = 200;
   const ring = document.createElement('div');
   ring.style.cssText = `
     position: fixed;
@@ -1922,40 +1922,46 @@ addEasterEgg('sonic', 'SONIC', function() {
     width: ${size}px;
     height: ${size}px;
     margin: -${size/2}px 0 0 -${size/2}px;
-    border: 24px solid gold;
+    border: 30px solid gold;
     border-radius: 50%;
-    box-shadow: 0 0 15px gold, 0 0 30px #ffd700, 0 0 60px #daa520, inset 0 0 10px rgba(0,0,0,0.5);
-    background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.4) 0%, transparent 60%);
+    box-shadow: 0 0 20px gold, 0 0 40px #ffd700, 0 0 80px #daa520;
+    background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.4) 0%, transparent 70%);
     z-index: 300000;
     pointer-events: none;
     animation: sonicSpin 2s linear infinite;
+    opacity: 0;
+    transition: opacity 0.5s;
   `;
   document.body.appendChild(ring);
+
+  // Внутренняя тень для объёма
+  const innerShadow = document.createElement('div');
+  innerShadow.style.cssText = `
+    position: absolute;
+    top: 50%; left: 50%;
+    width: ${size - 60}px;
+    height: ${size - 60}px;
+    margin: -${(size-60)/2}px 0 0 -${(size-60)/2}px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, transparent 50%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+  `;
+  ring.appendChild(innerShadow);
 
   const style = document.createElement('style');
   style.textContent = '@keyframes sonicSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
   document.head.appendChild(style);
 
-  // Появление
-  ring.style.transition = 'opacity 0.5s, transform 0.5s';
-  ring.style.opacity = '0';
-  ring.style.transform = 'scale(0)';
-  requestAnimationFrame(() => {
-    ring.style.opacity = '1';
-    ring.style.transform = 'scale(1)';
-  });
+  requestAnimationFrame(() => { ring.style.opacity = '1'; });
 
-  // Исчезновение через 4 секунды
   setTimeout(() => {
     ring.style.opacity = '0';
-    ring.style.transform = 'scale(0)';
     setTimeout(() => {
       ring.remove();
       style.remove();
     }, 500);
   }, 4000);
 });
-      
   
     
   
