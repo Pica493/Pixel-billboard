@@ -1961,18 +1961,43 @@ addEasterEgg('sonic', 'SONIC', function() {
   }, 4000);
 });
 
-// ================= БЭТМЕН: ПЛАВНЫЙ ПОЛЁТ И НАДПИСЬ =================
+
+
+  // ================= БЭТМЕН: ЖИЖА И НАДПИСЬ =================
 addEasterEgg('batman', 'BATMAN', function() {
+  // Затемнённый фон
   const overlay = document.createElement('div');
   overlay.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.85);
     z-index: 300000; pointer-events: none;
-    opacity: 0; transition: opacity 0.8s;
+    opacity: 0; transition: opacity 0.8s ease;
   `;
   document.body.appendChild(overlay);
 
-  // Адаптивный размер шрифта
+  // CSS-анимации
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes batWings {
+      0%, 100% { transform: rotate(-5deg) scale(1); }
+      50% { transform: rotate(5deg) scale(1.1); }
+    }
+    .flying-bat {
+      animation: batWings 0.2s ease-in-out infinite alternate;
+    }
+    @keyframes gooExpand {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+      60% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    @keyframes titleReveal {
+      0% { transform: translate(-50%, -50%) scaleY(0); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scaleY(1); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Генерация точек для контура букв
   const fontSize = Math.min(80, window.innerWidth / 6);
   const canvasWidth = 600, canvasHeight = 200;
   const textCanvas = document.createElement('canvas');
@@ -2000,6 +2025,7 @@ addEasterEgg('batman', 'BATMAN', function() {
     }
   }
 
+  // Выбираем до 80 мышей
   const totalBats = Math.min(points.length, 80);
   const selectedPoints = [];
   for (let i = 0; i < totalBats; i++) {
@@ -2012,19 +2038,6 @@ addEasterEgg('batman', 'BATMAN', function() {
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
-  // CSS-анимация взмахов крыльев
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes batWings {
-      0%, 100% { transform: rotate(-5deg) scale(1); }
-      50% { transform: rotate(5deg) scale(1.1); }
-    }
-    .flying-bat {
-      animation: batWings 0.2s ease-in-out infinite alternate;
-    }
-  `;
-  document.head.appendChild(style);
-
   selectedPoints.forEach((point) => {
     const bat = document.createElement('div');
     bat.textContent = '🦇';
@@ -2036,7 +2049,8 @@ addEasterEgg('batman', 'BATMAN', function() {
       pointer-events: none;
       transform: translate(-50%, -50%);
     `;
-    
+
+    // Случайная стартовая позиция с одной из сторон экрана
     let startX, startY;
     const side = Math.floor(Math.random() * 4);
     switch(side) {
@@ -2045,7 +2059,7 @@ addEasterEgg('batman', 'BATMAN', function() {
       case 2: startX = Math.random() * window.innerWidth; startY = window.innerHeight + 100; break;
       case 3: startX = -100; startY = Math.random() * window.innerHeight; break;
     }
-    
+
     bat.dataset.startX = startX;
     bat.dataset.startY = startY;
     bat.dataset.endX = centerX + point.x;
@@ -2053,7 +2067,7 @@ addEasterEgg('batman', 'BATMAN', function() {
     bat.dataset.midX = Math.random() * window.innerWidth;
     bat.dataset.midY = Math.random() * window.innerHeight;
     bat.dataset.t = 0;
-    bat.dataset.speed = 0.01 + Math.random() * 0.015; // Быстрее
+    bat.dataset.speed = 0.01 + Math.random() * 0.015;
     bat.dataset.delay = Math.random() * 1.2;
 
     bat.style.left = startX + 'px';
@@ -2072,10 +2086,10 @@ addEasterEgg('batman', 'BATMAN', function() {
     let allSettled = true;
     bats.forEach(bat => {
       if (bat.dataset.arrived === 'true') return;
-      
+
       const delay = parseFloat(bat.dataset.delay);
       if (elapsed < delay) { allSettled = false; return; }
-      
+
       const t = Math.min(parseFloat(bat.dataset.t), 1);
       if (t >= 1) {
         bat.style.opacity = '0';
@@ -2093,41 +2107,58 @@ addEasterEgg('batman', 'BATMAN', function() {
       const invT = 1 - t;
       const x = invT * invT * startX + 2 * invT * t * midX + t * t * endX;
       const y = invT * invT * startY + 2 * invT * t * midY + t * t * endY;
-      
+
       bat.style.left = x + 'px';
       bat.style.top = y + 'px';
 
       const newT = t + parseFloat(bat.dataset.speed);
       bat.dataset.t = Math.min(newT, 1);
       if (newT < 1) allSettled = false;
-      else bat.dataset.arrived = 'true'; // Помечаем как прибывшую
+      else bat.dataset.arrived = 'true';
     });
 
     if (allSettled && !settled) {
       settled = true;
-      // Все мыши на месте – показываем надпись
+      // Все мыши собрались – создаём жижу
+      const goo = document.createElement('div');
+      goo.style.cssText = `
+        position: absolute;
+        top: 50%; left: 50%;
+        width: ${fontSize * 5.5}px;
+        height: ${fontSize * 1.5}px;
+        background: radial-gradient(ellipse at center, #1a1a1a 0%, #000 100%);
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        z-index: 300002;
+        animation: gooExpand 0.6s ease-out forwards;
+        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      `;
+      overlay.appendChild(goo);
+
+      // Через 0.8 секунды после появления жижи показываем надпись
       setTimeout(() => {
+        // Удаляем мышей окончательно
         bats.forEach(b => b.remove());
-        
+
         const title = document.createElement('div');
         title.textContent = 'BATMAN';
         title.style.cssText = `
           position: absolute;
           top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%) scaleY(0);
           font-family: 'Arial Black', sans-serif;
           font-size: ${fontSize}px;
-          color: #111;
+          color: #0a0a0a;
           text-shadow: 0 0 20px #ffd700, 0 0 40px #ffaa00;
           letter-spacing: 4px;
-          z-index: 300002;
-          opacity: 0;
-          transition: opacity 0.4s;
+          z-index: 300003;
+          animation: titleReveal 0.5s ease-out forwards;
+          white-space: nowrap;
         `;
         overlay.appendChild(title);
-        requestAnimationFrame(() => { title.style.opacity = '1'; });
-        
-        // Исчезновение через 2.5 секунды
+
+        // Исчезновение всей сцены через 2.5 секунды после появления надписи
         setTimeout(() => {
           overlay.style.opacity = '0';
           setTimeout(() => {
@@ -2135,9 +2166,9 @@ addEasterEgg('batman', 'BATMAN', function() {
             style.remove();
           }, 800);
         }, 2500);
-      }, 150);
-      return;
+      }, 800);
     }
+
     requestAnimationFrame(animate);
   }
 
@@ -2146,6 +2177,8 @@ addEasterEgg('batman', 'BATMAN', function() {
     requestAnimationFrame(animate);
   });
 });
+
+       
   
   
   
