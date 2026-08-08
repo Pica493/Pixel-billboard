@@ -1917,11 +1917,13 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
   
   // ================= ШАРИНГАН (простой) =================
 
-  // ================= ШАРИНГАН (Наруто) - СТАТИЧНЫЙ =================
+  
+     // ================= ШАРИНГАН (Наруто) - статичный, с томоэ и дугами =================
 function startSharingan() {
   if (!canActivate('sharingan')) return;
   setActivated('sharingan');
 
+  // Затемнение фона
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:300000;display:flex;align-items:center;justify-content:center;';
   document.body.appendChild(overlay);
@@ -1940,22 +1942,31 @@ function startSharingan() {
 
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
-  const outerRadius = 150;
-  const innerRadius = 55;
-  const tomoRadius = 30;
-  const tomoDistance = 95;
+  const outerRadius = 150;        // внешний радиус красного круга
+  const innerRadius = 55;         // радиус чёрного зрачка
+  const tomoRadius = 28;          // размер томоэ
+  const tomoDistance = 90;        // расстояние томоэ от центра
+  const arcRadius = 32;           // радиус дуг между томоэ (от центра)
+  const arcWidth = 8;             // толщина дуг
 
+  // Рисует одно томоэ в виде запятой (классическая форма)
   function drawTomoe(cx, cy, radius, rotation) {
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(rotation);
 
     const r = radius;
+    // Форма запятой – комбинация двух дуг
     ctx.beginPath();
+    // Начинаем с левой части
     ctx.moveTo(-r * 0.5, 0);
+    // Верхняя дуга (выпуклая вверх)
     ctx.bezierCurveTo(-r, -r * 0.9, -r * 0.9, -r, 0, -r);
+    // Правая дуга (выпуклая вправо)
     ctx.bezierCurveTo(r * 0.9, -r, r, -r * 0.9, r * 0.5, 0);
+    // Нижняя дуга (выпуклая вниз)
     ctx.bezierCurveTo(r, r * 0.9, r * 0.9, r, 0, r);
+    // Левая дуга (выпуклая влево)
     ctx.bezierCurveTo(-r * 0.9, r, -r, r * 0.9, -r * 0.5, 0);
     ctx.closePath();
     ctx.fillStyle = '#000';
@@ -1963,11 +1974,23 @@ function startSharingan() {
     ctx.restore();
   }
 
-  // Рисуем Шаринган без вращения
+  // Рисует закруглённую дугу между томоэ
+  function drawArc(cx, cy, radius, startAngle, endAngle, color, lineWidth) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Рисуем статичный Шаринган
   function drawStaticSharingan() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Красный внешний круг
+    // 1. Красный внешний круг (склера)
     ctx.beginPath();
     ctx.arc(centerX, centerY, outerRadius, 0, Math.PI * 2);
     ctx.fillStyle = '#cc0000';
@@ -1976,20 +1999,30 @@ function startSharingan() {
     ctx.lineWidth = 4;
     ctx.stroke();
 
-    // Внутренний чёрный круг
+    // 2. Внутренний чёрный круг (зрачок)
     ctx.beginPath();
     ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
     ctx.fillStyle = '#000';
     ctx.fill();
 
-    // Три томоэ с фиксированным углом (0, 120, 240 градусов)
-    const fixedAngle = 0; // не вращаем
+    // 3. Три томоэ (без вращения, расположены под 0°, 120°, 240°)
+    const fixedAngle = 0; // можно изменить для поворота всего рисунка
     for (let i = 0; i < 3; i++) {
       const theta = fixedAngle + i * (2 * Math.PI / 3);
       const tomoX = centerX + tomoDistance * Math.cos(theta);
       const tomoY = centerY + tomoDistance * Math.sin(theta);
+      // Ориентируем томоэ наружу от центра
       const rot = theta + Math.PI / 2;
       drawTomoe(tomoX, tomoY, tomoRadius, rot);
+    }
+
+    // 4. Три закруглённые дуги между томоэ (чёрные, толщина 8px)
+    // Дуги расположены на окружности радиусом arcRadius от центра,
+    // между направлениями томоэ.
+    for (let i = 0; i < 3; i++) {
+      const startAngle = fixedAngle + i * (2 * Math.PI / 3) + 0.35; // смещение, чтобы дуга была между томоэ
+      const endAngle = fixedAngle + i * (2 * Math.PI / 3) + (2 * Math.PI / 3) - 0.35;
+      drawArc(centerX, centerY, arcRadius, startAngle, endAngle, '#000', arcWidth);
     }
   }
 
@@ -2019,7 +2052,7 @@ function startSharingan() {
 }
 
 addEasterEgg('sharingan', 'SHARINGAN', startSharingan);
- 
+
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
