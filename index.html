@@ -2001,82 +2001,156 @@ addEasterEgg('batman', 'BATMAN', function() {
   `;
   overlay.appendChild(spotlightNarrow);
 
-  // Логотип Бэтмена (Canvas – точная эмблема)
-  const logoCanvas = document.createElement('canvas');
-  logoCanvas.width = 300;
-  logoCanvas.height = 220;
-  logoCanvas.style.cssText = `
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 3;
-    filter: drop-shadow(0 0 50px #ffd700) drop-shadow(0 0 25px #ffaa00);
-    opacity: 0; transition: opacity 1s ease;
+  
+  // ================= БЭТМЕН НА ФОНЕ ЛУНЫ =================
+addEasterEgg('batman', 'BATMAN', function() {
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+
+  // Ночное небо (затемнённый фон со звёздами)
+  const sky = document.createElement('div');
+  sky.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 50% 50%, #1a1a3e, #000);
+    z-index: 300000; pointer-events: none;
+    opacity: 0; transition: opacity 0.8s;
   `;
-  overlay.appendChild(logoCanvas);
-  const ctx = logoCanvas.getContext('2d');
+  document.body.appendChild(sky);
 
-  // Рисуем каноничную эмблему Бэтмена (основанную на классическом дизайне)
-  function drawBatLogo() {
-    const w = logoCanvas.width, h = logoCanvas.height;
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = '#ffd700';
+  // Звёзды (маленькие белые точки)
+  for (let i = 0; i < 50; i++) {
+    const star = document.createElement('div');
+    const size = 1 + Math.random() * 2;
+    star.style.cssText = `
+      position: absolute;
+      top: ${Math.random() * 100}%;
+      left: ${Math.random() * 100}%;
+      width: ${size}px; height: ${size}px;
+      background: white;
+      border-radius: 50%;
+      opacity: ${0.3 + Math.random() * 0.7};
+      animation: twinkle ${2 + Math.random() * 3}s infinite;
+    `;
+    sky.appendChild(star);
+  }
 
+  // Луна (большая, жёлтая)
+  const moon = document.createElement('div');
+  moon.style.cssText = `
+    position: absolute;
+    top: ${centerY - 180}px; left: ${centerX - 150}px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle at 40% 40%, #fffde7, #ffd54f 80%);
+    border-radius: 50%;
+    box-shadow: 0 0 80px #ffd54f, 0 0 150px #ffb300;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.8s;
+  `;
+  sky.appendChild(moon);
+
+  // Силуэт Бэтмена (Canvas)
+  const batmanCanvas = document.createElement('canvas');
+  batmanCanvas.width = 200;
+  batmanCanvas.height = 250;
+  batmanCanvas.style.cssText = `
+    position: absolute;
+    top: ${centerY - 100}px; left: ${centerX - 20}px;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.8s;
+  `;
+  sky.appendChild(batmanCanvas);
+  const ctx = batmanCanvas.getContext('2d');
+
+  // Рисуем Бэтмена
+  function drawBatman() {
+    const w = batmanCanvas.width, h = batmanCanvas.height;
+    ctx.fillStyle = '#000';
+
+    // Голова с ушками
     ctx.beginPath();
-    // Начинаем с верхушки головы
-    ctx.moveTo(w * 0.5, h * 0.05);       // центр верха
-    // Правая сторона головы и верхний выступ
-    ctx.lineTo(w * 0.7, h * 0.2);
-    ctx.lineTo(w * 0.9, h * 0.1);        // кончик правого верхнего "уха"
-    ctx.lineTo(w * 0.85, h * 0.3);
-    ctx.lineTo(w * 0.95, h * 0.35);      // дальний край правого крыла
-    // Нижняя дуга правого крыла
-    ctx.lineTo(w * 0.8, h * 0.45);
-    ctx.lineTo(w * 0.85, h * 0.65);
-    ctx.lineTo(w * 0.75, h * 0.75);
-    ctx.lineTo(w * 0.65, h * 0.6);
-    // Внутренняя выемка правого крыла
-    ctx.lineTo(w * 0.55, h * 0.7);
-    ctx.lineTo(w * 0.5, h * 0.55);       // низ центра
-    // Левая сторона (симметрично)
-    ctx.lineTo(w * 0.45, h * 0.7);
-    ctx.lineTo(w * 0.35, h * 0.6);
-    ctx.lineTo(w * 0.25, h * 0.75);
-    ctx.lineTo(w * 0.15, h * 0.65);
-    ctx.lineTo(w * 0.2, h * 0.45);
-    // Верхняя дуга левого крыла
-    ctx.lineTo(w * 0.05, h * 0.35);
-    ctx.lineTo(w * 0.15, h * 0.3);
-    ctx.lineTo(w * 0.1, h * 0.1);        // кончик левого верхнего "уха"
-    ctx.lineTo(w * 0.3, h * 0.2);
+    ctx.moveTo(w * 0.5, h * 0.15);       // верхушка головы
+    ctx.lineTo(w * 0.6, h * 0.05);        // правое ухо
+    ctx.lineTo(w * 0.55, h * 0.15);
+    ctx.lineTo(w * 0.7, h * 0.2);         // правый край маски
+    ctx.lineTo(w * 0.6, h * 0.35);        // правое плечо
+    ctx.lineTo(w * 0.65, h * 0.45);       // край плаща
+    ctx.lineTo(w * 0.55, h * 0.5);
+    ctx.lineTo(w * 0.5, h * 0.4);         // талия
+    ctx.lineTo(w * 0.45, h * 0.5);
+    ctx.lineTo(w * 0.35, h * 0.45);
+    ctx.lineTo(w * 0.4, h * 0.35);        // левое плечо
+    ctx.lineTo(w * 0.3, h * 0.2);         // левый край маски
+    ctx.lineTo(w * 0.45, h * 0.15);
+    ctx.lineTo(w * 0.4, h * 0.05);        // левое ухо
+    ctx.closePath();
+    ctx.fill();
+
+    // Плащ (расширяется книзу)
+    ctx.beginPath();
+    ctx.moveTo(w * 0.35, h * 0.45);
+    ctx.lineTo(w * 0.2, h * 0.7);
+    ctx.lineTo(w * 0.15, h * 0.85);
+    ctx.lineTo(w * 0.3, h * 0.75);
+    ctx.lineTo(w * 0.45, h * 0.5);
+    ctx.lineTo(w * 0.55, h * 0.5);
+    ctx.lineTo(w * 0.7, h * 0.75);
+    ctx.lineTo(w * 0.85, h * 0.85);
+    ctx.lineTo(w * 0.8, h * 0.7);
+    ctx.lineTo(w * 0.65, h * 0.45);
     ctx.closePath();
     ctx.fill();
   }
-  drawBatLogo();
+  drawBatman();
 
-  // Анимация пульсации света
+  // Летучие мыши
+  const bats = [];
+  for (let i = 0; i < 5; i++) {
+    const bat = document.createElement('div');
+    bat.textContent = '🦇';
+    bat.style.cssText = `
+      position: absolute;
+      top: ${Math.random() * 100}%;
+      left: ${Math.random() * 100}%;
+      font-size: 30px;
+      z-index: 3;
+      animation: batFly ${4 + Math.random() * 4}s linear infinite;
+      opacity: 0.8;
+    `;
+    sky.appendChild(bat);
+    bats.push(bat);
+  }
+
+  // Анимации
   const style = document.createElement('style');
   style.textContent = `
-    @keyframes spotlightFade {
-      0% { opacity: 0.6; }
-      100% { opacity: 1; }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    @keyframes batFly {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(100px, -50px) rotate(15deg); }
+      50% { transform: translate(200px, 50px) rotate(-10deg); }
+      75% { transform: translate(-50px, 100px) rotate(5deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
     }
   `;
   document.head.appendChild(style);
 
   // Появление
-  requestAnimationFrame(() => {
-    overlay.style.opacity = '1';
-    setTimeout(() => {
-      logoCanvas.style.opacity = '1';
-    }, 400);
-  });
+  requestAnimationFrame(() => { sky.style.opacity = '1'; });
+  setTimeout(() => {
+    moon.style.opacity = '1';
+    batmanCanvas.style.opacity = '1';
+  }, 300);
 
   // Исчезновение через 5 секунд
   setTimeout(() => {
-    overlay.style.opacity = '0';
+    sky.style.opacity = '0';
     setTimeout(() => {
-      overlay.remove();
+      sky.remove();
       style.remove();
     }, 800);
   }, 5000);
