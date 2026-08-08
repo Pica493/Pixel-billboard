@@ -2337,7 +2337,7 @@ addEasterEgg('scorpion', 'SCORPION', function() {
 });
 
 
-// ================= ВВЕРХ: ДОМ НА ШАРАХ (труба поправлена) =================
+// ================= ВВЕРХ: ДОМ НА ШАРАХ (труба исправлена окончательно) =================
 addEasterEgg('up', 'UP', function() {
   const canvas = document.createElement('canvas');
   canvas.width = window.innerWidth;
@@ -2411,25 +2411,26 @@ addEasterEgg('up', 'UP', function() {
     ctx.fillStyle = '#5b2c22';
     ctx.fillRect(-w/2 - 10, -h/2 - 10, w + 20, 15);
 
-    // Труба (исправлено: основание заходит на крышу с обеих сторон)
+    // Труба (исправлено: основание заходит на крышу с обеих сторон, труба короче)
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.3)';
     ctx.shadowBlur = 8;
     ctx.fillStyle = '#888';
     // Основание трубы (трапеция, заходящая на крышу)
-    const tubeBaseY = -h/2 - 65; // верхний край основания
+    const tubeBaseY = -h/2 - 30; // верхний край основания (ближе к крыше)
     const tubeBaseWidth = 40;    // ширина у основания
     const tubeTopWidth = 30;     // ширина наверху
+    const tubeHeight = 40;       // высота трубы
     ctx.beginPath();
     ctx.moveTo(w/4 - tubeBaseWidth/2, tubeBaseY);          // левый верх
     ctx.lineTo(w/4 + tubeBaseWidth/2, tubeBaseY);          // правый верх
-    ctx.lineTo(w/4 + tubeTopWidth/2, tubeBaseY - 55);      // правый низ трубы
-    ctx.lineTo(w/4 - tubeTopWidth/2, tubeBaseY - 55);      // левый низ трубы
+    ctx.lineTo(w/4 + tubeTopWidth/2, tubeBaseY - tubeHeight); // правый низ трубы
+    ctx.lineTo(w/4 - tubeTopWidth/2, tubeBaseY - tubeHeight); // левый низ трубы
     ctx.closePath();
     ctx.fill();
     // "Шапка" трубы
     ctx.fillStyle = '#666';
-    ctx.fillRect(w/4 - tubeTopWidth/2 - 4, tubeBaseY - 65, tubeTopWidth + 8, 15);
+    ctx.fillRect(w/4 - tubeTopWidth/2 - 4, tubeBaseY - tubeHeight - 10, tubeTopWidth + 8, 12);
     ctx.restore();
 
     // Дверь
@@ -2546,7 +2547,6 @@ addEasterEgg('up', 'UP', function() {
 
   requestAnimationFrame(animate);
 });
-  
   
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
