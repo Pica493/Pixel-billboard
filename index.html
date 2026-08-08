@@ -1961,7 +1961,8 @@ addEasterEgg('sonic', 'SONIC', function() {
   }, 4000);
 });
 
-// ================= БЭТМЕН-СИГНАЛ (плавное свечение, чёткий логотип) =================
+
+  // ================= БЭТМЕН-СИГНАЛ (плавное свечение, логотип летучей мыши) =================
 addEasterEgg('batman', 'BATMAN', function() {
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
@@ -1970,71 +1971,107 @@ addEasterEgg('batman', 'BATMAN', function() {
   const overlay = document.createElement('div');
   overlay.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9);
+    background: rgba(0,0,0,0.85);
     z-index: 300000; pointer-events: none;
     opacity: 0;
-    transition: opacity 0.5s;
+    transition: opacity 0.8s ease;
   `;
   document.body.appendChild(overlay);
 
-  // Конус прожектора (свет из верхнего центра)
+  // Прожекторный свет (плавный радиальный луч)
   const spotlight = document.createElement('div');
   spotlight.style.cssText = `
     position: absolute;
     top: 0; left: 50%;
     transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 300px solid transparent;
-    border-right: 300px solid transparent;
-    border-top: 600px solid rgba(255,255,100,0.15);
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,255,200,0.25) 0%, transparent 70%);
     z-index: 1;
     pointer-events: none;
-    animation: spotlightPulse 3s ease-in-out infinite;
+    animation: spotlightFade 3s ease-in-out infinite;
   `;
   overlay.appendChild(spotlight);
 
-  // Второй конус (более яркий в центре)
-  const spotlightInner = document.createElement('div');
-  spotlightInner.style.cssText = `
+  // Второй слой света (более узкий, яркий)
+  const spotlightNarrow = document.createElement('div');
+  spotlightNarrow.style.cssText = `
     position: absolute;
     top: 0; left: 50%;
     transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 200px solid transparent;
-    border-right: 200px solid transparent;
-    border-top: 600px solid rgba(255,255,150,0.2);
+    width: 400px; height: 600px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,255,150,0.4) 0%, transparent 70%);
     z-index: 2;
     pointer-events: none;
+    animation: spotlightFade 3s ease-in-out infinite alternate;
   `;
-  overlay.appendChild(spotlightInner);
+  overlay.appendChild(spotlightNarrow);
 
-  // Знак Бэтмена (жёлтый силуэт)
-  const batmanLogo = document.createElement('div');
-  batmanLogo.style.cssText = `
+  // Логотип Бэтмена (Canvas – чёткая летучая мышь)
+  const logoCanvas = document.createElement('canvas');
+  logoCanvas.width = 300;
+  logoCanvas.height = 220;
+  logoCanvas.style.cssText = `
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 250px; height: 200px;
-    background: #ffd700;
-    clip-path: polygon(
-      50% 0%, 65% 30%, 85% 15%, 85% 40%,
-      100% 35%, 100% 55%, 85% 50%, 75% 100%,
-      50% 80%, 25% 100%, 15% 50%, 0% 55%,
-      0% 35%, 15% 40%, 15% 15%, 35% 30%
-    );
-    box-shadow: 0 0 80px #ffd700, 0 0 40px #ffaa00;
     z-index: 3;
+    filter: drop-shadow(0 0 40px #ffd700) drop-shadow(0 0 20px #ffaa00);
     opacity: 0;
-    transition: opacity 0.8s;
+    transition: opacity 1s ease;
   `;
-  overlay.appendChild(batmanLogo);
+  overlay.appendChild(logoCanvas);
+  const ctx = logoCanvas.getContext('2d');
 
-  // Анимация пульсации прожектора
+  // Рисуем классическую эмблему Бэтмена (жёлтая)
+  function drawBatLogo() {
+    const w = logoCanvas.width, h = logoCanvas.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#ffd700';
+
+    // Тело мыши – используем плавные кривые Безье
+    ctx.beginPath();
+    // Верхний пик (голова)
+    ctx.moveTo(w * 0.5, h * 0.02);
+    // Левое крыло вверх
+    ctx.lineTo(w * 0.25, h * 0.25);
+    ctx.lineTo(w * 0.08, h * 0.1);
+    ctx.lineTo(w * 0.1, h * 0.35);
+    ctx.lineTo(w * 0.2, h * 0.4);
+    // Нижняя часть левого крыла
+    ctx.lineTo(w * 0.12, h * 0.65);
+    ctx.lineTo(w * 0.18, h * 0.7);
+    ctx.lineTo(w * 0.25, h * 0.55);
+    // Левая сторона туловища
+    ctx.lineTo(w * 0.3, h * 0.7);
+    ctx.lineTo(w * 0.4, h * 0.65);
+    // Низ туловища
+    ctx.lineTo(w * 0.45, h * 0.85);
+    ctx.lineTo(w * 0.5, h * 0.8);
+    ctx.lineTo(w * 0.55, h * 0.85);
+    ctx.lineTo(w * 0.6, h * 0.65);
+    // Правая сторона туловища
+    ctx.lineTo(w * 0.7, h * 0.7);
+    ctx.lineTo(w * 0.75, h * 0.55);
+    // Нижняя часть правого крыла
+    ctx.lineTo(w * 0.82, h * 0.7);
+    ctx.lineTo(w * 0.88, h * 0.65);
+    // Правое крыло вверх
+    ctx.lineTo(w * 0.8, h * 0.4);
+    ctx.lineTo(w * 0.9, h * 0.35);
+    ctx.lineTo(w * 0.92, h * 0.1);
+    ctx.lineTo(w * 0.75, h * 0.25);
+    // Обратно к голове
+    ctx.closePath();
+    ctx.fill();
+  }
+  drawBatLogo();
+
+  // Анимации
   const style = document.createElement('style');
   style.textContent = `
-    @keyframes spotlightPulse {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
+    @keyframes spotlightFade {
+      0% { opacity: 0.5; }
+      100% { opacity: 1; }
     }
   `;
   document.head.appendChild(style);
@@ -2043,8 +2080,8 @@ addEasterEgg('batman', 'BATMAN', function() {
   requestAnimationFrame(() => {
     overlay.style.opacity = '1';
     setTimeout(() => {
-      batmanLogo.style.opacity = '1';
-    }, 300);
+      logoCanvas.style.opacity = '1';
+    }, 400);
   });
 
   // Исчезновение через 5 секунд
@@ -2053,10 +2090,9 @@ addEasterEgg('batman', 'BATMAN', function() {
     setTimeout(() => {
       overlay.remove();
       style.remove();
-    }, 500);
+    }, 800);
   }, 5000);
 });
-  
   
 
   
