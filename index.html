@@ -1912,99 +1912,49 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
 
 
 
-    // ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО =================
+    // ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (2D, как в игре) =================
 addEasterEgg('sonic', 'SONIC', function() {
-  const size = 200;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  canvas.style.cssText = `
-    position: fixed; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 300000; pointer-events: none;
-    opacity: 0; transition: opacity 0.5s;
+  const size = 180;
+  const ring = document.createElement('div');
+  ring.style.cssText = `
+    position: fixed;
+    top: 50%; left: 50%;
+    width: ${size}px;
+    height: ${size}px;
+    margin: -${size/2}px 0 0 -${size/2}px;
+    border: 24px solid gold;
+    border-radius: 50%;
+    box-shadow: 0 0 15px gold, 0 0 30px #ffd700, 0 0 60px #daa520, inset 0 0 10px rgba(0,0,0,0.5);
+    background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.4) 0%, transparent 60%);
+    z-index: 300000;
+    pointer-events: none;
+    animation: sonicSpin 2s linear infinite;
   `;
-  document.body.appendChild(canvas);
-  const ctx = canvas.getContext('2d');
+  document.body.appendChild(ring);
 
-  const cx = size / 2, cy = size / 2;
-  const outerR = size / 2 - 10;
-  const innerR = outerR - 30; // широкое кольцо
+  const style = document.createElement('style');
+  style.textContent = '@keyframes sonicSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
 
-  let rotation = 0;
+  // Появление
+  ring.style.transition = 'opacity 0.5s, transform 0.5s';
+  ring.style.opacity = '0';
+  ring.style.transform = 'scale(0)';
+  requestAnimationFrame(() => {
+    ring.style.opacity = '1';
+    ring.style.transform = 'scale(1)';
+  });
 
-  function drawRing() {
-    ctx.clearRect(0, 0, size, size);
-
-    // Внешняя тень
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetX = 5;
-    ctx.shadowOffsetY = 5;
-
-    // Металлический градиент
-    const gradient = ctx.createLinearGradient(cx - outerR, cy - outerR, cx + outerR, cy + outerR);
-    gradient.addColorStop(0, '#fff8dc');
-    gradient.addColorStop(0.15, '#ffd700');
-    gradient.addColorStop(0.3, '#daa520');
-    gradient.addColorStop(0.5, '#b8860b');
-    gradient.addColorStop(0.7, '#daa520');
-    gradient.addColorStop(0.85, '#ffd700');
-    gradient.addColorStop(1, '#fff8dc');
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-    ctx.arc(cx, cy, innerR, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.fillStyle = gradient;
-    ctx.fill();
-    ctx.restore();
-
-    // Внутренняя тень для объёма
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-    ctx.clip();
-    const innerShadow = ctx.createRadialGradient(cx, cy, innerR, cx, cy, outerR);
-    innerShadow.addColorStop(0, 'rgba(0,0,0,0.4)');
-    innerShadow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = innerShadow;
-    ctx.fillRect(0, 0, size, size);
-    ctx.restore();
-
-    // Блик
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-    ctx.clip();
-    const shine = ctx.createRadialGradient(cx - 30, cy - 30, 10, cx, cy, outerR);
-    shine.addColorStop(0, 'rgba(255,255,255,0.7)');
-    shine.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = shine;
-    ctx.fillRect(0, 0, size, size);
-    ctx.restore();
-
-    rotation += 0.02;
-    canvas.style.transform = `translate(-50%, -50%) rotateY(${rotation}rad)`;
-  }
-
-  function animate() {
-    drawRing();
-    requestAnimationFrame(animate);
-  }
-
-  requestAnimationFrame(() => { canvas.style.opacity = '1'; });
-  animate();
-
+  // Исчезновение через 4 секунды
   setTimeout(() => {
-    canvas.style.opacity = '0';
-    setTimeout(() => canvas.remove(), 500);
+    ring.style.opacity = '0';
+    ring.style.transform = 'scale(0)';
+    setTimeout(() => {
+      ring.remove();
+      style.remove();
+    }, 500);
   }, 4000);
 });
-
-    
-  
       
   
     
