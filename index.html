@@ -572,6 +572,14 @@ easterInput.addEventListener('keydown', function(e) {
     snakeCanvas.width = canvas.width; snakeCanvas.height = canvas.height;
     snakeCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:250;';
     container.appendChild(snakeCanvas);
+
+snakeCanvas.style.touchAction = 'none';
+    
+snakeCanvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+}, { passive: false });
+    
+    
     const sctx = snakeCanvas.getContext('2d');
     const CELL_SIZE = 10, COLS = canvas.width / CELL_SIZE, ROWS = canvas.height / CELL_SIZE;
    
@@ -609,7 +617,7 @@ let nextDirection = {x: 1, y: 0};
 let food = spawnFood();
 let gameOver = false;
 let gameInterval;
-
+let touchStartX = null, touchStartY = null;
     
     function isCellFree(cellX, cellY) {
       const px = cellX * CELL_SIZE, py = cellY * CELL_SIZE;
@@ -648,6 +656,45 @@ let gameInterval;
     if (coins > 0) window.addCoins(coins);
     if (window.updateRecord('snake', snakeScore)) window.addCoins(10);
   }
+
+snakeCanvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+}, { passive: false });
+
+snakeCanvas.addEventListener('touchend', function(e) {
+    if (touchStartX === null || touchStartY === null) return;
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    if (absDx < 10 && absDy < 10) return; // игнорируем маленькие движения
+
+    if (absDx > absDy) {
+        // горизонтальный свайп
+        if (dx > 0) {
+            nextDirection = {x: 1, y: 0}; // вправо
+        } else {
+            nextDirection = {x: -1, y: 0}; // влево
+        }
+    } else {
+        // вертикальный свайп
+        if (dy > 0) {
+            nextDirection = {x: 0, y: 1}; // вниз
+        } else {
+            nextDirection = {x: 0, y: -1}; // вверх
+        }
+    }
+    touchStartX = null;
+    touchStartY = null;
+}, { passive: false });
+
+        
   drawSnake();
   clearInterval(gameInterval);
   setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
