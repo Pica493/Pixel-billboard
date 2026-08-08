@@ -2179,9 +2179,9 @@ addEasterEgg('batman', 'BATMAN', function() {
 });
 
        
-  // ================= СКОРПИОН: ЦЕПЬ С КУНАЕМ (сайт улетает вправо) =================
+  // ================= СКОРПИОН: ЦЕПЬ С КУНАЕМ (исправленная анимация) =================
 addEasterEgg('scorpion', 'SCORPION', function() {
-  // Создаём canvas для цепи и куная
+  // Создаём отдельный canvas для цепи и куная, чтобы не затрагивать холст
   const canvas = document.createElement('canvas');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -2197,54 +2197,51 @@ addEasterEgg('scorpion', 'SCORPION', function() {
   let startTime = null;
   const duration = 4000; // 4 секунды
 
-  // Сохраняем оригинальный transform body
+  // Сохраняем оригинальные стили body
   const originalTransform = document.body.style.transform || '';
   const originalTransition = document.body.style.transition || '';
 
-  // Включаем плавное перемещение body
-  document.body.style.transition = 'transform 0.6s ease-in-out';
-
+  // Функция рисования куная (повёрнутого горизонтально остриём влево)
   function drawKunai(x, y, angle) {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
 
-    // Лезвие (большое)
-    ctx.fillStyle = '#ccc';
+    // Лезвие куная (указывает влево при angle = 0)
+    ctx.fillStyle = '#888';
     ctx.beginPath();
-    ctx.moveTo(0, -45);   // остриё
-    ctx.lineTo(15, 15);
-    ctx.lineTo(0, 30);
-    ctx.lineTo(-15, 15);
+    ctx.moveTo(-45, 0);       // остриё слева
+    ctx.lineTo(15, -12);      // верхняя грань лезвия
+    ctx.lineTo(15, 12);       // нижняя грань лезвия
     ctx.closePath();
     ctx.fill();
 
     // Блик на лезвии
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#ccc';
     ctx.beginPath();
-    ctx.moveTo(0, -40);
-    ctx.lineTo(7, 10);
-    ctx.lineTo(0, 20);
-    ctx.lineTo(-7, 10);
+    ctx.moveTo(-35, 0);
+    ctx.lineTo(8, -7);
+    ctx.lineTo(8, 7);
     ctx.closePath();
     ctx.fill();
 
-    // Кольцо (большое)
-    ctx.strokeStyle = '#888';
-    ctx.lineWidth = 5;
+    // Кольцо на рукоятке (справа)
+    ctx.strokeStyle = '#aaa';
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(0, 42, 12, 0, Math.PI * 2);
+    ctx.arc(35, 0, 12, 0, Math.PI * 2);
     ctx.stroke();
 
     // Внутреннее отверстие кольца
     ctx.fillStyle = '#111';
     ctx.beginPath();
-    ctx.arc(0, 42, 7, 0, Math.PI * 2);
+    ctx.arc(35, 0, 7, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
   }
 
+  // Функция рисования толстой цепи
   function drawChain(startX, startY, endX, endY) {
     const dx = endX - startX;
     const dy = endY - startY;
@@ -2255,23 +2252,23 @@ addEasterEgg('scorpion', 'SCORPION', function() {
     ctx.translate(startX, startY);
     ctx.rotate(angle);
 
-    // Основной трос (толстый)
+    // Основной трос
     ctx.strokeStyle = '#555';
-    ctx.lineWidth = 8;
+    ctx.lineWidth = 10;
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(distance, 0);
     ctx.stroke();
 
     // Звенья цепи
-    ctx.strokeStyle = '#777';
-    ctx.lineWidth = 4;
-    for (let i = 0; i < distance; i += 20) {
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 6;
+    for (let i = 0; i < distance; i += 25) {
       ctx.beginPath();
-      ctx.arc(i, 0, 6, 0, Math.PI * 2);
+      ctx.arc(i, 0, 7, 0, Math.PI * 2);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(i + 10, 0, 6, 0, Math.PI * 2);
+      ctx.arc(i + 12, 0, 7, 0, Math.PI * 2);
       ctx.stroke();
     }
 
@@ -2284,51 +2281,59 @@ addEasterEgg('scorpion', 'SCORPION', function() {
     const progress = Math.min(elapsed / duration, 1);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Кунай вылетает справа и втыкается (0–0.5 сек)
+    // Траектория куная: с правого края до центра
+    const kunaiStartX = window.innerWidth + 100;
+    const kunaiStartY = centerY;
+    const kunaiEndX = centerX;
+    const kunaiEndY = centerY;
+
+    // Угол поворота куная: летит остриём влево (0 радиан), поэтому кажется горизонтальным
+    const kunaiAngle = 0;
+
+    // Анимация по этапам
     if (progress <= 0.15) {
+      // Этап 1: кунай вылетает справа и втыкается (0–15% времени)
       const t = progress / 0.15;
-      const startX = window.innerWidth + 150;
-      const startY = centerY;
-      const endX = centerX;
-      const endY = centerY;
-      const x = startX + (endX - startX) * t;
-      const y = startY + (endY - startY) * t;
-      drawChain(startX, startY, x, y);
-      drawKunai(x, y, Math.PI * 0.9); // поворот для реалистичности
-    }
-    // Кунай тянет сайт вправо (0.15–0.6)
-    else if (progress <= 0.6) {
+      const x = kunaiStartX + (kunaiEndX - kunaiStartX) * t;
+      const y = kunaiStartY + (kunaiEndY - kunaiStartY) * t;
+      drawChain(kunaiStartX, kunaiStartY, x, y);
+      drawKunai(x, y, kunaiAngle);
+    } else if (progress <= 0.6) {
+      // Этап 2: кунай в центре, сайт уезжает вправо (15–60%)
       const t = (progress - 0.15) / 0.45;
-      const pullDistance = t * 200; // пикселей сдвига
+      const pullDistance = t * 300; // максимальный сдвиг 300px
       document.body.style.transform = `translateX(${pullDistance}px)`;
-      drawChain(window.innerWidth + 150, centerY, centerX + pullDistance, centerY);
-      drawKunai(centerX + pullDistance, centerY, Math.PI * 0.9);
-    }
-    // Возврат сайта обратно (0.6–1.0)
-    else {
+      document.body.style.transition = 'none'; // убираем плавность для точного контроля
+      drawChain(window.innerWidth + 100, centerY, centerX + pullDistance, centerY);
+      drawKunai(centerX + pullDistance, centerY, kunaiAngle);
+    } else {
+      // Этап 3: сайт возвращается обратно (60–100%)
       const t = (progress - 0.6) / 0.4;
-      const returnDistance = 200 * (1 - t);
+      const returnDistance = 300 * (1 - t);
       document.body.style.transform = `translateX(${returnDistance}px)`;
-      drawChain(window.innerWidth + 150, centerY, centerX + returnDistance, centerY);
-      drawKunai(centerX + returnDistance, centerY, Math.PI * 0.9);
+      document.body.style.transition = 'none';
+      drawChain(window.innerWidth + 100, centerY, centerX + returnDistance, centerY);
+      drawKunai(centerX + returnDistance, centerY, kunaiAngle);
+
       if (returnDistance < 1) {
+        // Полностью вернулись – восстанавливаем стили
         document.body.style.transform = originalTransform;
+        document.body.style.transition = originalTransition;
       }
     }
 
     if (progress < 1) {
       requestAnimationFrame(animate);
     } else {
-      // Восстанавливаем стили body
-      document.body.style.transition = originalTransition;
+      // Гарантированно восстанавливаем body
       document.body.style.transform = originalTransform;
+      document.body.style.transition = originalTransition;
       canvas.remove();
     }
   }
 
   requestAnimationFrame(animate);
 });
-
 
   
   
