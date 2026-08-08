@@ -1913,9 +1913,10 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
 
 
     
-   // ================= ШАРИНГАН (Canvas, идеальная симметрия) =================
+   
+  // ================= ШАРИНГАН (исправленные томоэ) =================
 addEasterEgg('sharingan', 'SHARINGAN', function() {
-  const size = 300; // размер холста
+  const size = 300;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -1936,7 +1937,7 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
   const cx = size / 2, cy = size / 2;
   const radius = size / 2 - 10;
 
-  // 1. Красный глаз (основа)
+  // Фон глаза
   const gradient = ctx.createRadialGradient(cx*0.7, cy*0.7, radius*0.05, cx, cy, radius);
   gradient.addColorStop(0, '#ff0000');
   gradient.addColorStop(0.7, '#8b0000');
@@ -1949,7 +1950,7 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
   ctx.lineWidth = 6;
   ctx.stroke();
 
-  // 2. Центральный зрачок (чёрная точка с красной обводкой)
+  // Центральный зрачок
   const pupilR = radius * 0.12;
   ctx.beginPath();
   ctx.arc(cx, cy, pupilR, 0, Math.PI * 2);
@@ -1959,13 +1960,13 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // 3. Томоэ (запятые)
-  const tomoDist = radius * 0.7; // расстояние от центра до центра томоэ
-  const tomoBodyR = radius * 0.18; // радиус тела томоэ
-  const tailLen = radius * 0.25;   // длина хвостика
+  // Томоэ
+  const tomoDist = radius * 0.7;   // расстояние от центра до центра тела томоэ
+  const tomoBodyR = radius * 0.18; // радиус тела
+  const tailLen = radius * 0.15;   // длина хвостика (уменьшена)
 
   for (let i = 0; i < 3; i++) {
-    const angle = (i * 120) * Math.PI / 180; // 0°, 120°, 240°
+    const angle = (i * 120) * Math.PI / 180;
     const tx = cx + tomoDist * Math.cos(angle);
     const ty = cy + tomoDist * Math.sin(angle);
 
@@ -1975,26 +1976,28 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
     ctx.fillStyle = '#111';
     ctx.fill();
 
-    // Хвостик томоэ (треугольник, направленный к центру)
+    // Хвостик: основание на краю тела, вершина направлена к центру
     const tailDir = angle + Math.PI; // направление к центру
-    const tipX = tx + Math.cos(tailDir) * tomoBodyR;
-    const tipY = ty + Math.sin(tailDir) * tomoBodyR;
-    const endX = tx + Math.cos(tailDir) * (tomoBodyR + tailLen);
-    const endY = ty + Math.sin(tailDir) * (tomoBodyR + tailLen);
+    // точка на внутреннем краю тела томоэ
+    const baseX = tx + Math.cos(tailDir) * tomoBodyR;
+    const baseY = ty + Math.sin(tailDir) * tomoBodyR;
+    // вершина хвоста
+    const tipX = baseX + Math.cos(tailDir) * tailLen;
+    const tipY = baseY + Math.sin(tailDir) * tailLen;
+    // перпендикуляр для ширины основания
+    const perpX = -Math.sin(tailDir) * tomoBodyR * 0.7;
+    const perpY = Math.cos(tailDir) * tomoBodyR * 0.7;
 
     ctx.beginPath();
-    ctx.moveTo(tipX, tipY);
-    // ширина хвоста у основания
-    const perpX = -Math.sin(tailDir) * tomoBodyR * 0.6;
-    const perpY = Math.cos(tailDir) * tomoBodyR * 0.6;
-    ctx.lineTo(endX + perpX, endY + perpY);
-    ctx.lineTo(endX - perpX, endY - perpY);
+    ctx.moveTo(baseX + perpX, baseY + perpY); // левая точка основания
+    ctx.lineTo(tipX, tipY);                     // вершина
+    ctx.lineTo(baseX - perpX, baseY - perpY);  // правая точка основания
     ctx.closePath();
     ctx.fillStyle = '#111';
     ctx.fill();
   }
 
-  // 4. Тонкие дуги между томоэ
+  // Тонкие дуги между томоэ
   const arcRadius = radius * 0.55;
   ctx.strokeStyle = 'rgba(0,0,0,0.8)';
   ctx.lineWidth = 2;
@@ -2006,16 +2009,13 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
     ctx.stroke();
   }
 
-  // Анимация появления
+  // Анимация
   requestAnimationFrame(() => { canvas.style.opacity = '1'; });
-
-  // Исчезновение через 3 секунды
   setTimeout(() => {
     canvas.style.opacity = '0';
     setTimeout(() => canvas.remove(), 500);
   }, 3000);
 });
-  
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
