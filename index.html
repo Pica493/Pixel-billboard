@@ -1961,8 +1961,7 @@ addEasterEgg('sonic', 'SONIC', function() {
   }, 4000);
 });
 
-
-  // ================= БЭТМЕН: МЫШИ ФОРМИРУЮТ НАДПИСЬ =================
+// ================= БЭТМЕН: ПЛАВНЫЙ ПОЛЁТ И НАДПИСЬ =================
 addEasterEgg('batman', 'BATMAN', function() {
   const overlay = document.createElement('div');
   overlay.style.cssText = `
@@ -1973,34 +1972,35 @@ addEasterEgg('batman', 'BATMAN', function() {
   `;
   document.body.appendChild(overlay);
 
-  // Генерируем точки для контура букв
+  // Адаптивный размер шрифта
+  const fontSize = Math.min(80, window.innerWidth / 6);
+  const canvasWidth = 600, canvasHeight = 200;
   const textCanvas = document.createElement('canvas');
-  textCanvas.width = 600;
-  textCanvas.height = 200;
+  textCanvas.width = canvasWidth;
+  textCanvas.height = canvasHeight;
   const tctx = textCanvas.getContext('2d');
   tctx.fillStyle = '#ffffff';
-  tctx.font = 'bold 130px "Arial Black", sans-serif';
+  tctx.font = `bold ${fontSize}px "Arial Black", sans-serif`;
   tctx.textAlign = 'center';
   tctx.textBaseline = 'middle';
-  tctx.fillText('BATMAN', textCanvas.width/2, textCanvas.height/2);
+  tctx.fillText('BATMAN', canvasWidth/2, canvasHeight/2);
 
-  const imageData = tctx.getImageData(0, 0, textCanvas.width, textCanvas.height).data;
+  const imageData = tctx.getImageData(0, 0, canvasWidth, canvasHeight).data;
   const points = [];
   const step = 4;
-  for (let y = 0; y < textCanvas.height; y += step) {
-    for (let x = 0; x < textCanvas.width; x += step) {
-      const idx = (y * textCanvas.width + x) * 4;
+  for (let y = 0; y < canvasHeight; y += step) {
+    for (let x = 0; x < canvasWidth; x += step) {
+      const idx = (y * canvasWidth + x) * 4;
       if (imageData[idx] > 128) {
         points.push({
-          x: x - textCanvas.width/2,
-          y: y - textCanvas.height/2
+          x: x - canvasWidth/2,
+          y: y - canvasHeight/2
         });
       }
     }
   }
 
-  // Выбираем до 70 мышей
-  const totalBats = Math.min(points.length, 70);
+  const totalBats = Math.min(points.length, 80);
   const selectedPoints = [];
   for (let i = 0; i < totalBats; i++) {
     const idx = Math.floor(Math.random() * points.length);
@@ -2012,17 +2012,31 @@ addEasterEgg('batman', 'BATMAN', function() {
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
+  // CSS-анимация взмахов крыльев
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes batWings {
+      0%, 100% { transform: rotate(-5deg) scale(1); }
+      50% { transform: rotate(5deg) scale(1.1); }
+    }
+    .flying-bat {
+      animation: batWings 0.2s ease-in-out infinite alternate;
+    }
+  `;
+  document.head.appendChild(style);
+
   selectedPoints.forEach((point) => {
     const bat = document.createElement('div');
     bat.textContent = '🦇';
+    bat.className = 'flying-bat';
     bat.style.cssText = `
       position: fixed;
-      font-size: 24px;
+      font-size: 22px;
       z-index: 300001;
       pointer-events: none;
       transform: translate(-50%, -50%);
     `;
-    // Стартовая позиция – случайная сторона
+    
     let startX, startY;
     const side = Math.floor(Math.random() * 4);
     switch(side) {
@@ -2031,6 +2045,7 @@ addEasterEgg('batman', 'BATMAN', function() {
       case 2: startX = Math.random() * window.innerWidth; startY = window.innerHeight + 100; break;
       case 3: startX = -100; startY = Math.random() * window.innerHeight; break;
     }
+    
     bat.dataset.startX = startX;
     bat.dataset.startY = startY;
     bat.dataset.endX = centerX + point.x;
@@ -2038,8 +2053,9 @@ addEasterEgg('batman', 'BATMAN', function() {
     bat.dataset.midX = Math.random() * window.innerWidth;
     bat.dataset.midY = Math.random() * window.innerHeight;
     bat.dataset.t = 0;
-    bat.dataset.speed = 0.008 + Math.random() * 0.012;
-    bat.dataset.delay = Math.random() * 1.5;
+    bat.dataset.speed = 0.01 + Math.random() * 0.015; // Быстрее
+    bat.dataset.delay = Math.random() * 1.2;
+
     bat.style.left = startX + 'px';
     bat.style.top = startY + 'px';
     overlay.appendChild(bat);
@@ -2048,16 +2064,25 @@ addEasterEgg('batman', 'BATMAN', function() {
 
   let startTime = null;
   let settled = false;
+
   function animate(timestamp) {
     if (!startTime) startTime = timestamp;
     const elapsed = (timestamp - startTime) / 1000;
 
     let allSettled = true;
     bats.forEach(bat => {
+      if (bat.dataset.arrived === 'true') return;
+      
       const delay = parseFloat(bat.dataset.delay);
       if (elapsed < delay) { allSettled = false; return; }
+      
       const t = Math.min(parseFloat(bat.dataset.t), 1);
-      if (t >= 1) return;
+      if (t >= 1) {
+        bat.style.opacity = '0';
+        bat.dataset.arrived = 'true';
+        return;
+      }
+
       const startX = parseFloat(bat.dataset.startX);
       const startY = parseFloat(bat.dataset.startY);
       const midX = parseFloat(bat.dataset.midX);
@@ -2068,19 +2093,22 @@ addEasterEgg('batman', 'BATMAN', function() {
       const invT = 1 - t;
       const x = invT * invT * startX + 2 * invT * t * midX + t * t * endX;
       const y = invT * invT * startY + 2 * invT * t * midY + t * t * endY;
+      
       bat.style.left = x + 'px';
       bat.style.top = y + 'px';
 
       const newT = t + parseFloat(bat.dataset.speed);
       bat.dataset.t = Math.min(newT, 1);
       if (newT < 1) allSettled = false;
+      else bat.dataset.arrived = 'true'; // Помечаем как прибывшую
     });
 
     if (allSettled && !settled) {
       settled = true;
-      // Заменяем мышей на текст
+      // Все мыши на месте – показываем надпись
       setTimeout(() => {
         bats.forEach(b => b.remove());
+        
         const title = document.createElement('div');
         title.textContent = 'BATMAN';
         title.style.cssText = `
@@ -2088,22 +2116,26 @@ addEasterEgg('batman', 'BATMAN', function() {
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           font-family: 'Arial Black', sans-serif;
-          font-size: 100px;
+          font-size: ${fontSize}px;
           color: #111;
           text-shadow: 0 0 20px #ffd700, 0 0 40px #ffaa00;
-          letter-spacing: 8px;
+          letter-spacing: 4px;
           z-index: 300002;
           opacity: 0;
-          transition: opacity 0.5s;
+          transition: opacity 0.4s;
         `;
         overlay.appendChild(title);
         requestAnimationFrame(() => { title.style.opacity = '1'; });
-        // Исчезновение через 2 секунды
+        
+        // Исчезновение через 2.5 секунды
         setTimeout(() => {
           overlay.style.opacity = '0';
-          setTimeout(() => overlay.remove(), 800);
-        }, 2000);
-      }, 200);
+          setTimeout(() => {
+            overlay.remove();
+            style.remove();
+          }, 800);
+        }, 2500);
+      }, 150);
       return;
     }
     requestAnimationFrame(animate);
@@ -2114,8 +2146,8 @@ addEasterEgg('batman', 'BATMAN', function() {
     requestAnimationFrame(animate);
   });
 });
-      
-
+  
+  
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
