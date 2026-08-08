@@ -1705,6 +1705,150 @@ addEasterEgg('spiderman', 'SPIDERMAN', function() {
   }, 2500);
 });
 
+
+// ================= НАЗАД В БУДУЩЕЕ: ЧАСЫ НА БАШНЕ =================
+addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+
+  // Контейнер всей сцены
+  const scene = document.createElement('div');
+  scene.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 300000; pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.5s;
+  `;
+  document.body.appendChild(scene);
+  requestAnimationFrame(() => { scene.style.opacity = '1'; });
+
+  // Башня (основание)
+  const tower = document.createElement('div');
+  tower.style.cssText = `
+    width: 120px; height: 180px;
+    background: linear-gradient(to bottom, #8b5a2b, #5c3a1e);
+    border-radius: 10px 10px 0 0;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    display: flex; flex-direction: column; align-items: center;
+  `;
+  scene.appendChild(tower);
+
+  // Циферблат часов
+  const clockFace = document.createElement('div');
+  clockFace.style.cssText = `
+    width: 100px; height: 100px;
+    background: white;
+    border-radius: 50%;
+    border: 6px solid #5c3a1e;
+    position: absolute;
+    top: 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3), 0 0 15px rgba(0,0,0,0.5);
+  `;
+  tower.appendChild(clockFace);
+
+  // Деления на циферблате (12 точек)
+  for (let i = 0; i < 12; i++) {
+    const dot = document.createElement('div');
+    const angle = (i * 30) * Math.PI / 180;
+    dot.style.cssText = `
+      position: absolute;
+      width: 4px; height: 4px;
+      background: #333;
+      border-radius: 50%;
+      top: ${50 + 42 * Math.sin(angle) - 2}px;
+      left: ${50 + 42 * Math.cos(angle) - 2}px;
+    `;
+    clockFace.appendChild(dot);
+  }
+
+  // Часовая стрелка
+  const hourHand = document.createElement('div');
+  hourHand.style.cssText = `
+    position: absolute;
+    top: 25px; left: 47px;
+    width: 6px; height: 25px;
+    background: #111;
+    transform-origin: 3px 25px;
+    transform: rotate(0deg);
+    border-radius: 2px;
+    transition: transform 0.1s linear;
+  `;
+  clockFace.appendChild(hourHand);
+
+  // Минутная стрелка
+  const minuteHand = document.createElement('div');
+  minuteHand.style.cssText = `
+    position: absolute;
+    top: 15px; left: 48px;
+    width: 4px; height: 35px;
+    background: #111;
+    transform-origin: 2px 35px;
+    transform: rotate(0deg);
+    border-radius: 2px;
+    transition: transform 0.1s linear;
+  `;
+  clockFace.appendChild(minuteHand);
+
+  // Центральная ось
+  const centerDot = document.createElement('div');
+  centerDot.style.cssText = `
+    position: absolute;
+    top: 47px; left: 47px;
+    width: 8px; height: 8px;
+    background: #c00;
+    border-radius: 50%;
+  `;
+  clockFace.appendChild(centerDot);
+
+  // Молния (скрыта)
+  const lightning = document.createElement('div');
+  lightning.textContent = '⚡';
+  lightning.style.cssText = `
+    position: fixed;
+    top: ${centerY - 150}px; left: ${centerX - 20}px;
+    font-size: 60px;
+    color: #ffd700;
+    filter: drop-shadow(0 0 15px #ffd700);
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease-out;
+  `;
+  document.body.appendChild(lightning);
+
+  // Анимация вращения стрелок
+  let rotation = 0;
+  const spinInterval = setInterval(() => {
+    rotation += 36;
+    hourHand.style.transform = `rotate(${rotation}deg)`;
+    minuteHand.style.transform = `rotate(${rotation * 12}deg)`;
+    if (rotation >= 1440) {
+      clearInterval(spinInterval);
+      // Остановка на 10:04
+      hourHand.style.transform = 'rotate(-60deg)';
+      minuteHand.style.transform = 'rotate(24deg)';
+
+      // Удар молнии через 0.5 сек
+      setTimeout(() => {
+        lightning.style.opacity = '1';
+        lightning.style.transform = 'scale(1)';
+        clockFace.style.boxShadow = '0 0 30px #ffd700, inset 0 0 20px #ffd700';
+
+        // Исчезновение всей сцены
+        setTimeout(() => {
+          scene.style.opacity = '0';
+          lightning.style.opacity = '0';
+          setTimeout(() => {
+            scene.remove();
+            lightning.remove();
+          }, 500);
+        }, 500);
+      }, 500);
+    }
+  }, 50);
+});
+
+  
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
