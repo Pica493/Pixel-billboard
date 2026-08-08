@@ -1707,11 +1707,14 @@ addEasterEgg('spiderman', 'SPIDERMAN', function() {
 
 
 // ================= НАЗАД В БУДУЩЕЕ: ЧАСЫ НА БАШНЕ =================
+
+
+  // ================= НАЗАД В БУДУЩЕЕ: ЧАСЫ НА БАШНЕ (исправленные) =================
 addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
-  // Контейнер всей сцены
+  // Сцена
   const scene = document.createElement('div');
   scene.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -1722,42 +1725,89 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
   document.body.appendChild(scene);
   requestAnimationFrame(() => { scene.style.opacity = '1'; });
 
-  // Башня (основание)
+  // Башня
   const tower = document.createElement('div');
   tower.style.cssText = `
-    width: 120px; height: 180px;
-    background: linear-gradient(to bottom, #8b5a2b, #5c3a1e);
-    border-radius: 10px 10px 0 0;
+    width: 160px; height: 220px;
+    background: linear-gradient(to bottom, #c49a6c, #8b5a2b);
+    border-radius: 15px 15px 0 0;
     position: relative;
-    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    box-shadow: 0 0 30px rgba(0,0,0,0.7), inset 0 -10px 20px rgba(0,0,0,0.4);
     display: flex; flex-direction: column; align-items: center;
+    overflow: visible;
   `;
   scene.appendChild(tower);
 
-  // Циферблат часов
+  // Крыша башни (треугольник)
+  const roof = document.createElement('div');
+  roof.style.cssText = `
+    width: 0; height: 0;
+    border-left: 80px solid transparent;
+    border-right: 80px solid transparent;
+    border-bottom: 40px solid #5c3a1e;
+    position: absolute;
+    top: -40px;
+  `;
+  tower.appendChild(roof);
+
+  // Шпиль
+  const spire = document.createElement('div');
+  spire.style.cssText = `
+    position: absolute;
+    top: -60px; left: 75px;
+    width: 10px; height: 30px;
+    background: #5c3a1e;
+    border-radius: 50% 50% 0 0;
+  `;
+  tower.appendChild(spire);
+
+  // Циферблат
   const clockFace = document.createElement('div');
   clockFace.style.cssText = `
-    width: 100px; height: 100px;
-    background: white;
+    width: 130px; height: 130px;
+    background: #f5f5dc;
     border-radius: 50%;
-    border: 6px solid #5c3a1e;
+    border: 8px solid #5c3a1e;
     position: absolute;
-    top: 20px;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.3), 0 0 15px rgba(0,0,0,0.5);
+    top: 30px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 0 0 20px rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Times New Roman', serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
   `;
   tower.appendChild(clockFace);
 
-  // Деления на циферблате (12 точек)
+  // Римские цифры (XII, III, VI, IX) и метки
+  const numerals = [
+    { text: 'XII', top: '10px', left: '50%', transform: 'translateX(-50%)' },
+    { text: 'III', top: '50%', right: '10px', transform: 'translateY(-50%)' },
+    { text: 'VI', bottom: '10px', left: '50%', transform: 'translateX(-50%)' },
+    { text: 'IX', top: '50%', left: '10px', transform: 'translateY(-50%)' }
+  ];
+  numerals.forEach(n => {
+    const num = document.createElement('div');
+    num.textContent = n.text;
+    num.style.cssText = `
+      position: absolute;
+      ${Object.entries(n).map(([k, v]) => `${k}: ${v};`).join(' ')}
+    `;
+    clockFace.appendChild(num);
+  });
+
+  // Часовые метки (остальные 8 точек)
   for (let i = 0; i < 12; i++) {
-    const dot = document.createElement('div');
+    if (i % 3 === 0) continue; // уже есть цифры
     const angle = (i * 30) * Math.PI / 180;
+    const dot = document.createElement('div');
     dot.style.cssText = `
       position: absolute;
-      width: 4px; height: 4px;
+      width: 5px; height: 5px;
       background: #333;
       border-radius: 50%;
-      top: ${50 + 42 * Math.sin(angle) - 2}px;
-      left: ${50 + 42 * Math.cos(angle) - 2}px;
+      top: ${65 + 55 * Math.sin(angle) - 2}px;
+      left: ${65 + 55 * Math.cos(angle) - 2}px;
     `;
     clockFace.appendChild(dot);
   }
@@ -1766,12 +1816,12 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
   const hourHand = document.createElement('div');
   hourHand.style.cssText = `
     position: absolute;
-    top: 25px; left: 47px;
-    width: 6px; height: 25px;
+    top: 38px; left: 62px;
+    width: 6px; height: 28px;
     background: #111;
     transform-origin: 3px 25px;
     transform: rotate(0deg);
-    border-radius: 2px;
+    border-radius: 3px;
     transition: transform 0.1s linear;
   `;
   clockFace.appendChild(hourHand);
@@ -1780,10 +1830,10 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
   const minuteHand = document.createElement('div');
   minuteHand.style.cssText = `
     position: absolute;
-    top: 15px; left: 48px;
-    width: 4px; height: 35px;
+    top: 25px; left: 63px;
+    width: 4px; height: 40px;
     background: #111;
-    transform-origin: 2px 35px;
+    transform-origin: 2px 38px;
     transform: rotate(0deg);
     border-radius: 2px;
     transition: transform 0.1s linear;
@@ -1791,35 +1841,49 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
   clockFace.appendChild(minuteHand);
 
   // Центральная ось
-  const centerDot = document.createElement('div');
-  centerDot.style.cssText = `
+  const centerPin = document.createElement('div');
+  centerPin.style.cssText = `
     position: absolute;
-    top: 47px; left: 47px;
-    width: 8px; height: 8px;
+    top: 60px; left: 60px;
+    width: 10px; height: 10px;
     background: #c00;
     border-radius: 50%;
+    box-shadow: 0 0 5px rgba(255,0,0,0.5);
   `;
-  clockFace.appendChild(centerDot);
+  clockFace.appendChild(centerPin);
 
-  // Молния (скрыта)
-  const lightning = document.createElement('div');
-  lightning.textContent = '⚡';
-  lightning.style.cssText = `
-    position: fixed;
-    top: ${centerY - 150}px; left: ${centerX - 20}px;
-    font-size: 60px;
-    color: #ffd700;
-    filter: drop-shadow(0 0 15px #ffd700);
+  // Молния (рисуем линиями)
+  const lightningCanvas = document.createElement('canvas');
+  lightningCanvas.width = window.innerWidth;
+  lightningCanvas.height = window.innerHeight;
+  lightningCanvas.style.cssText = `
+    position: fixed; top: 0; left: 0;
+    z-index: 300001; pointer-events: none;
     opacity: 0;
-    transform: scale(0);
-    transition: all 0.3s ease-out;
+    transition: opacity 0.3s ease-out;
   `;
-  document.body.appendChild(lightning);
+  document.body.appendChild(lightningCanvas);
+  const lctx = lightningCanvas.getContext('2d');
+
+  function drawLightning() {
+    lctx.clearRect(0, 0, lightningCanvas.width, lightningCanvas.height);
+    lctx.strokeStyle = '#ffd700';
+    lctx.lineWidth = 4;
+    lctx.shadowColor = '#ffd700';
+    lctx.shadowBlur = 15;
+    lctx.beginPath();
+    lctx.moveTo(centerX, 0);
+    lctx.lineTo(centerX - 30, centerY - 80);
+    lctx.lineTo(centerX + 20, centerY - 80);
+    lctx.lineTo(centerX - 10, centerY);
+    lctx.lineTo(centerX, centerY - 20);
+    lctx.stroke();
+  }
 
   // Анимация вращения стрелок
   let rotation = 0;
   const spinInterval = setInterval(() => {
-    rotation += 36;
+    rotation += 30;
     hourHand.style.transform = `rotate(${rotation}deg)`;
     minuteHand.style.transform = `rotate(${rotation * 12}deg)`;
     if (rotation >= 1440) {
@@ -1828,22 +1892,21 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
       hourHand.style.transform = 'rotate(-60deg)';
       minuteHand.style.transform = 'rotate(24deg)';
 
-      // Удар молнии через 0.5 сек
+      // Молния через 0.4 сек
       setTimeout(() => {
-        lightning.style.opacity = '1';
-        lightning.style.transform = 'scale(1)';
-        clockFace.style.boxShadow = '0 0 30px #ffd700, inset 0 0 20px #ffd700';
+        drawLightning();
+        lightningCanvas.style.opacity = '1';
+        clockFace.style.boxShadow = '0 0 40px #ffd700, inset 0 0 30px #ffd700';
 
-        // Исчезновение всей сцены
         setTimeout(() => {
+          lightningCanvas.style.opacity = '0';
           scene.style.opacity = '0';
-          lightning.style.opacity = '0';
           setTimeout(() => {
             scene.remove();
-            lightning.remove();
+            lightningCanvas.remove();
           }, 500);
         }, 500);
-      }, 500);
+      }, 400);
     }
   }, 50);
 });
