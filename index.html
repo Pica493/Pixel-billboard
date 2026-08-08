@@ -2337,6 +2337,184 @@ addEasterEgg('scorpion', 'SCORPION', function() {
 });
 
 
+// ================= ЧУЖОЙ: КИСЛОТНАЯ КРОВЬ =================
+addEasterEgg('xenomorph', 'XENOMORPH', function() {
+  // Создаём canvas для анимации
+  const canvas = document.createElement('canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.cssText = `
+    position: fixed; top: 0; left: 0;
+    z-index: 300000; pointer-events: none;
+  `;
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  let startTime = null;
+  const duration = 4000; // 4 секунды
+
+  // Параметры движения
+  const startX = -100;
+  const startY = window.innerHeight * 0.2;
+  const endX = window.innerWidth + 100;
+  const endY = window.innerHeight * 0.8;
+
+  // Рисуем силуэт ксеноморфа
+  function drawXenomorph(x, y, scale = 1, alpha = 1) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    
+    // Тело и голова
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath();
+    // Голова (вытянутая)
+    ctx.moveTo(0, -60);
+    ctx.bezierCurveTo(20, -55, 25, -20, 15, 0);
+    // Тело
+    ctx.bezierCurveTo(30, 30, 25, 70, 10, 100);
+    // Хвост (изогнутый)
+    ctx.bezierCurveTo(-5, 130, -30, 120, -40, 100);
+    ctx.bezierCurveTo(-50, 80, -20, 70, -5, 60);
+    // Нижняя часть тела
+    ctx.bezierCurveTo(-20, 40, -25, 10, -15, 0);
+    // Завершение головы
+    ctx.bezierCurveTo(-25, -20, -20, -55, 0, -60);
+    ctx.fill();
+
+    // Второй слой для объёма (хитин)
+    ctx.fillStyle = '#0d0d0d';
+    ctx.beginPath();
+    ctx.moveTo(0, -55);
+    ctx.bezierCurveTo(15, -50, 18, -20, 10, 0);
+    ctx.bezierCurveTo(20, 25, 18, 60, 5, 90);
+    ctx.bezierCurveTo(-3, 70, -10, 40, -10, 0);
+    ctx.bezierCurveTo(-15, -20, -15, -50, 0, -55);
+    ctx.fill();
+
+    // Глаза (белые, без зрачков)
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-5, -35, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(8, -35, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Зубы (тонкие линии)
+    ctx.strokeStyle = '#ddd';
+    ctx.lineWidth = 1.5;
+    for (let i = -3; i <= 3; i += 2) {
+      ctx.beginPath();
+      ctx.moveTo(i, -25);
+      ctx.lineTo(i, -18);
+      ctx.stroke();
+    }
+
+    // Когти на лапах (по желанию)
+    ctx.fillStyle = '#ddd';
+    ctx.beginPath();
+    ctx.moveTo(15, 90);
+    ctx.lineTo(22, 100);
+    ctx.lineTo(14, 98);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-10, 70);
+    ctx.lineTo(-18, 80);
+    ctx.lineTo(-8, 78);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // Рисуем кислотный след (ярко-зелёный, светящийся)
+  function drawAcidTrail(x, y, alpha = 1) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    // Основная линия
+    ctx.strokeStyle = '#00ff00';
+    ctx.lineWidth = 8;
+    ctx.shadowColor = '#00ff00';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - 50, y + 30);
+    ctx.stroke();
+    // Свечение
+    ctx.strokeStyle = '#88ff88';
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 25;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - 50, y + 30);
+    ctx.stroke();
+    // Частицы
+    for (let i = 0; i < 5; i++) {
+      const px = x - 50 + Math.random() * 20;
+      const py = y + 30 + Math.random() * 15;
+      ctx.fillStyle = `rgba(0, 255, 0, ${0.5 + Math.random() * 0.5})`;
+      ctx.beginPath();
+      ctx.arc(px, py, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Массив для хранения точек следа
+  const trailPoints = [];
+
+  // Функция анимации
+  function animate(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Позиция ксеноморфа
+    const x = startX + (endX - startX) * progress;
+    const y = startY + (endY - startY) * progress;
+
+    // Сохраняем точки следа
+    if (progress > 0.05) { // начинаем оставлять след после 5% анимации
+      trailPoints.push({x, y});
+      // Удаляем старые точки (держать не более 30)
+      if (trailPoints.length > 30) trailPoints.shift();
+    }
+
+    // Рисуем кислотный след позади ксеноморфа
+    for (let i = 0; i < trailPoints.length; i++) {
+      const point = trailPoints[i];
+      const fade = i / trailPoints.length; // чем старше, тем прозрачнее
+      drawAcidTrail(point.x, point.y, 0.7 - fade * 0.5);
+    }
+
+    // Рисуем самого ксеноморфа
+    // Небольшое колебание (как будто бежит)
+    const bounce = Math.sin(progress * Math.PI * 8) * 3;
+    drawXenomorph(x, y + bounce, 1.0, 1);
+
+    // Эффект разъедания пикселей под следом
+    if (trailPoints.length > 0) {
+      const lastPoint = trailPoints[trailPoints.length - 1];
+      // Находим координаты на холсте (в реальном сайте, но здесь мы не можем менять продаваемые пиксели напрямую,
+      // поэтому просто нарисуем зелёные прямоугольники поверх них для имитации)
+      ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+      ctx.fillRect(lastPoint.x - 30, lastPoint.y, 60, 10);
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      // Восстановление: просто убираем canvas (пиксели на холсте не менялись, это была графика поверх)
+      canvas.remove();
+    }
+  }
+
+  requestAnimationFrame(animate);
+});
+
   
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
