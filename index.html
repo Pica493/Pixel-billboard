@@ -1527,6 +1527,93 @@ addEasterEgg('memory', 'MEMORY', function() {
   resetTimer();
 });
 
+
+// ================= НАРУТО: ТЕНЕВОЕ КЛОНИРОВАНИЕ =================
+addEasterEgg('naruto', 'NARUTO', function() {
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+
+  // Белое облако дыма
+  const smokeCloud = document.createElement('div');
+  smokeCloud.style.cssText = `
+    position: fixed; top: ${centerY - 100}px; left: ${centerX - 100}px;
+    width: 200px; height: 150px;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.9) 10%, rgba(255,255,255,0.4) 60%, transparent 90%);
+    border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%;
+    filter: blur(15px);
+    opacity: 0;
+    transition: opacity 0.8s ease-out;
+    z-index: 300000;
+    pointer-events: none;
+  `;
+  document.body.appendChild(smokeCloud);
+  requestAnimationFrame(() => { smokeCloud.style.opacity = '1'; });
+
+  // Персонаж Наруто
+  const naruto = document.createElement('div');
+  naruto.textContent = '🍥';
+  naruto.style.cssText = `
+    position: fixed; top: ${centerY - 50}px; left: ${centerX - 25}px;
+    font-size: 50px;
+    z-index: 300001;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  `;
+  document.body.appendChild(naruto);
+
+  setTimeout(() => {
+    naruto.style.opacity = '1';
+    naruto.style.transform = 'scale(1)';
+    setTimeout(() => {
+      naruto.textContent = '🍥🙏'; // пальцы крестиком
+    }, 300);
+  }, 600);
+
+  // Клоны через 1.5 секунды
+  const cloneCount = 30;
+  const clones = [];
+  setTimeout(() => {
+    smokeCloud.remove();
+    naruto.remove();
+
+    for (let i = 0; i < cloneCount; i++) {
+      const clone = document.createElement('div');
+      clone.textContent = '🍥';
+      const x = Math.random() * (window.innerWidth - 50);
+      const y = Math.random() * (window.innerHeight - 50);
+      clone.style.cssText = `
+        position: fixed; top: ${y}px; left: ${x}px;
+        font-size: 30px;
+        z-index: 300002;
+        pointer-events: none;
+        opacity: 0;
+        transform: scale(0);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+      `;
+      document.body.appendChild(clone);
+      clones.push(clone);
+    }
+
+    clones.forEach((clone, index) => {
+      setTimeout(() => {
+        clone.style.opacity = '1';
+        clone.style.transform = 'scale(1)';
+      }, Math.random() * 400);
+    });
+
+    setTimeout(() => {
+      clones.forEach(clone => {
+        clone.style.opacity = '0';
+        clone.style.transform = 'scale(0)';
+      });
+      setTimeout(() => {
+        clones.forEach(clone => clone.remove());
+      }, 500);
+    }, 4000);
+  }, 1500);
+});
   
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
