@@ -2179,9 +2179,8 @@ addEasterEgg('batman', 'BATMAN', function() {
 });
 
        
-  // ================= СКОРПИОН: ЦЕПЬ С КУНАЕМ (исправленная анимация) =================
+// ================= СКОРПИОН: ЦЕПЬ С КУНАЕМ (финальная версия) =================
 addEasterEgg('scorpion', 'SCORPION', function() {
-  // Создаём отдельный canvas для цепи и куная, чтобы не затрагивать холст
   const canvas = document.createElement('canvas');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -2197,26 +2196,26 @@ addEasterEgg('scorpion', 'SCORPION', function() {
   let startTime = null;
   const duration = 4000; // 4 секунды
 
-  // Сохраняем оригинальные стили body
   const originalTransform = document.body.style.transform || '';
   const originalTransition = document.body.style.transition || '';
 
-  // Функция рисования куная (повёрнутого горизонтально остриём влево)
-  function drawKunai(x, y, angle) {
+  // Кунай (остриём влево)
+  function drawKunai(x, y, angle, alpha = 1) {
     ctx.save();
+    ctx.globalAlpha = alpha;
     ctx.translate(x, y);
     ctx.rotate(angle);
 
-    // Лезвие куная (указывает влево при angle = 0)
+    // Лезвие
     ctx.fillStyle = '#888';
     ctx.beginPath();
-    ctx.moveTo(-45, 0);       // остриё слева
-    ctx.lineTo(15, -12);      // верхняя грань лезвия
-    ctx.lineTo(15, 12);       // нижняя грань лезвия
+    ctx.moveTo(-45, 0);
+    ctx.lineTo(15, -12);
+    ctx.lineTo(15, 12);
     ctx.closePath();
     ctx.fill();
 
-    // Блик на лезвии
+    // Блик
     ctx.fillStyle = '#ccc';
     ctx.beginPath();
     ctx.moveTo(-35, 0);
@@ -2225,14 +2224,12 @@ addEasterEgg('scorpion', 'SCORPION', function() {
     ctx.closePath();
     ctx.fill();
 
-    // Кольцо на рукоятке (справа)
+    // Кольцо
     ctx.strokeStyle = '#aaa';
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.arc(35, 0, 12, 0, Math.PI * 2);
     ctx.stroke();
-
-    // Внутреннее отверстие кольца
     ctx.fillStyle = '#111';
     ctx.beginPath();
     ctx.arc(35, 0, 7, 0, Math.PI * 2);
@@ -2241,18 +2238,19 @@ addEasterEgg('scorpion', 'SCORPION', function() {
     ctx.restore();
   }
 
-  // Функция рисования толстой цепи
-  function drawChain(startX, startY, endX, endY) {
+  // Цепь
+  function drawChain(startX, startY, endX, endY, alpha = 1) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
     const dx = endX - startX;
     const dy = endY - startY;
     const distance = Math.hypot(dx, dy);
     const angle = Math.atan2(dy, dx);
 
-    ctx.save();
     ctx.translate(startX, startY);
     ctx.rotate(angle);
 
-    // Основной трос
+    // Трос
     ctx.strokeStyle = '#555';
     ctx.lineWidth = 10;
     ctx.beginPath();
@@ -2260,7 +2258,7 @@ addEasterEgg('scorpion', 'SCORPION', function() {
     ctx.lineTo(distance, 0);
     ctx.stroke();
 
-    // Звенья цепи
+    // Звенья
     ctx.strokeStyle = '#888';
     ctx.lineWidth = 6;
     for (let i = 0; i < distance; i += 25) {
@@ -2271,7 +2269,6 @@ addEasterEgg('scorpion', 'SCORPION', function() {
       ctx.arc(i + 12, 0, 7, 0, Math.PI * 2);
       ctx.stroke();
     }
-
     ctx.restore();
   }
 
@@ -2281,42 +2278,47 @@ addEasterEgg('scorpion', 'SCORPION', function() {
     const progress = Math.min(elapsed / duration, 1);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Траектория куная: с правого края до центра
     const kunaiStartX = window.innerWidth + 100;
     const kunaiStartY = centerY;
     const kunaiEndX = centerX;
     const kunaiEndY = centerY;
 
-    // Угол поворота куная: летит остриём влево (0 радиан), поэтому кажется горизонтальным
-    const kunaiAngle = 0;
-
-    // Анимация по этапам
+    // Этап 1: кунай летит (0–0.15)
     if (progress <= 0.15) {
-      // Этап 1: кунай вылетает справа и втыкается (0–15% времени)
       const t = progress / 0.15;
       const x = kunaiStartX + (kunaiEndX - kunaiStartX) * t;
       const y = kunaiStartY + (kunaiEndY - kunaiStartY) * t;
       drawChain(kunaiStartX, kunaiStartY, x, y);
-      drawKunai(x, y, kunaiAngle);
-    } else if (progress <= 0.6) {
-      // Этап 2: кунай в центре, сайт уезжает вправо (15–60%)
-      const t = (progress - 0.15) / 0.45;
-      const pullDistance = t * 300; // максимальный сдвиг 300px
+      drawKunai(x, y, 0);
+    }
+    // Этап 2: кунай зацепился, сайт едет вправо (0.15–0.5)
+    else if (progress <= 0.5) {
+      const t = (progress - 0.15) / 0.35;
+      const pullDistance = t * 300;
       document.body.style.transform = `translateX(${pullDistance}px)`;
-      document.body.style.transition = 'none'; // убираем плавность для точного контроля
-      drawChain(window.innerWidth + 100, centerY, centerX + pullDistance, centerY);
-      drawKunai(centerX + pullDistance, centerY, kunaiAngle);
-    } else {
-      // Этап 3: сайт возвращается обратно (60–100%)
-      const t = (progress - 0.6) / 0.4;
+      document.body.style.transition = 'none';
+      const currentX = centerX + pullDistance;
+      drawChain(kunaiStartX, centerY, currentX, centerY);
+      drawKunai(currentX, centerY, 0);
+    }
+    // Этап 3: кунай и цепь исчезают, сайт возвращается (0.5–1.0)
+    else {
+      const t = (progress - 0.5) / 0.5;
+      // Кунай и цепь затухают в первой половине этого этапа (t=0..0.3)
+      const fadeAlpha = t < 0.3 ? 1 - (t / 0.3) : 0;
+      // Сайт возвращается плавно на протяжении всего этапа
       const returnDistance = 300 * (1 - t);
       document.body.style.transform = `translateX(${returnDistance}px)`;
       document.body.style.transition = 'none';
-      drawChain(window.innerWidth + 100, centerY, centerX + returnDistance, centerY);
-      drawKunai(centerX + returnDistance, centerY, kunaiAngle);
 
+      if (fadeAlpha > 0) {
+        const currentX = centerX + returnDistance;
+        drawChain(kunaiStartX, centerY, currentX, centerY, fadeAlpha);
+        drawKunai(currentX, centerY, 0, fadeAlpha);
+      }
+
+      // Когда возврат завершён, восстанавливаем body
       if (returnDistance < 1) {
-        // Полностью вернулись – восстанавливаем стили
         document.body.style.transform = originalTransform;
         document.body.style.transition = originalTransition;
       }
@@ -2325,7 +2327,6 @@ addEasterEgg('scorpion', 'SCORPION', function() {
     if (progress < 1) {
       requestAnimationFrame(animate);
     } else {
-      // Гарантированно восстанавливаем body
       document.body.style.transform = originalTransform;
       document.body.style.transition = originalTransition;
       canvas.remove();
@@ -2334,6 +2335,7 @@ addEasterEgg('scorpion', 'SCORPION', function() {
 
   requestAnimationFrame(animate);
 });
+
 
   
   
