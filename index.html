@@ -1911,9 +1911,10 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
 });
 
 
-// ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (объёмное, металл) =================
+
+    // ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО =================
 addEasterEgg('sonic', 'SONIC', function() {
-  const size = 220;
+  const size = 200;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -1927,82 +1928,70 @@ addEasterEgg('sonic', 'SONIC', function() {
   const ctx = canvas.getContext('2d');
 
   const cx = size / 2, cy = size / 2;
-  const outerR = size / 2 - 8;
-  const innerR = outerR - 28; // толстое кольцо
+  const outerR = size / 2 - 10;
+  const innerR = outerR - 30; // широкое кольцо
 
-  let angle = 0;
+  let rotation = 0;
 
   function drawRing() {
     ctx.clearRect(0, 0, size, size);
 
-    // Тень от кольца
+    // Внешняя тень
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.9)';
-    ctx.shadowBlur = 25;
-    ctx.shadowOffsetX = 8;
-    ctx.shadowOffsetY = 8;
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
 
-    // Металлический градиент по окружности
-    const gradient = ctx.createConicGradient(angle * 0.5, cx, cy);
+    // Металлический градиент
+    const gradient = ctx.createLinearGradient(cx - outerR, cy - outerR, cx + outerR, cy + outerR);
     gradient.addColorStop(0, '#fff8dc');
-    gradient.addColorStop(0.1, '#ffd700');
-    gradient.addColorStop(0.2, '#daa520');
-    gradient.addColorStop(0.35, '#b8860b');
-    gradient.addColorStop(0.5, '#ffd700');
-    gradient.addColorStop(0.65, '#daa520');
-    gradient.addColorStop(0.8, '#b8860b');
-    gradient.addColorStop(0.9, '#ffd700');
+    gradient.addColorStop(0.15, '#ffd700');
+    gradient.addColorStop(0.3, '#daa520');
+    gradient.addColorStop(0.5, '#b8860b');
+    gradient.addColorStop(0.7, '#daa520');
+    gradient.addColorStop(0.85, '#ffd700');
     gradient.addColorStop(1, '#fff8dc');
 
-    // Рисуем кольцо (внешний круг минус внутренний)
     ctx.beginPath();
     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
     ctx.arc(cx, cy, innerR, 0, Math.PI * 2, true);
     ctx.closePath();
     ctx.fillStyle = gradient;
     ctx.fill();
-
-    // Убираем внешнюю тень
     ctx.restore();
 
-    // Внутренняя тень для глубины
+    // Внутренняя тень для объёма
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
     ctx.clip();
-
-    // Затемняем нижнюю часть кольца
-    const shadowGrad = ctx.createLinearGradient(cx, cy - outerR, cx, cy + outerR);
-    shadowGrad.addColorStop(0, 'rgba(255,255,255,0.3)');
-    shadowGrad.addColorStop(0.4, 'rgba(0,0,0,0)');
-    shadowGrad.addColorStop(0.7, 'rgba(0,0,0,0.5)');
-    shadowGrad.addColorStop(1, 'rgba(0,0,0,0.8)');
-    ctx.fillStyle = shadowGrad;
+    const innerShadow = ctx.createRadialGradient(cx, cy, innerR, cx, cy, outerR);
+    innerShadow.addColorStop(0, 'rgba(0,0,0,0.4)');
+    innerShadow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = innerShadow;
     ctx.fillRect(0, 0, size, size);
     ctx.restore();
 
-    // Блик сверху
+    // Блик
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
     ctx.clip();
-    const shineGrad = ctx.createRadialGradient(cx - outerR*0.3, cy - outerR*0.4, outerR*0.05, cx, cy, outerR);
-    shineGrad.addColorStop(0, 'rgba(255,255,255,0.9)');
-    shineGrad.addColorStop(0.3, 'rgba(255,255,255,0.2)');
-    shineGrad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = shineGrad;
+    const shine = ctx.createRadialGradient(cx - 30, cy - 30, 10, cx, cy, outerR);
+    shine.addColorStop(0, 'rgba(255,255,255,0.7)');
+    shine.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = shine;
     ctx.fillRect(0, 0, size, size);
     ctx.restore();
 
-    // Вращение вокруг вертикальной оси (3D)
-    angle += 0.025;
-    canvas.style.transform = `translate(-50%, -50%) rotateY(${angle}rad)`;
+    rotation += 0.02;
+    canvas.style.transform = `translate(-50%, -50%) rotateY(${rotation}rad)`;
   }
 
-  let animFrame;
   function animate() {
     drawRing();
-    animFrame = requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
   }
 
   requestAnimationFrame(() => { canvas.style.opacity = '1'; });
@@ -2010,12 +1999,10 @@ addEasterEgg('sonic', 'SONIC', function() {
 
   setTimeout(() => {
     canvas.style.opacity = '0';
-    setTimeout(() => {
-      cancelAnimationFrame(animFrame);
-      canvas.remove();
-    }, 500);
+    setTimeout(() => canvas.remove(), 500);
   }, 4000);
 });
+
     
   
       
