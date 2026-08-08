@@ -1911,6 +1911,70 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
   }, 50);
 });
 
+
+// ================= ШАРИНГАН =================
+addEasterEgg('sharingan', 'SHARINGAN', function() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 300000; pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+  `;
+  document.body.appendChild(overlay);
+
+  const eye = document.createElement('div');
+  eye.style.cssText = `
+    width: 200px; height: 200px;
+    background: radial-gradient(circle at 30% 30%, #ff0000, #8b0000 70%, #000 100%);
+    border-radius: 50%;
+    border: 6px solid #111;
+    position: relative;
+    box-shadow: 0 0 50px #ff0000, inset 0 0 30px rgba(0,0,0,0.5);
+  `;
+  overlay.appendChild(eye);
+
+  // Томоэ (три запятых)
+  for (let i = 0; i < 3; i++) {
+    const tomoe = document.createElement('div');
+    const angle = (i * 120) * Math.PI / 180;
+    const radius = 60;
+    const x = 100 + radius * Math.cos(angle) - 15;
+    const y = 100 + radius * Math.sin(angle) - 15;
+    tomoe.style.cssText = `
+      position: absolute;
+      top: ${y}px; left: ${x}px;
+      width: 30px; height: 30px;
+      background: #111;
+      border-radius: 50%;
+      transform: rotate(${angle}rad);
+    `;
+    eye.appendChild(tomoe);
+  }
+
+  // Зрачок (центральный круг)
+  const pupil = document.createElement('div');
+  pupil.style.cssText = `
+    position: absolute;
+    top: 80px; left: 80px;
+    width: 40px; height: 40px;
+    background: #000;
+    border-radius: 50%;
+    border: 3px solid #ff0000;
+  `;
+  eye.appendChild(pupil);
+
+  requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+
+  setTimeout(() => {
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.remove(), 500);
+  }, 3000);
+});
+
+
   
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
