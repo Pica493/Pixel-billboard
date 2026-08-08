@@ -1910,13 +1910,27 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
   }, 50);
 });
 
-
-// ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (чёткое, вращающееся через CSS) =================
+// ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (вращение слева направо) =================
 addEasterEgg('sonic', 'SONIC', function() {
   const size = 200;
+  // Контейнер с перспективой для 3D-эффекта
+  const container = document.createElement('div');
+  container.style.cssText = `
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    perspective: 600px;
+    z-index: 300000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s;
+  `;
+  document.body.appendChild(container);
+
+  // Само кольцо
   const ring = document.createElement('div');
   ring.style.cssText = `
-    position: fixed;
+    position: absolute;
     top: 50%; left: 50%;
     width: ${size}px;
     height: ${size}px;
@@ -1925,33 +1939,28 @@ addEasterEgg('sonic', 'SONIC', function() {
     border-radius: 50%;
     box-shadow: 0 0 0 4px #b8860b, inset 0 0 10px rgba(0,0,0,0.5);
     background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.5) 0%, transparent 70%);
-    z-index: 300000;
-    pointer-events: none;
     animation: sonicSpin 2s linear infinite;
-    opacity: 0;
-    transition: opacity 0.5s;
   `;
-  document.body.appendChild(ring);
+  container.appendChild(ring);
 
-  // Добавляем анимацию вращения
+  // Анимация вращения вокруг вертикальной оси
   const style = document.createElement('style');
-  style.textContent = '@keyframes sonicSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+  style.textContent = '@keyframes sonicSpin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }';
   document.head.appendChild(style);
 
   // Появление
-  requestAnimationFrame(() => { ring.style.opacity = '1'; });
+  requestAnimationFrame(() => { container.style.opacity = '1'; });
 
   // Исчезновение через 4 секунды
   setTimeout(() => {
-    ring.style.opacity = '0';
+    container.style.opacity = '0';
     setTimeout(() => {
-      ring.remove();
+      container.remove();
       style.remove();
     }, 500);
   }, 4000);
 });
 
-    
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
