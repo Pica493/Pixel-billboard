@@ -1913,99 +1913,105 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
 
 
 
-// ================= ШАРИНГАН (исправленный) =================
+// ================= ШАРИНГАН (canvas, идеальная геометрия) =================
 addEasterEgg('sharingan', 'SHARINGAN', function() {
-  const overlay = document.createElement('div');
-  overlay.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    z-index: 300000; pointer-events: none;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0;
-    transition: opacity 0.5s;
-  `;
-  document.body.appendChild(overlay);
+  const size = 300;
+  const cx = size / 2, cy = size / 2;
+  const radius = size / 2 - 10;
 
-  const eye = document.createElement('div');
-  eye.style.cssText = `
-    width: 240px; height: 240px;
-    background: radial-gradient(circle at 30% 30%, #ff0000, #8b0000 70%, #000 100%);
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  canvas.style.cssText = `
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 300000;
+    pointer-events: none;
     border-radius: 50%;
-    border: 8px solid #111;
-    position: relative;
-    box-shadow: 0 0 60px #ff0000, inset 0 0 40px rgba(0,0,0,0.6);
+    box-shadow: 0 0 60px #ff0000, 0 0 20px #ff0000;
   `;
-  overlay.appendChild(eye);
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  // Фоновый красный глаз
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  const gradient = ctx.createRadialGradient(cx*0.7, cy*0.7, radius*0.1, cx, cy, radius);
+  gradient.addColorStop(0, '#ff0000');
+  gradient.addColorStop(0.7, '#8b0000');
+  gradient.addColorStop(1, '#000000');
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 8;
+  ctx.stroke();
 
   // Центральный зрачок
-  const pupil = document.createElement('div');
-  pupil.style.cssText = `
-    position: absolute;
-    top: 100px; left: 100px;
-    width: 40px; height: 40px;
-    background: #000;
-    border-radius: 50%;
-    border: 3px solid #ff0000;
-    box-shadow: 0 0 10px #ff0000;
-  `;
-  eye.appendChild(pupil);
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 0.18, 0, Math.PI * 2);
+  ctx.fillStyle = '#000';
+  ctx.fill();
+  ctx.strokeStyle = '#ff0000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
 
   // Томоэ (запятые) и дуги
+  const tomoRadius = radius * 0.75;   // расстояние от центра до центров томоэ
+  const tomoSize = radius * 0.2;     // радиус тела томоэ
+  const tailLength = radius * 0.3;   // длина хвостика
+  const arcRadius = radius * 0.55;   // радиус тонких дуг
+
   for (let i = 0; i < 3; i++) {
-    const angle = (i * 120) * Math.PI / 180;
-    const radius = 75;
-    const cx = 120 + radius * Math.cos(angle);
-    const cy = 120 + radius * Math.sin(angle);
+    const angle = (i * 120) * Math.PI / 180; // углы 0°, 120°, 240°
+
+    // Центр томоэ
+    const tx = cx + tomoRadius * Math.cos(angle);
+    const ty = cy + tomoRadius * Math.sin(angle);
 
     // Тело томоэ (круг)
-    const tomoe = document.createElement('div');
-    tomoe.style.cssText = `
-      position: absolute;
-      top: ${cy - 22}px; left: ${cx - 22}px;
-      width: 44px; height: 44px;
-      background: #111;
-      border-radius: 50%;
-    `;
-    eye.appendChild(tomoe);
+    ctx.beginPath();
+    ctx.arc(tx, ty, tomoSize, 0, Math.PI * 2);
+    ctx.fillStyle = '#000';
+    ctx.fill();
 
-    // Хвостик томоэ (треугольник, смотрящий к центру)
-    const tail = document.createElement('div');
-    const tailAngle = angle + Math.PI; // направлен к центру
-    const tailLength = 30;
-    const tailX = cx + Math.cos(tailAngle) * 22; // от края круга
-    const tailY = cy + Math.sin(tailAngle) * 22;
-    tail.style.cssText = `
-      position: absolute;
-      top: ${tailY - 8}px; left: ${tailX - 8}px;
-      width: 0; height: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: ${tailLength}px solid #111;
-      transform-origin: 8px 0;
-      transform: rotate(${tailAngle + Math.PI/2}rad);
-    `;
-    eye.appendChild(tail);
+    // Хвостик томоэ (треугольник), направленный к центру
+    const tipAngle = angle + Math.PI; // противоположный угол (к центру)
+    const tipX = tx + Math.cos(tipAngle) * tomoSize;
+    const tipY = ty + Math.sin(tipAngle) * tomoSize;
+    const endX = tx + Math.cos(tipAngle) * (tomoSize + tailLength);
+    const endY = ty + Math.sin(tipAngle) * (tomoSize + tailLength);
 
-    // Дуга между томоэ (окружность, проходящая между центральным зрачком и томоэ)
-    const arcRadius = 50;
-    const arcContainer = document.createElement('div');
-    arcContainer.style.cssText = `
-      position: absolute;
-      top: ${120 - arcRadius}px; left: ${120 - arcRadius}px;
-      width: ${arcRadius * 2}px; height: ${arcRadius * 2}px;
-      border: 2px solid transparent;
-      border-top-color: rgba(0,0,0,0.5);
-      border-radius: 50%;
-      transform: rotate(${angle + 60 * Math.PI / 180}rad);
-    `;
-    eye.appendChild(arcContainer);
+    // Рисуем треугольник хвоста
+    ctx.beginPath();
+    ctx.moveTo(tipX, tipY);
+    // расчёт перпендикулярных смещений для ширины хвоста
+    const perpX = -Math.sin(tipAngle) * tomoSize * 0.6;
+    const perpY = Math.cos(tipAngle) * tomoSize * 0.6;
+    ctx.lineTo(endX + perpX, endY + perpY);
+    ctx.lineTo(endX - perpX, endY - perpY);
+    ctx.closePath();
+    ctx.fillStyle = '#000';
+    ctx.fill();
+
+    // Тонкая дуга между томоэ
+    ctx.beginPath();
+    const arcStartAngle = angle + Math.PI / 6;
+    const arcEndAngle = angle + Math.PI / 2;
+    ctx.arc(cx, cy, arcRadius, arcStartAngle, arcEndAngle);
+    ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
   }
 
-  requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+  // Появление и исчезновение
+  canvas.style.transition = 'opacity 0.5s';
+  canvas.style.opacity = '0';
+  requestAnimationFrame(() => { canvas.style.opacity = '1'; });
 
   setTimeout(() => {
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 500);
+    canvas.style.opacity = '0';
+    setTimeout(() => canvas.remove(), 500);
   }, 3000);
 });
   
