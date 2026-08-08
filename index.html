@@ -1549,72 +1549,164 @@ addEasterEgg('naruto', 'NARUTO', function() {
   document.body.appendChild(smokeCloud);
   requestAnimationFrame(() => { smokeCloud.style.opacity = '1'; });
 
-  // Персонаж Наруто
-  const naruto = document.createElement('div');
-  naruto.textContent = '🍥';
-  naruto.style.cssText = `
-    position: fixed; top: ${centerY - 50}px; left: ${centerX - 25}px;
-    font-size: 50px;
-    z-index: 300001;
-    pointer-events: none;
-    opacity: 0;
-    transform: scale(0);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+  // ================= ЗВЁЗДНЫЕ ВОЙНЫ: ПАЛПАТИН (пиксельный) =================
+addEasterEgg('palpatine', 'PALPATINE', function() {
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+
+  // Затемнённый фон (тёмная сторона)
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at ${centerX}px ${centerY}px, rgba(40,0,60,0.8), rgba(0,0,0,0.9));
+    z-index: 300000; pointer-events: none; opacity: 0;
+    transition: opacity 0.5s;
   `;
-  document.body.appendChild(naruto);
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => { overlay.style.opacity = '1'; });
 
+  // Пиксельный Палпатин (составной из div'ов)
+  const figure = document.createElement('div');
+  figure.style.cssText = `
+    position: fixed; top: ${centerY - 180}px; left: ${centerX - 40}px;
+    width: 80px; height: 200px;
+    z-index: 300001; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center;
+    opacity: 0; transform: scale(0.8);
+    transition: opacity 0.5s, transform 0.5s;
+  `;
+  document.body.appendChild(figure);
+
+  // Капюшон (верхняя часть)
+  const hood = document.createElement('div');
+  hood.style.cssText = `
+    width: 60px; height: 50px;
+    background: #111;
+    border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+    box-shadow: inset 0 -10px 10px rgba(0,0,0,0.8);
+  `;
+  figure.appendChild(hood);
+
+  // Лицо (тёмное)
+  const face = document.createElement('div');
+  face.style.cssText = `
+    width: 40px; height: 40px;
+    background: #1a1a1a;
+    border-radius: 30% 30% 50% 50%;
+    margin-top: -10px;
+    box-shadow: 0 0 10px rgba(255,0,0,0.3);
+  `;
+  figure.appendChild(face);
+
+  // Тело (мантия)
+  const body = document.createElement('div');
+  body.style.cssText = `
+    width: 70px; height: 80px;
+    background: #0a0a0a;
+    border-radius: 30% 30% 10% 10%;
+    margin-top: -5px;
+    position: relative;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+  `;
+  figure.appendChild(body);
+
+  // Левая рука (держит меч)
+  const leftArm = document.createElement('div');
+  leftArm.style.cssText = `
+    position: absolute;
+    bottom: 20px; left: -25px;
+    width: 20px; height: 60px;
+    background: #111;
+    border-radius: 10px 0 0 10px;
+    transform: rotate(15deg);
+    transform-origin: top right;
+  `;
+  body.appendChild(leftArm);
+
+  // Красный меч
+  const saber = document.createElement('div');
+  saber.style.cssText = `
+    position: absolute;
+    bottom: 0; left: 5px;
+    width: 8px; height: 70px;
+    background: linear-gradient(to top, #ff0000, #ff4444, #ffffff);
+    border-radius: 2px 2px 50% 50%;
+    box-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 80px #cc0000;
+    animation: saberPulse 0.5s infinite alternate;
+  `;
+  leftArm.appendChild(saber);
+
+  // Правая рука (поднимается)
+  const rightArm = document.createElement('div');
+  rightArm.style.cssText = `
+    position: absolute;
+    bottom: 20px; right: -25px;
+    width: 20px; height: 60px;
+    background: #111;
+    border-radius: 0 10px 10px 0;
+    transform: rotate(-15deg);
+    transform-origin: top left;
+    transition: transform 0.4s ease-out;
+  `;
+  body.appendChild(rightArm);
+
+  // Добавляем анимацию меча
+  const style = document.createElement('style');
+  style.textContent = '@keyframes saberPulse { 0% { box-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 80px #cc0000; } 100% { box-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000, 0 0 100px #ff0000; } }';
+  document.head.appendChild(style);
+
+  // Появление фигуры
   setTimeout(() => {
-    naruto.style.opacity = '1';
-    naruto.style.transform = 'scale(1)';
-    setTimeout(() => {
-      naruto.textContent = '🍥🙏'; // пальцы крестиком
-    }, 300);
-  }, 600);
+    figure.style.opacity = '1';
+    figure.style.transform = 'scale(1)';
+  }, 100);
 
-  // Клоны через 1.5 секунды
-  const cloneCount = 30;
-  const clones = [];
+  // Поднимает правую руку
   setTimeout(() => {
-    smokeCloud.remove();
-    naruto.remove();
+    rightArm.style.transform = 'rotate(-120deg)';
+  }, 800);
 
-    for (let i = 0; i < cloneCount; i++) {
-      const clone = document.createElement('div');
-      clone.textContent = '🍥';
-      const x = Math.random() * (window.innerWidth - 50);
-      const y = Math.random() * (window.innerHeight - 50);
-      clone.style.cssText = `
-        position: fixed; top: ${y}px; left: ${x}px;
-        font-size: 30px;
-        z-index: 300002;
+  // Молнии через 1.2 секунды
+  setTimeout(() => {
+    const boltCount = 50;
+    for (let i = 0; i < boltCount; i++) {
+      const bolt = document.createElement('div');
+      bolt.textContent = '⚡';
+      bolt.style.cssText = `
+        position: fixed;
+        top: ${Math.random() * window.innerHeight}px;
+        left: ${Math.random() * window.innerWidth}px;
+        font-size: ${20 + Math.random() * 40}px;
+        color: #e0b0ff;
+        z-index: 300005;
         pointer-events: none;
-        opacity: 0;
-        transform: scale(0);
-        transition: opacity 0.5s ease, transform 0.5s ease;
+        opacity: 0.9;
+        filter: drop-shadow(0 0 10px #cc00ff) drop-shadow(0 0 25px #9900ff);
+        animation: lightningFlash 0.2s infinite alternate;
       `;
-      document.body.appendChild(clone);
-      clones.push(clone);
+      document.body.appendChild(bolt);
+      setTimeout(() => bolt.remove(), 2000 + Math.random() * 1000);
     }
-
-    clones.forEach((clone, index) => {
-      setTimeout(() => {
-        clone.style.opacity = '1';
-        clone.style.transform = 'scale(1)';
-      }, Math.random() * 400);
-    });
-
+    // Вспышка на фоне
+    overlay.style.background = `radial-gradient(circle at ${centerX}px ${centerY}px, rgba(100,0,200,0.9), transparent 80%)`;
     setTimeout(() => {
-      clones.forEach(clone => {
-        clone.style.opacity = '0';
-        clone.style.transform = 'scale(0)';
-      });
-      setTimeout(() => {
-        clones.forEach(clone => clone.remove());
-      }, 500);
-    }, 4000);
-  }, 1500);
+      overlay.style.background = 'transparent';
+    }, 2000);
+  }, 1200);
+
+  // Очистка
+  setTimeout(() => {
+    figure.style.opacity = '0';
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      figure.remove();
+      overlay.remove();
+      style.remove();
+      // Удаляем оставшиеся молнии
+      document.querySelectorAll('div[style*="lightningFlash"]').forEach(el => el.remove());
+    }, 500);
+  }, 4500);
 });
-  
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
