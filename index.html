@@ -1911,8 +1911,7 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
 });
 
 
-
-// ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (широкое, объёмное) =================
+// ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (чёткое, вращающееся) =================
 addEasterEgg('sonic', 'SONIC', function() {
   const size = 200;
   const ring = document.createElement('div');
@@ -1922,47 +1921,41 @@ addEasterEgg('sonic', 'SONIC', function() {
     width: ${size}px;
     height: ${size}px;
     margin: -${size/2}px 0 0 -${size/2}px;
-    border: 30px solid gold;
+    border: 30px solid #ffd700;
     border-radius: 50%;
-    box-shadow: 0 0 20px gold, 0 0 40px #ffd700, 0 0 80px #daa520;
-    background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.4) 0%, transparent 70%);
+    box-shadow: 0 0 0 4px #b8860b, inset 0 0 10px rgba(0,0,0,0.5);
+    background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.5) 0%, transparent 70%);
     z-index: 300000;
     pointer-events: none;
-    animation: sonicSpin 2s linear infinite;
     opacity: 0;
-    transition: opacity 0.5s;
   `;
   document.body.appendChild(ring);
 
-  // Внутренняя тень для объёма
-  const innerShadow = document.createElement('div');
-  innerShadow.style.cssText = `
-    position: absolute;
-    top: 50%; left: 50%;
-    width: ${size - 60}px;
-    height: ${size - 60}px;
-    margin: -${(size-60)/2}px 0 0 -${(size-60)/2}px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, transparent 50%, rgba(0,0,0,0.4) 100%);
-    pointer-events: none;
-  `;
-  ring.appendChild(innerShadow);
+  // Вращение через JS (надёжнее CSS-анимации)
+  let angle = 0;
+  let animFrame;
+  function rotate() {
+    angle += 2;
+    ring.style.transform = `rotate(${angle}deg)`;
+    animFrame = requestAnimationFrame(rotate);
+  }
 
-  const style = document.createElement('style');
-  style.textContent = '@keyframes sonicSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-  document.head.appendChild(style);
+  // Появление
+  requestAnimationFrame(() => {
+    ring.style.opacity = '1';
+    rotate();
+  });
 
-  requestAnimationFrame(() => { ring.style.opacity = '1'; });
-
+  // Исчезновение через 4 секунды
   setTimeout(() => {
     ring.style.opacity = '0';
     setTimeout(() => {
+      cancelAnimationFrame(animFrame);
       ring.remove();
-      style.remove();
     }, 500);
   }, 4000);
 });
-  
+
     
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
