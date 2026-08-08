@@ -1917,7 +1917,6 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
   
   // ================= ШАРИНГАН (простой) =================
 
-
 // ================= ШАРИНГАН (правильный, как в аниме) =================
 addEasterEgg('sharingan', 'SHARINGAN', function() {
   const size = 300;
@@ -1960,55 +1959,55 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // 3. Томоэ (запятые) – тело + хвост
+  // 3. Томоэ (запятые) – плавная капля
   const tomoDist = radius * 0.7;   // расстояние от центра до центра тела томоэ
   const tomoBodyR = radius * 0.18; // радиус тела
-  const tailLen = radius * 0.22;   // длина хвоста (немного увеличена, чтобы было заметно)
+  const tailLen = radius * 0.22;   // длина хвоста
 
   for (let i = 0; i < 3; i++) {
-    const angle = (i * 120) * Math.PI / 180; // 0°, 120°, 240°
+    const angle = (i * 120) * Math.PI / 180;
     const tx = cx + tomoDist * Math.cos(angle);
     const ty = cy + tomoDist * Math.sin(angle);
 
-    // Тело томоэ (круг)
+    // Рисуем тело томоэ (круг)
     ctx.beginPath();
     ctx.arc(tx, ty, tomoBodyR, 0, Math.PI * 2);
     ctx.fillStyle = '#111';
     ctx.fill();
 
-    // Хвостик: сужающийся к центру
+    // Хвост: плавный конус, сужающийся к центру
     const tailDir = angle + Math.PI; // направление к центру
-    // точка на внутреннем краю тела томоэ
     const baseX = tx + Math.cos(tailDir) * tomoBodyR;
     const baseY = ty + Math.sin(tailDir) * tomoBodyR;
-    // вершина хвоста (немного ближе к центру, чем тело)
     const tipX = baseX + Math.cos(tailDir) * tailLen;
     const tipY = baseY + Math.sin(tailDir) * tailLen;
-    // ширина основания хвоста (чуть меньше диаметра тела)
-    const halfBaseWidth = tomoBodyR * 0.8;
-    const perpX = -Math.sin(tailDir) * halfBaseWidth;
-    const perpY = Math.cos(tailDir) * halfBaseWidth;
+    const halfBaseWidth = tomoBodyR * 0.7;
 
+    // Используем кривые Безье для плавного сужения
     ctx.beginPath();
-    ctx.moveTo(baseX + perpX, baseY + perpY); // левая точка основания
-    ctx.lineTo(tipX, tipY);                     // вершина
-    ctx.lineTo(baseX - perpX, baseY - perpY);  // правая точка основания
+    ctx.moveTo(baseX + Math.cos(tailDir - Math.PI/2) * halfBaseWidth,
+               baseY + Math.sin(tailDir - Math.PI/2) * halfBaseWidth);
+    ctx.quadraticCurveTo(
+      baseX + Math.cos(tailDir) * tailLen * 0.5,
+      baseY + Math.sin(tailDir) * tailLen * 0.5,
+      tipX, tipY
+    );
+    ctx.quadraticCurveTo(
+      baseX + Math.cos(tailDir) * tailLen * 0.5,
+      baseY + Math.sin(tailDir) * tailLen * 0.5,
+      baseX - Math.cos(tailDir - Math.PI/2) * halfBaseWidth,
+      baseY - Math.sin(tailDir - Math.PI/2) * halfBaseWidth
+    );
     ctx.closePath();
     ctx.fillStyle = '#111';
     ctx.fill();
-
-    // Скругляем вершину хвоста (рисуем маленький круг)
-    ctx.beginPath();
-    ctx.arc(tipX, tipY, halfBaseWidth * 0.3, 0, Math.PI * 2);
-    ctx.fill();
   }
 
-  // 4. Тонкие дуги между томоэ (с внешней стороны круга томоэ)
-  ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+  // 4. Тонкие дуги между томоэ (с внешней стороны)
+  ctx.strokeStyle = 'rgba(0,0,0,0.7)';
   ctx.lineWidth = 2;
   for (let i = 0; i < 3; i++) {
-    // дуга проходит между соседними томоэ, на чуть большем радиусе, чем сами томоэ
-    const arcRadius = tomoDist * 1.15;
+    const arcRadius = tomoDist * 1.12; // чуть дальше от центра, чем сами томоэ
     const startAngle = (i * 120 + 30) * Math.PI / 180;
     const endAngle = (i * 120 + 90) * Math.PI / 180;
     ctx.beginPath();
@@ -2016,14 +2015,14 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
     ctx.stroke();
   }
 
-  // Анимация
+  // Анимация появления
   requestAnimationFrame(() => { canvas.style.opacity = '1'; });
   setTimeout(() => {
     canvas.style.opacity = '0';
     setTimeout(() => canvas.remove(), 500);
   }, 3000);
 });
-
+ 
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
