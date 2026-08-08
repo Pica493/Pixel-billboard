@@ -1144,6 +1144,169 @@ document.body.style.overflow = '';
   }, 300000);
 });
 
+
+// ================= ТЕТРИС (модальное окно, экономика, телефон) =================
+addEasterEgg('tetris', 'TETRIS', function() {
+  // Создаём overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:200000;display:flex;align-items:center;justify-content:center;';
+  document.body.appendChild(overlay);
+
+  // Блокируем pull-to-refresh
+  overlay.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+
+  const gameContainer = document.createElement('div');
+  gameContainer.style.cssText = 'background:#1a1a2e;border:2px solid #4caf50;border-radius:15px;padding:10px;display:flex;flex-direction:column;align-items:center;max-width:95vw;';
+  overlay.appendChild(gameContainer);
+
+  // Информация: уровень, линии, счёт
+  const infoDiv = document.createElement('div');
+  infoDiv.style.cssText = 'color:#fff;font-family:monospace;font-size:16px;margin-bottom:5px;text-align:center;';
+  infoDiv.textContent = 'Уровень: 1 | Линии: 0';
+  gameContainer.appendChild(infoDiv);
+
+  // Холст для тетриса (адаптивный размер)
+  const canvas = document.createElement('canvas');
+  const cellSize = Math.min(30, Math.floor((window.innerWidth - 40) / 10));
+  canvas.width = cellSize * 10;
+  canvas.height = cellSize * 20;
+  canvas.style.cssText = 'border:2px solid #fff;background:#111;';
+  gameContainer.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  // Кнопки для телефона
+  const controls = document.createElement('div');
+  controls.style.cssText = 'display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:10px;';
+  gameContainer.appendChild(controls);
+
+  const btnLeft = document.createElement('button'); btnLeft.textContent = '◀'; 
+  const btnRight = document.createElement('button'); btnRight.textContent = '▶'; 
+  const btnDown = document.createElement('button'); btnDown.textContent = '▼'; 
+  const btnRotate = document.createElement('button'); btnRotate.textContent = '↻'; 
+  const btnHardDrop = document.createElement('button'); btnHardDrop.textContent = '⏬'; 
+  const btnClose = document.createElement('button'); btnClose.textContent = '✕ Закрыть';
+
+  [btnLeft, btnRight, btnDown, btnRotate, btnHardDrop, btnClose].forEach(b => {
+    b.style.cssText = 'padding:10px 15px;background:#444;color:#fff;border:none;border-radius:5px;font-size:20px;cursor:pointer;';
+    controls.appendChild(b);
+  });
+
+  // Игровые переменные
+  const COLS = 10, ROWS = 20;
+  const tetrominos = [
+    [[1,1,1,1]], [[1,1],[1,1]], [[0,1,1],[1,1,0]], [[1,1,0],[0,1,1]],
+    [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]], [[0,1,0],[1,1,1]]
+  ];
+  const colors = ['#0ff','#ff0','#0f0','#f00','#00f','#f90','#90f'];
+
+  let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+  let currentPiece, currentColor, currentX, currentY;
+  let linesCleared = 0, level = 1, gameOver = false, dropInterval;
+
+  function randomPiece() {
+    const idx = Math.floor(Math.random() * tetrominos.length);
+    return { shape: tetrominos[idx], color: colors[idx] };
+  }
+
+  function spawnPiece() {
+    const p = randomPiece();
+    currentPiece = p.shape; currentColor = p.color;
+    currentX = Math.floor((COLS - currentPiece[0].length) / 2);
+    currentY = 0;
+    if (!isValid(currentX, currentY, currentPiece)) endGame();
+  }
+
+  function isValid(x, y, piece) {
+    for (let r = 0; r < piece.length; r++)
+      for (let c = 0; c < piece[0].length; c++)
+        if (piece[r][c]) {
+          const nx = x + c, ny = y + r;
+          if (nx < 0 || nx >= COLS || ny >= ROWS || (ny >= 0 && board[ny][nx])) return false;
+        }
+    return true;
+  }
+
+  function placePiece() {
+    for (let r = 0; r < currentPiece.length; r++)
+      for (let c = 0; c < currentPiece[0].length; c++)
+        if (currentPiece[r][c]) board[currentY + r][currentX + c] = currentColor;
+    clearLines(); spawnPiece();
+  }
+
+  function clearLines() {
+    let cleared = 0;
+    for (let row = ROWS - 1; row >= 0; row--) {
+      if (board[row].every(v => v)) {
+        board.splice(row, 1); board.unshift(Array(COLS).fill(0));
+        cleared++; row++;
+      }
+    }
+    if (cleared) {
+      linesCleared += cleared;
+      level = Math.floor(linesCleared / 10) + 1;
+      clearInterval(dropInterval);
+      dropInterval = setInterval(() => { if (!gameOver) moveDown(); }, Math.max(100, 500 - (level-1)*40));
+    }
+  }
+
+  function moveDown() { if (isValid(currentX, currentY+1, currentPiece)) currentY++; else placePiece(); draw(); }
+  function moveLeft() { if (isValid(currentX-1, currentY, currentPiece)) { currentX--; draw(); } }
+  function moveRight() { if (isValid(currentX+1, currentY, currentPiece)) { currentX++; draw(); } }
+  function rotate() {
+    const rot = currentPiece[0].map((_, i) => currentPiece.map(row => row[i]).reverse());
+    if (isValid(currentX, currentY, rot)) { currentPiece = rot; draw(); }
+  }
+  function hardDrop() { while (isValid(currentX, currentY+1, currentPiece)) currentY++; placePiece(); draw(); }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
+      if (board[r][c]) { ctx.fillStyle = board[r][c]; ctx.fillRect(c*cellSize, r*cellSize, cellSize-1, cellSize-1); }
+    if (currentPiece && !gameOver)
+      for (let r = 0; r < currentPiece.length; r++) for (let c = 0; c < currentPiece[0].length; c++)
+        if (currentPiece[r][c]) {
+          ctx.fillStyle = currentColor;
+          ctx.fillRect((currentX+c)*cellSize, (currentY+r)*cellSize, cellSize-1, cellSize-1);
+        }
+    infoDiv.textContent = `Уровень: ${level} | Линии: ${linesCleared}`;
+  }
+
+  function endGame() {
+    gameOver = true; clearInterval(dropInterval);
+    const coins = Math.floor(linesCleared / 5);
+    if (coins > 0 && window.addCoins) window.addCoins(coins);
+    if (window.updateRecord && window.updateRecord('tetris', linesCleared)) window.addCoins(10);
+    if (typeof showMessage === 'function') showMessage(`Тетрис окончен! Линий: ${linesCleared}. Монет: ${coins}`, '#0ff');
+    setTimeout(() => { overlay.remove(); if (typeof safeRedraw === 'function') safeRedraw(); }, 2000);
+  }
+
+  function handleKey(e) {
+    if (gameOver) return; e.preventDefault();
+    if (e.key === 'ArrowLeft') moveLeft(); else if (e.key === 'ArrowRight') moveRight();
+    else if (e.key === 'ArrowDown') moveDown(); else if (e.key === 'ArrowUp') rotate(); else if (e.key === ' ') hardDrop();
+  }
+  window.addEventListener('keydown', handleKey);
+
+  // Привязка кнопок
+  btnLeft.addEventListener('click', moveLeft);
+  btnRight.addEventListener('click', moveRight);
+  btnDown.addEventListener('click', moveDown);
+  btnRotate.addEventListener('click', rotate);
+  btnHardDrop.addEventListener('click', hardDrop);
+  btnClose.addEventListener('click', () => { if (!gameOver) endGame(); else overlay.remove(); });
+
+  spawnPiece(); draw();
+  dropInterval = setInterval(() => { if (!gameOver) moveDown(); }, 500);
+
+  // Автоочистка через 5 минут
+  setTimeout(() => {
+    clearInterval(dropInterval);
+    window.removeEventListener('keydown', handleKey);
+    if (overlay.parentNode) overlay.remove();
+  }, 300000);
+});
+
+  
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
   function updateClock() {
