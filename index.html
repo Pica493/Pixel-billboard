@@ -1962,198 +1962,167 @@ addEasterEgg('sonic', 'SONIC', function() {
 });
 
 
-  // ================= БЭТМЕН-СИГНАЛ (каноничный логотип + плавный свет) =================
+  // ================= БЭТМЕН: ЛЕТУЧИЕ МЫШИ ФОРМИРУЮТ НАДПИСЬ =================
 addEasterEgg('batman', 'BATMAN', function() {
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
-
-  // Затемнённый фон
   const overlay = document.createElement('div');
   overlay.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.85);
     z-index: 300000; pointer-events: none;
-    opacity: 0; transition: opacity 0.8s ease;
+    opacity: 0; transition: opacity 0.8s;
   `;
   document.body.appendChild(overlay);
 
-  // Широкий прожекторный луч (плавное радиальное свечение)
-  const spotlight = document.createElement('div');
-  spotlight.style.cssText = `
-    position: absolute;
-    top: 0; left: 50%; transform: translateX(-50%);
-    width: 800px; height: 700px;
-    background: radial-gradient(ellipse at 50% 0%, rgba(255,255,180,0.25) 0%, transparent 70%);
-    z-index: 1; pointer-events: none;
-    animation: spotlightFade 3s ease-in-out infinite;
-  `;
-  overlay.appendChild(spotlight);
+  // Получаем координаты точек для надписи "BATMAN"
+  const textCanvas = document.createElement('canvas');
+  textCanvas.width = 600;
+  textCanvas.height = 200;
+  const tctx = textCanvas.getContext('2d');
+  tctx.fillStyle = '#ffffff';
+  tctx.font = 'bold 120px Arial, sans-serif';
+  tctx.textAlign = 'center';
+  tctx.textBaseline = 'middle';
+  tctx.fillText('BATMAN', textCanvas.width/2, textCanvas.height/2);
 
-  // Узкий центральный луч (более яркий)
-  const spotlightNarrow = document.createElement('div');
-  spotlightNarrow.style.cssText = `
-    position: absolute;
-    top: 0; left: 50%; transform: translateX(-50%);
-    width: 500px; height: 700px;
-    background: radial-gradient(ellipse at 50% 0%, rgba(255,255,120,0.4) 0%, transparent 70%);
-    z-index: 2; pointer-events: none;
-    animation: spotlightFade 3s ease-in-out infinite alternate;
-  `;
-  overlay.appendChild(spotlightNarrow);
+  const imageData = tctx.getImageData(0, 0, textCanvas.width, textCanvas.height).data;
+  const points = [];
+  const step = 3; // шаг сканирования
+  for (let y = 0; y < textCanvas.height; y += step) {
+    for (let x = 0; x < textCanvas.width; x += step) {
+      const index = (y * textCanvas.width + x) * 4;
+      if (imageData[index] > 128) { // белый пиксель
+        points.push({
+          x: x - textCanvas.width/2, // координаты относительно центра текста
+          y: y - textCanvas.height/2
+        });
+      }
+    }
+  }
 
-  
-  // ================= БЭТМЕН НА ФОНЕ ЛУНЫ =================
-addEasterEgg('batman', 'BATMAN', function() {
+  // Ограничим количество мышей до 80
+  const totalBats = Math.min(points.length, 80);
+  const selectedPoints = [];
+  for (let i = 0; i < totalBats; i++) {
+    const idx = Math.floor(Math.random() * points.length);
+    selectedPoints.push(points[idx]);
+    points.splice(idx, 1);
+  }
+
+  const bats = [];
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
-  // Ночное небо (затемнённый фон со звёздами)
-  const sky = document.createElement('div');
-  sky.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(ellipse at 50% 50%, #1a1a3e, #000);
-    z-index: 300000; pointer-events: none;
-    opacity: 0; transition: opacity 0.8s;
-  `;
-  document.body.appendChild(sky);
-
-  // Звёзды (маленькие белые точки)
-  for (let i = 0; i < 50; i++) {
-    const star = document.createElement('div');
-    const size = 1 + Math.random() * 2;
-    star.style.cssText = `
-      position: absolute;
-      top: ${Math.random() * 100}%;
-      left: ${Math.random() * 100}%;
-      width: ${size}px; height: ${size}px;
-      background: white;
-      border-radius: 50%;
-      opacity: ${0.3 + Math.random() * 0.7};
-      animation: twinkle ${2 + Math.random() * 3}s infinite;
-    `;
-    sky.appendChild(star);
-  }
-
-  // Луна (большая, жёлтая)
-  const moon = document.createElement('div');
-  moon.style.cssText = `
-    position: absolute;
-    top: ${centerY - 180}px; left: ${centerX - 150}px;
-    width: 300px; height: 300px;
-    background: radial-gradient(circle at 40% 40%, #fffde7, #ffd54f 80%);
-    border-radius: 50%;
-    box-shadow: 0 0 80px #ffd54f, 0 0 150px #ffb300;
-    z-index: 1;
-    opacity: 0;
-    transition: opacity 0.8s;
-  `;
-  sky.appendChild(moon);
-
-  // Силуэт Бэтмена (Canvas)
-  const batmanCanvas = document.createElement('canvas');
-  batmanCanvas.width = 200;
-  batmanCanvas.height = 250;
-  batmanCanvas.style.cssText = `
-    position: absolute;
-    top: ${centerY - 100}px; left: ${centerX - 20}px;
-    z-index: 2;
-    opacity: 0;
-    transition: opacity 0.8s;
-  `;
-  sky.appendChild(batmanCanvas);
-  const ctx = batmanCanvas.getContext('2d');
-
-  // Рисуем Бэтмена
-  function drawBatman() {
-    const w = batmanCanvas.width, h = batmanCanvas.height;
-    ctx.fillStyle = '#000';
-
-    // Голова с ушками
-    ctx.beginPath();
-    ctx.moveTo(w * 0.5, h * 0.15);       // верхушка головы
-    ctx.lineTo(w * 0.6, h * 0.05);        // правое ухо
-    ctx.lineTo(w * 0.55, h * 0.15);
-    ctx.lineTo(w * 0.7, h * 0.2);         // правый край маски
-    ctx.lineTo(w * 0.6, h * 0.35);        // правое плечо
-    ctx.lineTo(w * 0.65, h * 0.45);       // край плаща
-    ctx.lineTo(w * 0.55, h * 0.5);
-    ctx.lineTo(w * 0.5, h * 0.4);         // талия
-    ctx.lineTo(w * 0.45, h * 0.5);
-    ctx.lineTo(w * 0.35, h * 0.45);
-    ctx.lineTo(w * 0.4, h * 0.35);        // левое плечо
-    ctx.lineTo(w * 0.3, h * 0.2);         // левый край маски
-    ctx.lineTo(w * 0.45, h * 0.15);
-    ctx.lineTo(w * 0.4, h * 0.05);        // левое ухо
-    ctx.closePath();
-    ctx.fill();
-
-    // Плащ (расширяется книзу)
-    ctx.beginPath();
-    ctx.moveTo(w * 0.35, h * 0.45);
-    ctx.lineTo(w * 0.2, h * 0.7);
-    ctx.lineTo(w * 0.15, h * 0.85);
-    ctx.lineTo(w * 0.3, h * 0.75);
-    ctx.lineTo(w * 0.45, h * 0.5);
-    ctx.lineTo(w * 0.55, h * 0.5);
-    ctx.lineTo(w * 0.7, h * 0.75);
-    ctx.lineTo(w * 0.85, h * 0.85);
-    ctx.lineTo(w * 0.8, h * 0.7);
-    ctx.lineTo(w * 0.65, h * 0.45);
-    ctx.closePath();
-    ctx.fill();
-  }
-  drawBatman();
-
-  // Летучие мыши
-  const bats = [];
-  for (let i = 0; i < 5; i++) {
+  // Создаём летучих мышей
+  selectedPoints.forEach((point, index) => {
     const bat = document.createElement('div');
     bat.textContent = '🦇';
     bat.style.cssText = `
-      position: absolute;
-      top: ${Math.random() * 100}%;
-      left: ${Math.random() * 100}%;
-      font-size: 30px;
-      z-index: 3;
-      animation: batFly ${4 + Math.random() * 4}s linear infinite;
-      opacity: 0.8;
+      position: fixed;
+      font-size: 24px;
+      z-index: 300001;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: none;
     `;
-    sky.appendChild(bat);
+    // Начальная позиция — за пределами экрана (случайная сторона)
+    let startX, startY;
+    const side = Math.floor(Math.random() * 4);
+    switch(side) {
+      case 0: // сверху
+        startX = Math.random() * window.innerWidth;
+        startY = -100;
+        break;
+      case 1: // справа
+        startX = window.innerWidth + 100;
+        startY = Math.random() * window.innerHeight;
+        break;
+      case 2: // снизу
+        startX = Math.random() * window.innerWidth;
+        startY = window.innerHeight + 100;
+        break;
+      case 3: // слева
+        startX = -100;
+        startY = Math.random() * window.innerHeight;
+        break;
+    }
+    bat.dataset.startX = startX;
+    bat.dataset.startY = startY;
+    // Конечная точка (целевая) — смещённая относительно центра экрана
+    const endX = centerX + point.x;
+    const endY = centerY + point.y;
+    bat.dataset.endX = endX;
+    bat.dataset.endY = endY;
+    // Промежуточная точка (для кривой) — случайная в пределах экрана
+    const midX = Math.random() * window.innerWidth;
+    const midY = Math.random() * window.innerHeight;
+    bat.dataset.midX = midX;
+    bat.dataset.midY = midY;
+    // Параметры анимации
+    bat.dataset.t = 0; // прогресс от 0 до 1
+    bat.dataset.speed = 0.008 + Math.random() * 0.012; // разная скорость
+    bat.dataset.delay = Math.random() * 1.5; // задержка перед стартом (в секундах)
+    bat.dataset.elapsed = 0;
+
+    bat.style.left = startX + 'px';
+    bat.style.top = startY + 'px';
+    overlay.appendChild(bat);
     bats.push(bat);
+  });
+
+  // Запускаем анимацию
+  let startTime = null;
+  function animate(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsedGlobal = (timestamp - startTime) / 1000; // в секундах
+
+    let allSettled = true;
+    bats.forEach(bat => {
+      const delay = parseFloat(bat.dataset.delay);
+      if (elapsedGlobal < delay) {
+        allSettled = false;
+        return;
+      }
+      const elapsed = elapsedGlobal - delay;
+      const t = Math.min(parseFloat(bat.dataset.t), 1);
+      if (t >= 1) return; // уже на месте
+
+      const startX = parseFloat(bat.dataset.startX);
+      const startY = parseFloat(bat.dataset.startY);
+      const midX = parseFloat(bat.dataset.midX);
+      const midY = parseFloat(bat.dataset.midY);
+      const endX = parseFloat(bat.dataset.endX);
+      const endY = parseFloat(bat.dataset.endY);
+
+      // Квадратичная кривая Безье: B(t) = (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
+      const invT = 1 - t;
+      const x = invT * invT * startX + 2 * invT * t * midX + t * t * endX;
+      const y = invT * invT * startY + 2 * invT * t * midY + t * t * endY;
+
+      bat.style.left = x + 'px';
+      bat.style.top = y + 'px';
+
+      // Обновляем прогресс
+      const newT = t + parseFloat(bat.dataset.speed);
+      bat.dataset.t = Math.min(newT, 1);
+      if (newT < 1) allSettled = false;
+    });
+
+    if (allSettled) {
+      // Все мыши на месте, ждём немного и исчезаем
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 800);
+      }, 2500);
+      return;
+    }
+    requestAnimationFrame(animate);
   }
 
-  // Анимации
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
-    @keyframes batFly {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      25% { transform: translate(100px, -50px) rotate(15deg); }
-      50% { transform: translate(200px, 50px) rotate(-10deg); }
-      75% { transform: translate(-50px, 100px) rotate(5deg); }
-      100% { transform: translate(0, 0) rotate(0deg); }
-    }
-  `;
-  document.head.appendChild(style);
-
-  // Появление
-  requestAnimationFrame(() => { sky.style.opacity = '1'; });
-  setTimeout(() => {
-    moon.style.opacity = '1';
-    batmanCanvas.style.opacity = '1';
-  }, 300);
-
-  // Исчезновение через 5 секунд
-  setTimeout(() => {
-    sky.style.opacity = '0';
-    setTimeout(() => {
-      sky.remove();
-      style.remove();
-    }, 800);
-  }, 5000);
+  // Показываем оверлей и запускаем анимацию
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    requestAnimationFrame(animate);
+  });
 });
   
 
