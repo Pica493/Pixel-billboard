@@ -1911,7 +1911,7 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
 });
 
 
-// ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (чёткое, вращающееся) =================
+// ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (чёткое, вращающееся через CSS) =================
 addEasterEgg('sonic', 'SONIC', function() {
   const size = 200;
   const ring = document.createElement('div');
@@ -1927,31 +1927,26 @@ addEasterEgg('sonic', 'SONIC', function() {
     background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.5) 0%, transparent 70%);
     z-index: 300000;
     pointer-events: none;
+    animation: sonicSpin 2s linear infinite;
     opacity: 0;
+    transition: opacity 0.5s;
   `;
   document.body.appendChild(ring);
 
-  // Вращение через JS (надёжнее CSS-анимации)
-  let angle = 0;
-  let animFrame;
-  function rotate() {
-    angle += 2;
-    ring.style.transform = `rotate(${angle}deg)`;
-    animFrame = requestAnimationFrame(rotate);
-  }
+  // Добавляем анимацию вращения
+  const style = document.createElement('style');
+  style.textContent = '@keyframes sonicSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
 
   // Появление
-  requestAnimationFrame(() => {
-    ring.style.opacity = '1';
-    rotate();
-  });
+  requestAnimationFrame(() => { ring.style.opacity = '1'; });
 
   // Исчезновение через 4 секунды
   setTimeout(() => {
     ring.style.opacity = '0';
     setTimeout(() => {
-      cancelAnimationFrame(animFrame);
       ring.remove();
+      style.remove();
     }, 500);
   }, 4000);
 });
