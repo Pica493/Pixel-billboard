@@ -576,6 +576,8 @@ easterInput.addEventListener('keydown', function(e) {
 
   // snake
   
+ 
+  
 function startSnake() {
   const snakeCanvas = document.createElement('canvas');
   snakeCanvas.width = canvas.width;
@@ -583,58 +585,85 @@ function startSnake() {
   snakeCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:250;';
   container.appendChild(snakeCanvas);
 
-  // ===== МАКСИМАЛЬНАЯ БЛОКИРОВКА КЛАВИАТУРЫ =====
+  // ===== ГЛОБАЛЬНАЯ БЛОКИРОВКА ФОКУСА =====
   snakeCanvas.setAttribute('tabindex', '-1');
   snakeCanvas.setAttribute('inputmode', 'none');
   snakeCanvas.style.userSelect = 'none';
   snakeCanvas.style.webkitUserSelect = 'none';
   snakeCanvas.style.touchCallout = 'none';
   snakeCanvas.style.touchAction = 'none';
-  snakeCanvas.style.pointerEvents = 'auto';
 
-  // Блокируем фокус мгновенно и с задержкой
+  // Принудительно убираем фокус с любого элемента
+  function killFocus() {
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+    snakeCanvas.blur();
+  }
+
+  // Блокируем события фокуса на canvas и на документе
   snakeCanvas.addEventListener('focus', function(e) {
-    e.target.blur();
+    e.preventDefault();
+    e.stopPropagation();
+    killFocus();
   }, true);
 
-  // Блокируем все события, которые могут вызвать фокус
-  const blockEvents = ['touchstart', 'touchmove', 'touchend', 'pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'selectstart', 'contextmenu'];
+  snakeCanvas.addEventListener('focusin', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    killFocus();
+  }, true);
+
+  // Глобальный обработчик на документе – если какой-то элемент получает фокус, сразу снимаем
+  document.addEventListener('focus', function(e) {
+    if (e.target !== document.body) {
+      e.preventDefault();
+      e.stopPropagation();
+      killFocus();
+    }
+  }, true);
+
+  document.addEventListener('focusin', function(e) {
+    if (e.target !== document.body) {
+      e.preventDefault();
+      e.stopPropagation();
+      killFocus();
+    }
+  }, true);
+
+  // Блокируем все события, которые могут привести к фокусу
+  const blockEvents = [
+    'touchstart', 'touchmove', 'touchend',
+    'pointerdown', 'pointerup',
+    'mousedown', 'mouseup',
+    'click', 'selectstart', 'contextmenu'
+  ];
   blockEvents.forEach(function(evt) {
     snakeCanvas.addEventListener(evt, function(e) {
       e.preventDefault();
       e.stopPropagation();
-      if (document.activeElement === snakeCanvas) {
-        snakeCanvas.blur();
-      }
+      killFocus();
     }, { passive: false });
   });
 
-  // Дополнительно: блокируем focusin/focusout
-  snakeCanvas.addEventListener('focusin', function(e) { e.preventDefault(); e.stopPropagation(); }, true);
-  snakeCanvas.addEventListener('focusout', function(e) { e.preventDefault(); e.stopPropagation(); }, true);
-
-  // Отключаем контекстное меню и выделение
-  snakeCanvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-  snakeCanvas.addEventListener('selectstart', function(e) { e.preventDefault(); });
-
-  // Снимаем фокус при любом касании, если всё же появился
+  // Дополнительно – при каждом касании снимаем фокус
   snakeCanvas.addEventListener('touchstart', function(e) {
-    if (document.activeElement === snakeCanvas) {
-      snakeCanvas.blur();
-    }
-  }, { passive: true });
+    killFocus();
+    // ... управление свайпами
+  }, { passive: false });
 
+  // ----- ОСТАЛЬНАЯ ЛОГИКА ИГРЫ (свайпы, движение, змейка) -----
   const sctx = snakeCanvas.getContext('2d');
   const CELL_SIZE = 10,
     COLS = canvas.width / CELL_SIZE,
     ROWS = canvas.height / CELL_SIZE;
 
-  // ---------- УПРАВЛЕНИЕ СВАЙПАМИ (ТЕЛЕФОН) ----------
   let touchStartX = null,
     touchStartY = null;
 
   snakeCanvas.addEventListener('touchstart', function(e) {
     e.preventDefault();
+    killFocus();
     const touch = e.touches[0];
     touchStartX = touch.clientX;
     touchStartY = touch.clientY;
@@ -643,6 +672,7 @@ function startSnake() {
   snakeCanvas.addEventListener('touchend', function(e) {
     if (touchStartX === null || touchStartY === null) return;
     e.preventDefault();
+    killFocus();
     const touch = e.changedTouches[0];
     const dx = touch.clientX - touchStartX;
     const dy = touch.clientY - touchStartY;
@@ -660,6 +690,135 @@ function startSnake() {
     touchStartY = null;
   }, { passive: false });
 
+  // ---------- ЛОГИКА ИГРЫ ----------
+  function findFreeStart() {
+    const maxAttempts = 200;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const startX = Math.floor(Math.random() * (COLS - 5)) + 2;
+      const startY = Math.floor(Math.random() * (ROWS - 2)) + 1;
+      const cells = [
+        { x: startX, y: startY },
+        { x: startX - 1, y: startY },
+        { x: startX - 2, y: startY }
+      ];
+      const allFree = cells.every(cell => isCellFree(cell.x, cell.y));
+      if (allFree) return cells;
+    }
+    return null;
+  }
+
+  let snake = findFreeStart();
+  if (!snake) {
+    gameOver = true;
+    drawSnake();
+    showMessage('Нет места для змейки! Попробуй позже.', '#f00');
+    setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+    return;
+  }
+
+  let direction = { x: 1, y: 0 };
+  let nextDirection = { x: 1, y: 0 };
+  let food = spawnFood();
+  let gameOver = false;
+  let gameInterval;
+
+  function isCellFree(cellX, cellY) {
+    const px = cellX * CELL_SIZE,
+      py = cellY * CELL_SIZE;
+    for (let block of window.soldPixels) {
+      if (px < block.x + block.w && px + CELL_SIZE > block.x && py < block.y + block.h && py + CELL_SIZE > block.y) return false;
+    }
+    return cellX >= 0 && cellX < COLS && cellY >= 0 && cellY < ROWS;
+  }
+
+  function spawnFood() {
+    for (let i = 0; i < 1000; i++) {
+      const fx = Math.floor(Math.random() * COLS),
+        fy = Math.floor(Math.random() * ROWS);
+      if (isCellFree(fx, fy) && !snake.some(s => s.x === fx && s.y === fy)) return { x: fx, y: fy };
+    }
+    return null;
+  }
+
+  function drawSnake() {
+    sctx.clearRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+    sctx.fillStyle = '#00cc00';
+    snake.forEach(seg => sctx.fillRect(seg.x * CELL_SIZE, seg.y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1));
+    if (food) {
+      sctx.fillStyle = '#ff3333';
+      sctx.fillRect(food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
+    }
+    if (gameOver) {
+      sctx.fillStyle = 'rgba(0,0,0,0.7)';
+      sctx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+      sctx.fillStyle = '#fff';
+      sctx.font = '20px monospace';
+      sctx.textAlign = 'center';
+      sctx.fillText('Игра окончена!', snakeCanvas.width / 2, snakeCanvas.height / 2);
+    }
+  }
+
+  function step() {
+    if (gameOver) return;
+    if (!(nextDirection.x === -direction.x && nextDirection.y === -direction.y)) direction = nextDirection;
+    const head = snake[0],
+      newHead = { x: head.x + direction.x, y: head.y + direction.y };
+
+    if (!isCellFree(newHead.x, newHead.y) || snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+      gameOver = true;
+      const snakeScore = snake.length - 3;
+      if (snakeScore > 0) {
+        const coins = Math.floor(snakeScore / 3);
+        if (coins > 0) window.addCoins(coins);
+        if (window.updateRecord('snake', snakeScore)) window.addCoins(10);
+      }
+      drawSnake();
+      clearInterval(gameInterval);
+      setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+      return;
+    }
+
+    snake.unshift(newHead);
+    if (food && newHead.x === food.x && newHead.y === food.y) {
+      food = spawnFood();
+      if (!food) {
+        gameOver = true;
+        drawSnake();
+        clearInterval(gameInterval);
+        setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+        return;
+      }
+    } else {
+      snake.pop();
+    }
+    drawSnake();
+  }
+
+  function handleKey(e) {
+    e.preventDefault();
+    const keyMap = {
+      'ArrowUp': { x: 0, y: -1 },
+      'ArrowDown': { x: 0, y: 1 },
+      'ArrowLeft': { x: -1, y: 0 },
+      'ArrowRight': { x: 1, y: 0 }
+    };
+    if (keyMap[e.key]) nextDirection = keyMap[e.key];
+  }
+
+  window.addEventListener('keydown', handleKey);
+  drawSnake();
+  gameInterval = setInterval(step, 150);
+
+  const cleanup = () => {
+    clearInterval(gameInterval);
+    window.removeEventListener('keydown', handleKey);
+    if (snakeCanvas.parentNode) snakeCanvas.remove();
+    safeRedraw();
+  };
+  setTimeout(cleanup, 120000);
+}
+
+  
     
   // ---------- ЛОГИКА ИГРЫ ----------
   function findFreeStart() {
