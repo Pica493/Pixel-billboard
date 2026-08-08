@@ -1550,8 +1550,9 @@ addEasterEgg('naruto', 'NARUTO', function() {
   requestAnimationFrame(() => { smokeCloud.style.opacity = '1'; });
 
 
-// ================= НАРУТО: ТЕНЕВОЕ КЛОНИРОВАНИЕ =================
+// ================= НАРУТО: ТЕНЕВОЕ КЛОНИРОВАНИЕ (без кулдаунов) =================
 addEasterEgg('naruto', 'NARUTO', function() {
+  // Без кулдаунов – просто выполняем анимацию
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
@@ -1593,7 +1594,7 @@ addEasterEgg('naruto', 'NARUTO', function() {
   `;
   document.body.appendChild(naruto);
 
-  // Волосы (жёлтые, торчащие)
+  // Волосы
   const hair = document.createElement('div');
   hair.style.cssText = `
     width: 70px; height: 45px;
@@ -1631,7 +1632,6 @@ addEasterEgg('naruto', 'NARUTO', function() {
   eyeR.style.cssText = 'width:10px;height:10px;background:#00bfff;border-radius:50%;margin:0 5px;';
   face.appendChild(eyeL);
   face.appendChild(eyeR);
-  // Усики
   for (let side = 0; side < 2; side++) {
     for (let i = 0; i < 3; i++) {
       const whisker = document.createElement('div');
@@ -1651,7 +1651,7 @@ addEasterEgg('naruto', 'NARUTO', function() {
   face.appendChild(mouth);
   naruto.appendChild(face);
 
-  // Куртка (оранжевая)
+  // Куртка
   const jacket = document.createElement('div');
   jacket.style.cssText = `
     width: 60px; height: 50px;
@@ -1666,13 +1666,13 @@ addEasterEgg('naruto', 'NARUTO', function() {
   jacket.appendChild(collar);
   naruto.appendChild(jacket);
 
-  // Руки, сложенные крестиком
+  // Руки
   const arms = document.createElement('div');
   arms.style.cssText = 'display:flex;justify-content:center;width:60px;margin-top:-2px;font-size:20px;color:#ffcc00;text-shadow:1px 1px 0 #000;';
   arms.textContent = '🤞';
   naruto.appendChild(arms);
 
-  // Штаны (синие)
+  // Штаны
   const pants = document.createElement('div');
   pants.style.cssText = 'width:50px;height:20px;background:#0033aa;border-radius:0 0 5px 5px;';
   naruto.appendChild(pants);
@@ -1685,7 +1685,7 @@ addEasterEgg('naruto', 'NARUTO', function() {
     setTimeout(() => smoke.remove(), 800);
   }, 600);
 
-  // Теневое клонирование через 1.5 сек
+  // Теневое клонирование
   setTimeout(() => {
     const cloneCount = 25;
     const clones = [];
