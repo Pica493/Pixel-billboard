@@ -1306,6 +1306,204 @@ addEasterEgg('tetris', 'TETRIS', function() {
   }, 300000);
 });
 
+// ================= MEMORY (Мемори) =================
+addEasterEgg('memory', 'MEMORY', function() {
+  // Модальное окно
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:200000;display:flex;align-items:center;justify-content:center;';
+  document.body.appendChild(overlay);
+
+  // Блокируем pull-to-refresh
+  overlay.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+
+  const gameContainer = document.createElement('div');
+  gameContainer.style.cssText = 'background:#1a1a2e;border:2px solid #4caf50;border-radius:15px;padding:15px;display:flex;flex-direction:column;align-items:center;max-width:95vw;';
+  overlay.appendChild(gameContainer);
+
+  // Информация
+  const infoDiv = document.createElement('div');
+  infoDiv.style.cssText = 'color:#fff;font-family:monospace;font-size:16px;margin-bottom:10px;text-align:center;';
+  infoDiv.textContent = 'Уровень: 1 | Пары: 4 | Время: 45с';
+  gameContainer.appendChild(infoDiv);
+
+  // Сетка карточек
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;justify-content:center;gap:8px;margin-bottom:10px;';
+  gameContainer.appendChild(grid);
+
+  // Кнопка закрытия
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕ Закрыть';
+  closeBtn.style.cssText = 'margin-top:10px;padding:8px 15px;background:#c00;color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:sans-serif;';
+  gameContainer.appendChild(closeBtn);
+
+  // Эмодзи для карточек (более 30 штук)
+  const emojis = ['🍎','🍊','🍇','🍒','🍋','🍉','🍑','🍌','🍓','🥝','🍍','🥭','🍈','🥑','🌽','🥕','🍔','🍕','🍦','🍩','🍪','🧁','🎂','🍭','🍿','🥨','🍫','🍬','🥜','🍯','🧸','🎈','⚽','🚗','✈️','🚀','🗼','🎵','📚','💡'];
+
+  let level = 1;
+  let pairs = 4;               // количество пар
+  let totalCards = pairs * 2;
+  let timeLimit = 45;          // секунд на уровень
+  let timerInterval;
+  let timeLeft = timeLimit;
+  let canClick = true;
+  let openedCards = [];
+  let matchedPairs = 0;
+  let levelsCleared = 0;
+  let gameOver = false;
+
+  // Создание колоды для текущего уровня
+  function createDeck() {
+    const selectedEmojis = [];
+    const shuffled = emojis.slice().sort(() => Math.random() - 0.5);
+    for (let i = 0; i < pairs; i++) {
+      selectedEmojis.push(shuffled[i]);
+    }
+    const deck = [];
+    selectedEmojis.forEach(emoji => {
+      deck.push({ emoji, id: emoji + Math.random() });
+      deck.push({ emoji, id: emoji + Math.random() });
+    });
+    return deck.sort(() => Math.random() - 0.5);
+  }
+
+  let deck = createDeck();
+
+  // Отрисовка сетки
+  function renderGrid() {
+    grid.innerHTML = '';
+    const cols = Math.ceil(Math.sqrt(totalCards));
+    const rows = Math.ceil(totalCards / cols);
+    grid.style.gridTemplateColumns = `repeat(${cols}, 60px)`;
+
+    deck.forEach((card, index) => {
+      const cardEl = document.createElement('div');
+      cardEl.className = 'memory-card';
+      cardEl.style.cssText = `
+        width:60px; height:60px;
+        background:#333;
+        border-radius:10px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:30px; cursor:pointer;
+        transform: scale(1);
+        transition: transform 0.2s;
+        user-select: none;
+      `;
+      cardEl.dataset.index = index;
+      cardEl.dataset.emoji = card.emoji;
+
+      // Если карта уже открыта (угадана), показываем эмодзи
+      if (card.opened) {
+        cardEl.textContent = card.emoji;
+        cardEl.style.background = '#555';
+      } else {
+        cardEl.textContent = '❓';
+      }
+
+      cardEl.addEventListener('click', () => flipCard(cardEl, card));
+      grid.appendChild(cardEl);
+    });
+  }
+
+  function flipCard(cardEl, card) {
+    if (!canClick || gameOver) return;
+    if (card.opened || openedCards.length >= 2) return;
+
+    cardEl.textContent = card.emoji;
+    cardEl.style.background = '#555';
+    card.opened = true;
+    openedCards.push({ cardEl, card });
+
+    if (openedCards.length === 2) {
+      canClick = false;
+      const [first, second] = openedCards;
+      if (first.card.emoji === second.card.emoji) {
+        // Угадана пара
+        matchedPairs++;
+        openedCards = [];
+        canClick = true;
+        if (matchedPairs === pairs) {
+          levelComplete();
+        }
+      } else {
+        // Не угадана – переворачиваем обратно через 600 мс
+        setTimeout(() => {
+          first.cardEl.textContent = '❓';
+          first.cardEl.style.background = '#333';
+          first.card.opened = false;
+          second.cardEl.textContent = '❓';
+          second.cardEl.style.background = '#333';
+          second.card.opened = false;
+          openedCards = [];
+          canClick = true;
+        }, 600);
+      }
+    }
+  }
+
+  function levelComplete() {
+    levelsCleared++;
+    if (window.addCoins) window.addCoins(2); // +2 монеты за уровень
+
+    // Усложнение: каждые 2 уровня увеличиваем количество пар и уменьшаем время
+    level++;
+    if (levelsCleared % 2 === 0) {
+      pairs = Math.min(pairs + 2, 16); // макс 16 пар (32 карточки)
+      totalCards = pairs * 2;
+    }
+    timeLimit = Math.max(15, 45 - (level - 1) * 2); // уменьшаем до минимума 15 секунд
+    timeLeft = timeLimit;
+    matchedPairs = 0;
+    openedCards = [];
+    deck = createDeck();
+    renderGrid();
+    updateInfo();
+    resetTimer();
+  }
+
+  function updateInfo() {
+    infoDiv.textContent = `Уровень: ${level} | Пары: ${pairs} | Время: ${timeLeft}с`;
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateInfo();
+      if (timeLeft <= 0) {
+        endGame();
+      }
+    }, 1000);
+  }
+
+  function endGame() {
+    gameOver = true;
+    clearInterval(timerInterval);
+    canClick = false;
+    // Монеты за рекорд
+    if (window.updateRecord && window.updateRecord('memory', levelsCleared)) {
+      if (window.addCoins) window.addCoins(10);
+    }
+    if (typeof showMessage === 'function') {
+      showMessage(`Мемори окончено! Пройдено уровней: ${levelsCleared}. Монет: ${levelsCleared * 2}`, '#ff0');
+    }
+    setTimeout(() => {
+      overlay.remove();
+      if (typeof safeRedraw === 'function') safeRedraw();
+    }, 2000);
+  }
+
+  // Закрытие по кнопке
+  closeBtn.addEventListener('click', () => {
+    if (!gameOver) endGame();
+    else overlay.remove();
+  });
+
+  // Старт
+  renderGrid();
+  resetTimer();
+});
+
   
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
@@ -1786,6 +1984,7 @@ applyWeatherByTime();
 <div>🎯 Бит: <span id="rec-bit">0</span></div>
 <div>🔢 2048: <span id="rec-2048">0</span> макс. плитка</div>
 <div>🧱 Тетрис: <span id="rec-tetris">0</span> линий</div>
+<div>🧠 Мемори: <span id="rec-memory">0</span> уровней</div>
     <button id="close-profile" style="margin-top:10px;">Закрыть</button>
   </div>
 </div>
@@ -1974,6 +2173,8 @@ const FRAMES = [
     document.getElementById('rec-bit').textContent = profile.records.bit;
 document.getElementById('rec-2048').textContent = profile.records['2048'] || 0;
 document.getElementById('rec-tetris').textContent = profile.records.tetris || 0;
+document.getElementById('rec-memory').textContent = profile.records.memory || 0;
+
     
     const av = AVATARS.find(a => a.id === profile.equipped.avatar) || AVATARS[0];
     const preview = document.getElementById('profile-avatar-preview');
