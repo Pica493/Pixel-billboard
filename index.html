@@ -1635,7 +1635,75 @@ addEasterEgg('memory', 'MEMORY', function() {
   resetTimer();
 });
 
+// ================= ЧЕЛОВЕК-ПАУК: ПАУТИНА =================
+addEasterEgg('spiderman', 'SPIDERMAN', function() {
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
 
+  const web = document.createElement('div');
+  web.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 300000; pointer-events: none;
+  `;
+  document.body.appendChild(web);
+
+  // Радиальные нити (8 лучей)
+  for (let angle = 0; angle < 360; angle += 22.5) {
+    const line = document.createElement('div');
+    const rad = (angle * Math.PI) / 180;
+    const length = Math.sqrt(centerX * centerX + centerY * centerY);
+    line.style.cssText = `
+      position: absolute;
+      top: ${centerY}px; left: ${centerX}px;
+      width: ${length}px; height: 2px;
+      background: linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.2));
+      transform-origin: 0 0;
+      transform: rotate(${rad}rad) scaleX(0);
+      opacity: 0.8;
+      transition: transform 0.6s ease-out, opacity 0.3s;
+    `;
+    web.appendChild(line);
+    requestAnimationFrame(() => { line.style.transform = `rotate(${rad}rad) scaleX(1)`; });
+  }
+
+  // Круговые нити (5 колец)
+  for (let r = 50; r <= 250; r += 50) {
+    const circle = document.createElement('div');
+    circle.style.cssText = `
+      position: absolute;
+      top: ${centerY - r}px; left: ${centerX - r}px;
+      width: ${r * 2}px; height: ${r * 2}px;
+      border: 2px solid rgba(255,255,255,0.7);
+      border-radius: 50%;
+      opacity: 0;
+      transform: scale(0);
+      transition: transform 0.6s ease-out, opacity 0.3s;
+    `;
+    web.appendChild(circle);
+    requestAnimationFrame(() => { circle.style.opacity = '0.8'; circle.style.transform = 'scale(1)'; });
+  }
+
+  // Центральный узел
+  const centerCircle = document.createElement('div');
+  centerCircle.style.cssText = `
+    position: absolute;
+    top: ${centerY - 20}px; left: ${centerX - 20}px;
+    width: 40px; height: 40px;
+    border: 2px solid rgba(255,255,255,0.9);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0);
+    transition: transform 0.6s ease-out, opacity 0.3s;
+  `;
+  web.appendChild(centerCircle);
+  requestAnimationFrame(() => { centerCircle.style.opacity = '1'; centerCircle.style.transform = 'scale(1)'; });
+
+  // Исчезновение через 2.5 секунды
+  setTimeout(() => {
+    web.style.opacity = '0';
+    setTimeout(() => web.remove(), 500);
+  }, 2500);
+});
 
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
