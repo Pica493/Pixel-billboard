@@ -567,104 +567,37 @@ easterInput.addEventListener('keydown', function(e) {
   addEasterEgg('bleach', 'BLEACH', triggerBleachPortal);
 
   // snake
-  function startSnake() {
-    const snakeCanvas = document.createElement('canvas');
-    snakeCanvas.width = canvas.width; snakeCanvas.height = canvas.height;
-    snakeCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:250;';
-    container.appendChild(snakeCanvas);
+  
+function startSnake() {
+  const snakeCanvas = document.createElement('canvas');
+  snakeCanvas.width = canvas.width;
+  snakeCanvas.height = canvas.height;
+  snakeCanvas.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; z-index:250;';
+  container.appendChild(snakeCanvas);
 
-snakeCanvas.style.touchAction = 'none';
-    
-snakeCanvas.addEventListener('touchmove', function(e) {
+  // Отключаем стандартное поведение для тач-событий
+  snakeCanvas.style.touchAction = 'none';
+  snakeCanvas.addEventListener('touchmove', function(e) {
     e.preventDefault();
-}, { passive: false });
-    
-    
-    const sctx = snakeCanvas.getContext('2d');
-    const CELL_SIZE = 10, COLS = canvas.width / CELL_SIZE, ROWS = canvas.height / CELL_SIZE;
-   
-    
-    // Поиск случайного свободного места для старта (3 клетки в ряд по горизонтали)
-function findFreeStart() {
-  const maxAttempts = 200;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const startX = Math.floor(Math.random() * (COLS - 5)) + 2;
-    const startY = Math.floor(Math.random() * (ROWS - 2)) + 1;
-    const cells = [
-      {x: startX, y: startY},
-      {x: startX - 1, y: startY},
-      {x: startX - 2, y: startY}
-    ];
-    // Проверяем, что все три клетки свободны
-    const allFree = cells.every(cell => isCellFree(cell.x, cell.y));
-    if (allFree) return cells;
-  }
-  return null; // не нашли места
-}
+  }, { passive: false });
 
-let snake = findFreeStart();
-if (!snake) {
-  // Если совсем нет свободного места, показываем сообщение и выходим
-  gameOver = true;
-  drawSnake();
-  showMessage('Нет места для змейки! Попробуй позже.', '#f00');
-  setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
-  return;
-}
+  const sctx = snakeCanvas.getContext('2d');
+  const CELL_SIZE = 10,
+    COLS = canvas.width / CELL_SIZE,
+    ROWS = canvas.height / CELL_SIZE;
 
-let direction = {x: 1, y: 0};
-let nextDirection = {x: 1, y: 0};
-let food = spawnFood();
-let gameOver = false;
-let gameInterval;
-let touchStartX = null, touchStartY = null;
-    
-    function isCellFree(cellX, cellY) {
-      const px = cellX * CELL_SIZE, py = cellY * CELL_SIZE;
-      for (let block of window.soldPixels) {
-        if (px < block.x + block.w && px + CELL_SIZE > block.x && py < block.y + block.h && py + CELL_SIZE > block.y) return false;
-      }
-      return cellX >= 0 && cellX < COLS && cellY >= 0 && cellY < ROWS;
-    }
-    function spawnFood() {
-      for (let i = 0; i < 1000; i++) {
-        const fx = Math.floor(Math.random() * COLS), fy = Math.floor(Math.random() * ROWS);
-        if (isCellFree(fx, fy) && !snake.some(s => s.x === fx && s.y === fy)) return {x: fx, y: fy};
-      }
-      return null;
-    }
-    function drawSnake() {
-      sctx.clearRect(0, 0, snakeCanvas.width, snakeCanvas.height);
-      sctx.fillStyle = '#00cc00'; snake.forEach(seg => sctx.fillRect(seg.x * CELL_SIZE, seg.y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1));
-      if (food) { sctx.fillStyle = '#ff3333'; sctx.fillRect(food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1); }
-      if (gameOver) {
-        sctx.fillStyle = 'rgba(0,0,0,0.7)'; sctx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
-        sctx.fillStyle = '#fff'; sctx.font = '20px monospace'; sctx.textAlign = 'center'; sctx.fillText('Игра окончена!', snakeCanvas.width/2, snakeCanvas.height/2);
-      }
-    }
-    function step() {
-      if (gameOver) return;
-      if (!(nextDirection.x === -direction.x && nextDirection.y === -direction.y)) direction = nextDirection;
-      const head = snake[0], newHead = {x: head.x + direction.x, y: head.y + direction.y};
-     
-      
-      if (!isCellFree(newHead.x, newHead.y) || snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
-  gameOver = true;
-  const snakeScore = snake.length - 3;
-  if (snakeScore > 0) {
-    const coins = Math.floor(snakeScore / 3);
-    if (coins > 0) window.addCoins(coins);
-    if (window.updateRecord('snake', snakeScore)) window.addCoins(10);
-  }
+  // ---------- УПРАВЛЕНИЕ СВАЙПАМИ (ТЕЛЕФОН) ----------
+  let touchStartX = null,
+    touchStartY = null;
 
-snakeCanvas.addEventListener('touchstart', function(e) {
+  snakeCanvas.addEventListener('touchstart', function(e) {
     e.preventDefault();
     const touch = e.touches[0];
     touchStartX = touch.clientX;
     touchStartY = touch.clientY;
-}, { passive: false });
+  }, { passive: false });
 
-snakeCanvas.addEventListener('touchend', function(e) {
+  snakeCanvas.addEventListener('touchend', function(e) {
     if (touchStartX === null || touchStartY === null) return;
     e.preventDefault();
     const touch = e.changedTouches[0];
@@ -673,52 +606,147 @@ snakeCanvas.addEventListener('touchend', function(e) {
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    if (absDx < 10 && absDy < 10) return; // игнорируем маленькие движения
+    if (absDx < 10 && absDy < 10) return; // игнорируем случайные касания
 
     if (absDx > absDy) {
-        // горизонтальный свайп
-        if (dx > 0) {
-            nextDirection = {x: 1, y: 0}; // вправо
-        } else {
-            nextDirection = {x: -1, y: 0}; // влево
-        }
+      // горизонтальный свайп
+      nextDirection = dx > 0 ? { x: 1, y: 0 } : { x: -1, y: 0 };
     } else {
-        // вертикальный свайп
-        if (dy > 0) {
-            nextDirection = {x: 0, y: 1}; // вниз
-        } else {
-            nextDirection = {x: 0, y: -1}; // вверх
-        }
+      // вертикальный свайп
+      nextDirection = dy > 0 ? { x: 0, y: 1 } : { x: 0, y: -1 };
     }
     touchStartX = null;
     touchStartY = null;
-}, { passive: false });
+  }, { passive: false });
 
-        
-  drawSnake();
-  clearInterval(gameInterval);
-  setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
-  return;
-}
-
-      
-      snake.unshift(newHead);
-      if (food && newHead.x === food.x && newHead.y === food.y) {
-        food = spawnFood();
-        if (!food) { gameOver = true; drawSnake(); clearInterval(gameInterval); setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000); return; }
-      } else { snake.pop(); }
-      drawSnake();
+  // ---------- ЛОГИКА ИГРЫ ----------
+  function findFreeStart() {
+    const maxAttempts = 200;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const startX = Math.floor(Math.random() * (COLS - 5)) + 2;
+      const startY = Math.floor(Math.random() * (ROWS - 2)) + 1;
+      const cells = [
+        { x: startX, y: startY },
+        { x: startX - 1, y: startY },
+        { x: startX - 2, y: startY }
+      ];
+      const allFree = cells.every(cell => isCellFree(cell.x, cell.y));
+      if (allFree) return cells;
     }
-    function handleKey(e) {
-      e.preventDefault();
-      const keyMap = { 'ArrowUp': {x:0, y:-1}, 'ArrowDown': {x:0, y:1}, 'ArrowLeft': {x:-1, y:0}, 'ArrowRight': {x:1, y:0} };
-      if (keyMap[e.key]) nextDirection = keyMap[e.key];
-    }
-    window.addEventListener('keydown', handleKey);
-    drawSnake(); gameInterval = setInterval(step, 150);
-    const cleanup = () => { clearInterval(gameInterval); window.removeEventListener('keydown', handleKey); if (snakeCanvas.parentNode) snakeCanvas.remove(); safeRedraw(); };
-    setTimeout(cleanup, 120000);
+    return null;
   }
+
+  let snake = findFreeStart();
+  if (!snake) {
+    gameOver = true;
+    drawSnake();
+    showMessage('Нет места для змейки! Попробуй позже.', '#f00');
+    setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+    return;
+  }
+
+  let direction = { x: 1, y: 0 };
+  let nextDirection = { x: 1, y: 0 };
+  let food = spawnFood();
+  let gameOver = false;
+  let gameInterval;
+
+  function isCellFree(cellX, cellY) {
+    const px = cellX * CELL_SIZE,
+      py = cellY * CELL_SIZE;
+    for (let block of window.soldPixels) {
+      if (px < block.x + block.w && px + CELL_SIZE > block.x && py < block.y + block.h && py + CELL_SIZE > block.y) return false;
+    }
+    return cellX >= 0 && cellX < COLS && cellY >= 0 && cellY < ROWS;
+  }
+
+  function spawnFood() {
+    for (let i = 0; i < 1000; i++) {
+      const fx = Math.floor(Math.random() * COLS),
+        fy = Math.floor(Math.random() * ROWS);
+      if (isCellFree(fx, fy) && !snake.some(s => s.x === fx && s.y === fy)) return { x: fx, y: fy };
+    }
+    return null;
+  }
+
+  function drawSnake() {
+    sctx.clearRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+    sctx.fillStyle = '#00cc00';
+    snake.forEach(seg => sctx.fillRect(seg.x * CELL_SIZE, seg.y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1));
+    if (food) {
+      sctx.fillStyle = '#ff3333';
+      sctx.fillRect(food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
+    }
+    if (gameOver) {
+      sctx.fillStyle = 'rgba(0,0,0,0.7)';
+      sctx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+      sctx.fillStyle = '#fff';
+      sctx.font = '20px monospace';
+      sctx.textAlign = 'center';
+      sctx.fillText('Игра окончена!', snakeCanvas.width / 2, snakeCanvas.height / 2);
+    }
+  }
+
+  function step() {
+    if (gameOver) return;
+    if (!(nextDirection.x === -direction.x && nextDirection.y === -direction.y)) direction = nextDirection;
+    const head = snake[0],
+      newHead = { x: head.x + direction.x, y: head.y + direction.y };
+
+    if (!isCellFree(newHead.x, newHead.y) || snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+      gameOver = true;
+      const snakeScore = snake.length - 3;
+      if (snakeScore > 0) {
+        const coins = Math.floor(snakeScore / 3);
+        if (coins > 0) window.addCoins(coins);
+        if (window.updateRecord('snake', snakeScore)) window.addCoins(10);
+      }
+      drawSnake();
+      clearInterval(gameInterval);
+      setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+      return;
+    }
+
+    snake.unshift(newHead);
+    if (food && newHead.x === food.x && newHead.y === food.y) {
+      food = spawnFood();
+      if (!food) {
+        gameOver = true;
+        drawSnake();
+        clearInterval(gameInterval);
+        setTimeout(() => { snakeCanvas.remove(); safeRedraw(); }, 2000);
+        return;
+      }
+    } else {
+      snake.pop();
+    }
+    drawSnake();
+  }
+
+  function handleKey(e) {
+    e.preventDefault();
+    const keyMap = {
+      'ArrowUp': { x: 0, y: -1 },
+      'ArrowDown': { x: 0, y: 1 },
+      'ArrowLeft': { x: -1, y: 0 },
+      'ArrowRight': { x: 1, y: 0 }
+    };
+    if (keyMap[e.key]) nextDirection = keyMap[e.key];
+  }
+
+  window.addEventListener('keydown', handleKey);
+  drawSnake();
+  gameInterval = setInterval(step, 150);
+
+  const cleanup = () => {
+    clearInterval(gameInterval);
+    window.removeEventListener('keydown', handleKey);
+    if (snakeCanvas.parentNode) snakeCanvas.remove();
+    safeRedraw();
+  };
+  setTimeout(cleanup, 120000);
+}
+    
   addEasterEgg('snake', 'SNAKE', startSnake);
 
   // pikachu
