@@ -2179,8 +2179,9 @@ addEasterEgg('batman', 'BATMAN', function() {
 });
 
        
-  // ================= СКОРПИОН: ЦЕПЬ С КУНАЕМ =================
+  // ================= СКОРПИОН: ЦЕПЬ С КУНАЕМ (сайт улетает вправо) =================
 addEasterEgg('scorpion', 'SCORPION', function() {
+  // Создаём canvas для цепи и куная
   const canvas = document.createElement('canvas');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -2196,59 +2197,85 @@ addEasterEgg('scorpion', 'SCORPION', function() {
   let startTime = null;
   const duration = 4000; // 4 секунды
 
+  // Сохраняем оригинальный transform body
+  const originalTransform = document.body.style.transform || '';
+  const originalTransition = document.body.style.transition || '';
+
+  // Включаем плавное перемещение body
+  document.body.style.transition = 'transform 0.6s ease-in-out';
+
   function drawKunai(x, y, angle) {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
-    ctx.fillStyle = '#888';
+
+    // Лезвие (большое)
+    ctx.fillStyle = '#ccc';
     ctx.beginPath();
-    ctx.moveTo(0, -30);
-    ctx.lineTo(8, 10);
+    ctx.moveTo(0, -45);   // остриё
+    ctx.lineTo(15, 15);
+    ctx.lineTo(0, 30);
+    ctx.lineTo(-15, 15);
+    ctx.closePath();
+    ctx.fill();
+
+    // Блик на лезвии
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(0, -40);
+    ctx.lineTo(7, 10);
     ctx.lineTo(0, 20);
-    ctx.lineTo(-8, 10);
+    ctx.lineTo(-7, 10);
     ctx.closePath();
     ctx.fill();
-    ctx.fillStyle = '#ddd';
+
+    // Кольцо (большое)
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.moveTo(0, -20);
-    ctx.lineTo(3, 5);
-    ctx.lineTo(0, 10);
-    ctx.lineTo(-3, 5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = '#aaa';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(0, 28, 8, 0, Math.PI * 2);
+    ctx.arc(0, 42, 12, 0, Math.PI * 2);
     ctx.stroke();
+
+    // Внутреннее отверстие кольца
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(0, 42, 7, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.restore();
   }
 
-  function drawChain(startX, startY, endX, endY, tension = 0) {
-    ctx.strokeStyle = '#666';
-    ctx.lineWidth = 4;
-    ctx.shadowColor = '#000';
-    ctx.shadowBlur = 5;
+  function drawChain(startX, startY, endX, endY) {
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const distance = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx);
+
+    ctx.save();
+    ctx.translate(startX, startY);
+    ctx.rotate(angle);
+
+    // Основной трос (толстый)
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 8;
     ctx.beginPath();
-    const midX = (startX + endX) / 2 + tension;
-    const midY = (startY + endY) / 2;
-    ctx.moveTo(startX, startY);
-    ctx.quadraticCurveTo(midX, midY, endX, endY);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(distance, 0);
     ctx.stroke();
-    const distance = Math.hypot(endX - startX, endY - startY);
-    const steps = Math.floor(distance / 15);
-    for (let i = 0; i < steps; i++) {
-      const t = i / steps;
-      const invT = 1 - t;
-      const x = invT * invT * startX + 2 * invT * t * midX + t * t * endX;
-      const y = invT * invT * startY + 2 * invT * t * midY + t * t * endY;
-      ctx.strokeStyle = '#555';
-      ctx.lineWidth = 2;
+
+    // Звенья цепи
+    ctx.strokeStyle = '#777';
+    ctx.lineWidth = 4;
+    for (let i = 0; i < distance; i += 20) {
       ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.arc(i, 0, 6, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(i + 10, 0, 6, 0, Math.PI * 2);
       ctx.stroke();
     }
-    ctx.shadowBlur = 0;
+
+    ctx.restore();
   }
 
   function animate(timestamp) {
@@ -2257,70 +2284,52 @@ addEasterEgg('scorpion', 'SCORPION', function() {
     const progress = Math.min(elapsed / duration, 1);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (progress <= 0.2) {
-      const t = progress / 0.2;
-      const startX = window.innerWidth + 100;
+    // Кунай вылетает справа и втыкается (0–0.5 сек)
+    if (progress <= 0.15) {
+      const t = progress / 0.15;
+      const startX = window.innerWidth + 150;
       const startY = centerY;
       const endX = centerX;
       const endY = centerY;
       const x = startX + (endX - startX) * t;
       const y = startY + (endY - startY) * t;
-      const angle = Math.PI * 0.5 + (t * Math.PI * 0.3);
-      drawChain(startX, startY, x, y, -50 * t);
-      drawKunai(x, y, angle);
-    } else if (progress <= 0.6) {
-      const t = (progress - 0.2) / 0.4;
-      const offset = t * 200;
-      ctx.fillStyle = 'rgba(0,0,0,0.3)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(centerX - 150, centerY - 150, 300, 300);
-      ctx.clip();
-      ctx.fillStyle = '#fff';
-      for (let i = 0; i < 50; i++) {
-        const px = centerX - 150 + Math.random() * 300 + offset;
-        const py = centerY - 150 + Math.random() * 300;
-        ctx.fillRect(px, py, 8, 8);
+      drawChain(startX, startY, x, y);
+      drawKunai(x, y, Math.PI * 0.9); // поворот для реалистичности
+    }
+    // Кунай тянет сайт вправо (0.15–0.6)
+    else if (progress <= 0.6) {
+      const t = (progress - 0.15) / 0.45;
+      const pullDistance = t * 200; // пикселей сдвига
+      document.body.style.transform = `translateX(${pullDistance}px)`;
+      drawChain(window.innerWidth + 150, centerY, centerX + pullDistance, centerY);
+      drawKunai(centerX + pullDistance, centerY, Math.PI * 0.9);
+    }
+    // Возврат сайта обратно (0.6–1.0)
+    else {
+      const t = (progress - 0.6) / 0.4;
+      const returnDistance = 200 * (1 - t);
+      document.body.style.transform = `translateX(${returnDistance}px)`;
+      drawChain(window.innerWidth + 150, centerY, centerX + returnDistance, centerY);
+      drawKunai(centerX + returnDistance, centerY, Math.PI * 0.9);
+      if (returnDistance < 1) {
+        document.body.style.transform = originalTransform;
       }
-      ctx.restore();
-      drawChain(window.innerWidth + 100, centerY, centerX, centerY, -100);
-      drawKunai(centerX, centerY, Math.PI * 0.8);
-    } else if (progress <= 0.8) {
-      const t = (progress - 0.6) / 0.2;
-      const offset = 200 * (1 - t);
-      ctx.fillStyle = 'rgba(0,0,0,0.2)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(centerX - 150, centerY - 150, 300, 300);
-      ctx.clip();
-      ctx.fillStyle = '#fff';
-      for (let i = 0; i < 50; i++) {
-        const px = centerX - 150 + Math.random() * 300 + offset;
-        const py = centerY - 150 + Math.random() * 300;
-        ctx.fillRect(px, py, 8, 8);
-      }
-      ctx.restore();
-      drawChain(window.innerWidth + 100, centerY, centerX, centerY, -50 * (1 - t));
-      drawKunai(centerX, centerY, Math.PI * 0.8);
-    } else {
-      const t = (progress - 0.8) / 0.2;
-      ctx.globalAlpha = 1 - t;
-      drawChain(window.innerWidth + 100, centerY, centerX, centerY, -20);
-      drawKunai(centerX, centerY, Math.PI * 0.8);
-      ctx.globalAlpha = 1;
     }
 
     if (progress < 1) {
       requestAnimationFrame(animate);
     } else {
+      // Восстанавливаем стили body
+      document.body.style.transition = originalTransition;
+      document.body.style.transform = originalTransform;
       canvas.remove();
     }
   }
 
   requestAnimationFrame(animate);
 });
+
+
   
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
