@@ -1912,7 +1912,8 @@ addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
 
 
 
-  // ================= ШАРИНГАН (улучшенный) =================
+
+// ================= ШАРИНГАН (исправленный) =================
 addEasterEgg('sharingan', 'SHARINGAN', function() {
   const overlay = document.createElement('div');
   overlay.style.cssText = `
@@ -1927,7 +1928,7 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
 
   const eye = document.createElement('div');
   eye.style.cssText = `
-    width: 220px; height: 220px;
+    width: 240px; height: 240px;
     background: radial-gradient(circle at 30% 30%, #ff0000, #8b0000 70%, #000 100%);
     border-radius: 50%;
     border: 8px solid #111;
@@ -1940,7 +1941,7 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
   const pupil = document.createElement('div');
   pupil.style.cssText = `
     position: absolute;
-    top: 90px; left: 90px;
+    top: 100px; left: 100px;
     width: 40px; height: 40px;
     background: #000;
     border-radius: 50%;
@@ -1949,56 +1950,55 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
   `;
   eye.appendChild(pupil);
 
-  // Томоэ (3 запятые)
+  // Томоэ (запятые) и дуги
   for (let i = 0; i < 3; i++) {
     const angle = (i * 120) * Math.PI / 180;
-    const radius = 70;
-    const cx = 110 + radius * Math.cos(angle);
-    const cy = 110 + radius * Math.sin(angle);
+    const radius = 75;
+    const cx = 120 + radius * Math.cos(angle);
+    const cy = 120 + radius * Math.sin(angle);
 
     // Тело томоэ (круг)
     const tomoe = document.createElement('div');
     tomoe.style.cssText = `
       position: absolute;
-      top: ${cy - 20}px; left: ${cx - 20}px;
-      width: 40px; height: 40px;
+      top: ${cy - 22}px; left: ${cx - 22}px;
+      width: 44px; height: 44px;
       background: #111;
       border-radius: 50%;
-      transform: rotate(${angle + Math.PI/2}rad);
     `;
-    // Хвостик томоэ (треугольник)
+    eye.appendChild(tomoe);
+
+    // Хвостик томоэ (треугольник, смотрящий к центру)
     const tail = document.createElement('div');
+    const tailAngle = angle + Math.PI; // направлен к центру
+    const tailLength = 30;
+    const tailX = cx + Math.cos(tailAngle) * 22; // от края круга
+    const tailY = cy + Math.sin(tailAngle) * 22;
     tail.style.cssText = `
       position: absolute;
-      top: 50%; left: 50%;
+      top: ${tailY - 8}px; left: ${tailX - 8}px;
       width: 0; height: 0;
       border-left: 8px solid transparent;
       border-right: 8px solid transparent;
-      border-top: 16px solid #111;
-      transform: translate(-50%, -100%);
+      border-top: ${tailLength}px solid #111;
+      transform-origin: 8px 0;
+      transform: rotate(${tailAngle + Math.PI/2}rad);
     `;
-    tomoe.appendChild(tail);
-    eye.appendChild(tomoe);
-  }
+    eye.appendChild(tail);
 
-  // Тонкие дуги между томоэ (3 штуки)
-  for (let i = 0; i < 3; i++) {
-    const angle1 = (i * 120) * Math.PI / 180;
-    const angle2 = ((i + 1) % 3 * 120) * Math.PI / 180;
-    const midAngle = (angle1 + angle2) / 2;
-    const arc = document.createElement('div');
-    const arcRadius = 55;
-    arc.style.cssText = `
+    // Дуга между томоэ (окружность, проходящая между центральным зрачком и томоэ)
+    const arcRadius = 50;
+    const arcContainer = document.createElement('div');
+    arcContainer.style.cssText = `
       position: absolute;
-      top: ${110 - arcRadius}px; left: ${110 - arcRadius}px;
+      top: ${120 - arcRadius}px; left: ${120 - arcRadius}px;
       width: ${arcRadius * 2}px; height: ${arcRadius * 2}px;
       border: 2px solid transparent;
-      border-top-color: rgba(0,0,0,0.4);
+      border-top-color: rgba(0,0,0,0.5);
       border-radius: 50%;
-      transform: rotate(${midAngle}rad);
-      opacity: 0.6;
+      transform: rotate(${angle + 60 * Math.PI / 180}rad);
     `;
-    eye.appendChild(arc);
+    eye.appendChild(arcContainer);
   }
 
   requestAnimationFrame(() => { overlay.style.opacity = '1'; });
@@ -2008,7 +2008,6 @@ addEasterEgg('sharingan', 'SHARINGAN', function() {
     setTimeout(() => overlay.remove(), 500);
   }, 3000);
 });
-
   
   
   // ---------- КАЛЕНДАРЬ И ВРЕМЯ ----------
