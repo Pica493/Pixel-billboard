@@ -1705,8 +1705,265 @@ addEasterEgg('spiderman', 'SPIDERMAN', function() {
   }, 2500);
 });
 
+// ================= НАЗАД В БУДУЩЕЕ: ЧАСЫ НА БАШНЕ (дверь вплотную к порогу) =================
+addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
+  const canvas = document.createElement('canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.cssText = 'position:fixed;top:0;left:0;z-index:300000;pointer-events:none;background:transparent;';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
 
+  const centerX = canvas.width / 2, centerY = canvas.height / 2;
+  let startTime = null;
+  const totalDuration = 5000;
 
+  const buildingWidth = 480;
+  const mainBodyHeight = 250;
+  const roofHeight = 180;
+  const columnHeight = 200;
+  const columnRadius = 16;
+  const columnBaseWidth = 26;
+  const columnGap = 100;
+  const columnsX = [
+    centerX - columnGap * 1.5,
+    centerX - columnGap * 0.5,
+    centerX + columnGap * 0.5,
+    centerX + columnGap * 1.5
+  ];
+
+  const columnTopY = centerY - mainBodyHeight / 2 + 30;
+  const columnBottomY = columnTopY + columnHeight;
+  const facadeTopY = columnBottomY - columnHeight - 6;
+  const facadeBottomY = columnBottomY + 6;
+
+  // Дверь: низ примыкает к верхней ступени порога
+  const doorHeight = 80;
+  const startStepY = columnBottomY + 2; // верхняя ступень порога
+  const doorY = startStepY - doorHeight; // дверь над ступенью
+
+  const clockCenterX = centerX;
+  const clockCenterY = centerY - mainBodyHeight / 2 - roofHeight * 0.35;
+  const clockRadius = 65;
+
+  function drawColumn(x, topY, bottomY) {
+    const shaftRadius = columnRadius;
+    const baseWidth = columnBaseWidth;
+    const baseHeight = 14, capitalHeight = 16;
+
+    // База
+    ctx.fillStyle = '#d4c5a9';
+    ctx.fillRect(x - baseWidth/2, bottomY - baseHeight, baseWidth, baseHeight);
+    ctx.strokeStyle = '#b0a090'; ctx.lineWidth = 2;
+    ctx.strokeRect(x - baseWidth/2, bottomY - baseHeight, baseWidth, baseHeight);
+
+    // Ствол
+    ctx.fillStyle = '#e6dcc8';
+    ctx.beginPath();
+    ctx.moveTo(x - shaftRadius, topY);
+    ctx.lineTo(x - shaftRadius, bottomY - baseHeight);
+    ctx.arcTo(x - shaftRadius, bottomY - baseHeight + shaftRadius, x, bottomY - baseHeight + shaftRadius, shaftRadius);
+    ctx.arcTo(x + shaftRadius, bottomY - baseHeight + shaftRadius, x + shaftRadius, bottomY - baseHeight, shaftRadius);
+    ctx.lineTo(x + shaftRadius, topY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#b0a090'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // Капитель
+    ctx.fillStyle = '#d4c5a9';
+    ctx.fillRect(x - baseWidth/2, topY - capitalHeight, baseWidth, capitalHeight);
+    ctx.strokeRect(x - baseWidth/2, topY - capitalHeight, baseWidth, capitalHeight);
+    ctx.fillStyle = '#b0a090';
+    ctx.beginPath(); ctx.arc(x - baseWidth/2 + 6, topY - capitalHeight/2, 5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + baseWidth/2 - 6, topY - capitalHeight/2, 5, 0, Math.PI*2); ctx.fill();
+  }
+
+  function drawRoof() {
+    const roofBaseY = columnTopY - 8;
+    ctx.fillStyle = '#6b5b4f';
+    ctx.beginPath();
+    ctx.moveTo(centerX - buildingWidth/2 - 15, roofBaseY);
+    ctx.lineTo(centerX, roofBaseY - roofHeight);
+    ctx.lineTo(centerX + buildingWidth/2 + 15, roofBaseY);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#3e362c'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#5d4e3d';
+    ctx.fillRect(centerX - buildingWidth/2 - 25, roofBaseY - 8, buildingWidth + 50, 15);
+  }
+
+  function drawHorizontalBands() {
+    const y1 = columnTopY, y2 = columnTopY + 12, y3 = columnTopY + 24;
+    ctx.fillStyle = '#8b7d6b';
+    ctx.fillRect(centerX - buildingWidth/2, y1, buildingWidth, 8);
+    ctx.fillRect(centerX - buildingWidth/2, y2, buildingWidth, 6);
+    ctx.fillRect(centerX - buildingWidth/2, y3, buildingWidth, 6);
+  }
+
+  function drawVerticalWindow(x, y, w = 30, h = 60) {
+    ctx.fillStyle = '#aed6f1'; ctx.fillRect(x - w/2, y, w, h);
+    ctx.strokeStyle = '#5d4e3d'; ctx.lineWidth = 3; ctx.strokeRect(x - w/2, y, w, h);
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + h);
+    ctx.moveTo(x - w/2, y + h/2); ctx.lineTo(x + w/2, y + h/2); ctx.stroke();
+  }
+
+  function drawDoor(x, y) {
+    ctx.fillStyle = '#5b2c22'; ctx.fillRect(x - 20, y, 40, 80);
+    ctx.strokeStyle = '#3e362c'; ctx.lineWidth = 3; ctx.strokeRect(x - 20, y, 40, 80);
+    ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.arc(x + 12, y + 40, 5, 0, Math.PI*2); ctx.fill();
+  }
+
+  function drawClockFace() {
+    ctx.beginPath(); ctx.arc(clockCenterX, clockCenterY, clockRadius, 0, Math.PI*2);
+    ctx.fillStyle = '#f5f0e6'; ctx.fill();
+    ctx.strokeStyle = '#4a3c2c'; ctx.lineWidth = 6; ctx.stroke();
+    ctx.beginPath(); ctx.arc(clockCenterX, clockCenterY, clockRadius - 8, 0, Math.PI*2);
+    ctx.strokeStyle = '#b0a090'; ctx.lineWidth = 2; ctx.stroke();
+    const numerals = ['XII','III','VI','IX'];
+    const angles = [-Math.PI/2, 0, Math.PI/2, Math.PI];
+    ctx.font = 'bold 16px "Times New Roman", serif';
+    ctx.fillStyle = '#1a1a1a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let i=0; i<4; i++) {
+      const x = clockCenterX + Math.cos(angles[i])*(clockRadius-18);
+      const y = clockCenterY + Math.sin(angles[i])*(clockRadius-18);
+      ctx.fillText(numerals[i], x, y);
+    }
+    for (let i=0; i<12; i++) {
+      if (i%3===0) continue;
+      const angle = (i*30 - 90)*Math.PI/180;
+      const dx = clockCenterX + Math.cos(angle)*(clockRadius-14);
+      const dy = clockCenterY + Math.sin(angle)*(clockRadius-14);
+      ctx.beginPath(); ctx.arc(dx, dy, 3, 0, Math.PI*2); ctx.fillStyle = '#333'; ctx.fill();
+    }
+  }
+
+  function drawHands(hourAngle, minuteAngle) {
+    ctx.save(); ctx.translate(clockCenterX, clockCenterY); ctx.rotate(hourAngle);
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(-3, -clockRadius*0.45, 6, clockRadius*0.45); ctx.restore();
+    ctx.save(); ctx.translate(clockCenterX, clockCenterY); ctx.rotate(minuteAngle);
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(-2, -clockRadius*0.65, 4, clockRadius*0.65); ctx.restore();
+    ctx.beginPath(); ctx.arc(clockCenterX, clockCenterY, 5, 0, Math.PI*2); ctx.fillStyle = '#b22222'; ctx.fill();
+  }
+
+  function drawLightning(progress) {
+    if (progress<=0) return;
+    const alpha = Math.sin(progress*Math.PI)*0.9;
+    ctx.save(); ctx.globalAlpha = alpha;
+    const startX = centerX - 150 + Math.random()*50;
+    const startY = columnTopY - roofHeight - 20;
+    const endX = clockCenterX + (Math.random()-0.5)*20;
+    const endY = clockCenterY - clockRadius + 10;
+    ctx.strokeStyle = '#ffff80'; ctx.lineWidth = 4; ctx.shadowColor = '#ffff00'; ctx.shadowBlur = 15;
+    let x=startX, y=startY;
+    ctx.beginPath(); ctx.moveTo(x, y);
+    for (let i=1; i<=12; i++) {
+      const t = i/12;
+      const tx = startX + (endX-startX)*t;
+      const ty = startY + (endY-startY)*t;
+      x = tx + (Math.random()-0.5)*40*(1-t);
+      y = ty + (Math.random()-0.5)*30*(1-t);
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(endX, endY); ctx.stroke();
+    for (let j=0; j<4; j++) {
+      ctx.beginPath();
+      const bx = startX + (endX-startX)*(0.3+Math.random()*0.5);
+      const by = startY + (endY-startY)*(0.3+Math.random()*0.3);
+      ctx.moveTo(bx, by);
+      ctx.lineTo(bx + (Math.random()-0.5)*60, by + (Math.random()-0.2)*80);
+      ctx.lineWidth = 2; ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function animate(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    const progress = Math.min(elapsed / totalDuration, 1);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Фасад
+    ctx.fillStyle = '#8b7d6b';
+    ctx.fillRect(centerX - buildingWidth/2, facadeTopY, buildingWidth, facadeBottomY - facadeTopY);
+    ctx.strokeStyle = '#5d4e3d'; ctx.lineWidth = 2;
+    ctx.strokeRect(centerX - buildingWidth/2, facadeTopY, buildingWidth, facadeBottomY - facadeTopY);
+
+    // Окна (подняты выше)
+    const windowW = 30, windowH = 60;
+    const windowY = columnTopY + 30;
+    const sec1X = columnsX[0] + (columnsX[1]-columnsX[0])/2;
+    drawVerticalWindow(sec1X, windowY, windowW, windowH);
+    const secCenterX = columnsX[1] + (columnsX[2]-columnsX[1])/2;
+    drawVerticalWindow(secCenterX, windowY, windowW, 50);
+    const sec2X = columnsX[2] + (columnsX[3]-columnsX[2])/2;
+    drawVerticalWindow(sec2X, windowY, windowW, windowH);
+
+    const buildingLeft = centerX - buildingWidth/2;
+    const buildingRight = centerX + buildingWidth/2;
+    drawVerticalWindow((buildingLeft + columnsX[0]) / 2, windowY, windowW, windowH);
+    drawVerticalWindow((columnsX[3] + buildingRight) / 2, windowY, windowW, windowH);
+
+    drawHorizontalBands();
+    drawRoof();
+    drawClockFace();
+
+    // Ступени порога (начинаются от стволов колонн, расширяются книзу)
+    const leftEdge = columnsX[0] - columnRadius;
+    const rightEdge = columnsX[3] + columnRadius;
+    const baseWidth = rightEdge - leftEdge;
+    const steps = 3;
+    const stepHeight = 8;
+    const widths = [baseWidth, baseWidth + 20, baseWidth + 40];
+
+    for (let i = 0; i < steps; i++) {
+      const w = widths[i];
+      const x = (leftEdge + rightEdge) / 2 - w / 2;
+      const y = startStepY + i * stepHeight;
+      ctx.fillStyle = '#bdc3c7';
+      ctx.fillRect(x, y, w, stepHeight);
+      ctx.strokeStyle = '#7f8c8d'; ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, w, stepHeight);
+    }
+
+    // Дверь (низ примыкает к верхней ступени)
+    drawDoor(secCenterX, doorY);
+
+    // Колонны (передний план)
+    columnsX.forEach(x => drawColumn(x, columnTopY, columnBottomY));
+
+    // Стрелки часов
+    let hourAngle, minuteAngle;
+    if (progress < 0.4) {
+      const rot = progress * 360 * 5;
+      hourAngle = (rot - 90) * Math.PI / 180;
+      minuteAngle = (rot * 12 - 90) * Math.PI / 180;
+    } else if (progress < 0.7) {
+      const t = (progress - 0.4) / 0.3;
+      hourAngle = (360*5 - 90 + (-60 - (360*5 - 90)) * t) * Math.PI / 180;
+      minuteAngle = (360*5*12 - 90 + (24 - (360*5*12 - 90)) * t) * Math.PI / 180;
+    } else {
+      hourAngle = (-60) * Math.PI / 180;
+      minuteAngle = 24 * Math.PI / 180;
+    }
+    drawHands(hourAngle, minuteAngle);
+
+    // Молния
+    if (progress > 0.7 && progress < 0.9) {
+      drawLightning((progress - 0.7) / 0.2);
+    } else if (progress >= 0.9) {
+      canvas.style.opacity = 1 - (progress - 0.9) / 0.1;
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      canvas.remove();
+    }
+  }
+
+  requestAnimationFrame(animate);
+});
+
+  
   
 
   
