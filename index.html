@@ -1708,9 +1708,256 @@ addEasterEgg('spiderman', 'SPIDERMAN', function() {
 
 
 
-  // ================= НАЗАД В БУДУЩЕЕ: ЧАСЫ НА БАШНЕ (исправленные) =================
+  
+// ================= НАЗАД В БУДУЩЕЕ: ЧАСЫ НА БАШНЕ (исправленные) =================
+addEasterEgg('backtothefuture', 'BACKTOTHEFUTURE', function() {
+  const canvas = document.createElement('canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.cssText = `
+    position: fixed; top: 0; left: 0;
+    z-index: 300000; pointer-events: none;
+    background: transparent;
+  `;
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
 
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  let startTime = null;
+  const totalDuration = 5000; // 5 секунд
 
+  // Параметры здания
+  const buildingWidth = 180;
+  const buildingHeight = 220;
+  const roofHeight = 70;
+  const columnRadius = 12;
+  const columnHeight = buildingHeight;
+  const columnsX = [
+    centerX - buildingWidth/2 + 25,
+    centerX - buildingWidth/2 + 75,
+    centerX + buildingWidth/2 - 75,
+    centerX + buildingWidth/2 - 25
+  ];
+
+  // Параметры циферблата
+  const clockRadius = 70;
+  const clockCenterX = centerX;
+  const clockCenterY = centerY - 20;
+
+  // Рисование здания и колонн
+  function drawBuilding() {
+    // Колонны (4 шт.)
+    ctx.fillStyle = '#d4c5a9';
+    columnsX.forEach(x => {
+      ctx.beginPath();
+      ctx.moveTo(x - columnRadius, centerY + buildingHeight/2 - columnHeight);
+      ctx.lineTo(x - columnRadius, centerY + buildingHeight/2);
+      ctx.arcTo(x - columnRadius, centerY + buildingHeight/2 + columnRadius, x, centerY + buildingHeight/2 + columnRadius, columnRadius);
+      ctx.arcTo(x + columnRadius, centerY + buildingHeight/2 + columnRadius, x + columnRadius, centerY + buildingHeight/2, columnRadius);
+      ctx.lineTo(x + columnRadius, centerY + buildingHeight/2 - columnHeight);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#b0a090';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+
+    // Основание здания (прямоугольник)
+    ctx.fillStyle = '#8b7d6b';
+    ctx.fillRect(centerX - buildingWidth/2, centerY - buildingHeight/2, buildingWidth, buildingHeight);
+    // Окантовка
+    ctx.strokeStyle = '#5d4e3d';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(centerX - buildingWidth/2, centerY - buildingHeight/2, buildingWidth, buildingHeight);
+
+    // Треугольная крыша (фронтон)
+    ctx.fillStyle = '#6b5b4f';
+    ctx.beginPath();
+    ctx.moveTo(centerX - buildingWidth/2 - 10, centerY - buildingHeight/2);
+    ctx.lineTo(centerX, centerY - buildingHeight/2 - roofHeight);
+    ctx.lineTo(centerX + buildingWidth/2 + 10, centerY - buildingHeight/2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#3e362c';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  // Рисование циферблата
+  function drawClockFace() {
+    // Внешний круг
+    ctx.beginPath();
+    ctx.arc(clockCenterX, clockCenterY, clockRadius, 0, Math.PI * 2);
+    ctx.fillStyle = '#f5f0e6';
+    ctx.fill();
+    ctx.strokeStyle = '#4a3c2c';
+    ctx.lineWidth = 6;
+    ctx.stroke();
+
+    // Внутренний ободок
+    ctx.beginPath();
+    ctx.arc(clockCenterX, clockCenterY, clockRadius - 8, 0, Math.PI * 2);
+    ctx.strokeStyle = '#b0a090';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Римские цифры и метки
+    const romanNumerals = ['XII', 'III', 'VI', 'IX'];
+    const romanAngles = [-Math.PI/2, 0, Math.PI/2, Math.PI]; // углы для 12, 3, 6, 9
+    ctx.font = 'bold 16px "Times New Roman", serif';
+    ctx.fillStyle = '#1a1a1a';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i < 4; i++) {
+      const angle = romanAngles[i];
+      const x = clockCenterX + Math.cos(angle) * (clockRadius - 18);
+      const y = clockCenterY + Math.sin(angle) * (clockRadius - 18);
+      ctx.fillText(romanNumerals[i], x, y);
+    }
+
+    // Метки для остальных часов (маленькие кружки)
+    for (let i = 0; i < 12; i++) {
+      if (i % 3 === 0) continue; // уже есть цифры
+      const angle = (i * 30 - 90) * Math.PI / 180;
+      const dotX = clockCenterX + Math.cos(angle) * (clockRadius - 14);
+      const dotY = clockCenterY + Math.sin(angle) * (clockRadius - 14);
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#333';
+      ctx.fill();
+    }
+  }
+
+  // Рисование стрелок
+  function drawHands(hourAngle, minuteAngle) {
+    // Часовая стрелка
+    ctx.save();
+    ctx.translate(clockCenterX, clockCenterY);
+    ctx.rotate(hourAngle);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(-3, -clockRadius * 0.45, 6, clockRadius * 0.45);
+    ctx.restore();
+
+    // Минутная стрелка
+    ctx.save();
+    ctx.translate(clockCenterX, clockCenterY);
+    ctx.rotate(minuteAngle);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(-2, -clockRadius * 0.65, 4, clockRadius * 0.65);
+    ctx.restore();
+
+    // Центральная ось
+    ctx.beginPath();
+    ctx.arc(clockCenterX, clockCenterY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#b22222';
+    ctx.fill();
+  }
+
+  // Молния (рисование реалистичной линии с разветвлениями)
+  function drawLightning(progress) {
+    if (progress <= 0) return;
+    // progress от 0 до 1: 0 - нет молнии, 1 - полная яркость
+    const alpha = Math.sin(progress * Math.PI) * 0.9; // вспышка и затухание
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+
+    // Основной ствол молнии из верхнего левого угла в циферблат
+    const startX = centerX - 150 + Math.random() * 50;
+    const startY = centerY - buildingHeight/2 - roofHeight - 40;
+    const endX = clockCenterX + (Math.random() - 0.5) * 20;
+    const endY = clockCenterY - clockRadius + 10;
+
+    ctx.strokeStyle = '#ffff80';
+    ctx.lineWidth = 4;
+    ctx.shadowColor = '#ffff00';
+    ctx.shadowBlur = 15;
+
+    // Генерация точек для молнии
+    let x = startX, y = startY;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    const segments = 12;
+    for (let i = 1; i <= segments; i++) {
+      const t = i / segments;
+      const targetX = startX + (endX - startX) * t;
+      const targetY = startY + (endY - startY) * t;
+      x = targetX + (Math.random() - 0.5) * 40 * (1 - t);
+      y = targetY + (Math.random() - 0.5) * 30 * (1 - t);
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+
+    // Ответвления
+    for (let j = 0; j < 4; j++) {
+      ctx.beginPath();
+      const branchStartX = startX + (endX - startX) * (0.3 + Math.random() * 0.5);
+      const branchStartY = startY + (endY - startY) * (0.3 + Math.random() * 0.3);
+      ctx.moveTo(branchStartX, branchStartY);
+      const bx = branchStartX + (Math.random() - 0.5) * 60;
+      const by = branchStartY + (Math.random() - 0.2) * 80;
+      ctx.lineTo(bx, by);
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Анимация
+  function animate(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    const progress = Math.min(elapsed / totalDuration, 1);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawBuilding();
+    drawClockFace();
+
+    // Вращение стрелок
+    let hourAngle, minuteAngle;
+    if (progress < 0.4) {
+      // Быстрое вращение
+      const rotation = progress * 360 * 5; // 5 полных оборотов
+      hourAngle = (rotation - 90) * Math.PI / 180;
+      minuteAngle = (rotation * 12 - 90) * Math.PI / 180;
+    } else if (progress < 0.7) {
+      // Замедление и остановка на 10:04
+      const t = (progress - 0.4) / 0.3;
+      const startHour = 360 * 5 - 90;
+      const startMinute = startHour * 12;
+      const targetHour = -60;   // 10:04: часовая на 10 часов + 4 минуты = 302° от 12 = -58° от вертикали? Упростим: 10*30 + 4*0.5 = 302°, в радианах около -1.01 рад от оси X. Я выставлю угол -60° (примерно).
+      const targetMinute = 24;  // минутная на 4 минуты = 24°
+      hourAngle = (startHour + (targetHour - startHour) * t) * Math.PI / 180;
+      minuteAngle = (startMinute + (targetMinute - startMinute) * t) * Math.PI / 180;
+    } else {
+      // Удержание на 10:04
+      hourAngle = (-60) * Math.PI / 180;
+      minuteAngle = 24 * Math.PI / 180;
+    }
+
+    drawHands(hourAngle, minuteAngle);
+
+    // Молния появляется после остановки стрелок
+    if (progress > 0.7 && progress < 0.9) {
+      const lightningProgress = (progress - 0.7) / 0.2;
+      drawLightning(lightningProgress);
+    } else if (progress >= 0.9) {
+      // Затухание и исчезновение всего
+      canvas.style.opacity = 1 - (progress - 0.9) / 0.1;
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      canvas.remove();
+    }
+  }
+
+  requestAnimationFrame(animate);
+});
   
 
 // ================= СОНИК: ЗОЛОТОЕ КОЛЬЦО (вращение слева направо) =================
