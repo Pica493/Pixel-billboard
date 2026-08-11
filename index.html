@@ -2906,77 +2906,27 @@ applyWeatherByTime();
  
 <!-- ========== ПРОФИЛЬ И МАГАЗИН (исправленный, без дублей, с новыми цветами) ========== -->
 <style>
-#profile-btn, #shop-btn, #help-btn {
-  position: fixed;
-  top: 15px;
-  background: #222;
-  color: #eee;
-  border-radius: 20px;
-  padding: 0 14px;
-  cursor: pointer;
-  z-index: 99999;
-  font-size: 14px;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  backdrop-filter: blur(5px);
-  height: 30px;
-  line-height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-}
-#profile-btn {
-  left: 160px;
-  border: 2px solid #4caf50;
-}
-#shop-btn {
-  left: 225px;
-  border: 2px solid #4caf50;
-}
-#help-btn {
-  left: 290px;
-  border: 2px solid #ffd700;
-  padding: 0 12px;
-}
-
-/* ===== АДАПТАЦИЯ ДЛЯ ТЕЛЕФОНОВ ===== */
-@media (max-width: 600px) {
-  #profile-btn, #shop-btn, #help-btn {
-    font-size: 11px;
-    height: 26px;
-    line-height: 26px;
-    top: 10px;
-    padding: 0 10px;
+  #profile-btn, #shop-btn {
+    position: fixed;
+    top: 15px;
+    background: #222;
+    color: #eee;
+    border: 2px solid #4caf50;
+    border-radius: 20px;
+    padding: 5px 15px;
+    cursor: pointer;
+    z-index: 99999;
+    font-size: 14px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    backdrop-filter: blur(5px);
   }
-  #profile-btn { left: 130px; }
-  #shop-btn   { left: 190px; }
-  #help-btn   { left: 250px; }
-}
-@media (max-width: 420px) {
-  #profile-btn, #shop-btn, #help-btn {
-    font-size: 9px;
-    height: 22px;
-    line-height: 22px;
-    top: 8px;
-    padding: 0 6px;
-  }
-  #profile-btn { left: 110px; }
-  #shop-btn   { left: 165px; }
-  #help-btn   { left: 220px; }
-}
+  #profile-btn { left: 160px; }
+  #shop-btn { left: 260px; }
 
-
-  
-
-  /* ===== МОДАЛЬНЫЕ ОКНА ===== */
   .modal {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.8);
     z-index: 200000;
     justify-content: center;
@@ -2996,7 +2946,6 @@ applyWeatherByTime();
     font-family: 'Segoe UI', sans-serif;
   }
 
-  /* ===== СЕТКИ МАГАЗИНА ===== */
   .avatar-grid, .frame-grid, .color-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
@@ -3100,6 +3049,7 @@ applyWeatherByTime();
   .frame-neon-grid { border: 3px solid #0ff; background: repeating-linear-gradient(0deg, #000, #000 4px, #0ff 4px, #0ff 5px); background-size: 100% 10px; animation: neonGridScroll 1s linear infinite; }
   .frame-matrix-code { border: 3px solid #0f0; box-shadow: 0 0 15px #0f0; background: repeating-linear-gradient(0deg, #000, #000 4px, #0f0 4px, #0f0 6px); animation: matrixRain 1s linear infinite; background-size: 100% 6px; }
 
+  /* Ключевые кадры */
   @keyframes rotateBorder { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
   @keyframes rainbowSlide { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
   @keyframes crystalFlash { 0% { box-shadow: 0 0 5px #fff, 0 0 15px #e0f7fa, 0 0 30px #b2ebf2; } 100% { box-shadow: 0 0 15px #fff, 0 0 30px #e0f7fa, 0 0 60px #b2ebf2; } }
@@ -3121,28 +3071,11 @@ applyWeatherByTime();
   @keyframes hologramFlicker { 0% { opacity: 0.6; } 100% { opacity: 1; } }
   @keyframes darkPulse { 0% { box-shadow: 0 0 10px #000; } 100% { box-shadow: 0 0 40px #000; } }
   @keyframes lightPulse { 0% { box-shadow: 0 0 20px #ff0; } 100% { box-shadow: 0 0 60px #fff; } }
-
-  /* ===== СТИЛИ ДЛЯ СПРАВКИ (дополнительные) ===== */
-  #help-modal .modal-content { max-width: 600px; }
-  #help-modal h2 { color: #ffd700; text-align: center; margin-bottom: 10px; }
-  #help-modal h3 { color: #4caf50; margin-top: 15px; margin-bottom: 5px; font-size: 1.1rem; }
-  #help-modal h4 { color: #66bb6a; margin-top: 10px; margin-bottom: 3px; font-size: 1rem; }
-  #help-modal p, #help-modal li { color: #ddd; font-size: 0.95rem; line-height: 1.5; }
-  #help-modal a { color: #4caf50; text-decoration: underline; }
-  #help-modal a:hover { color: #66bb6a; }
-  #help-modal ul { padding-left: 20px; margin: 5px 0; }
-  #help-modal .section { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333; }
-  #help-modal .section:last-child { border-bottom: none; }
-  .help-tag { display: inline-block; background: #333; color: #0f0; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
-  .help-author { background: #1a1a2e; padding: 10px 15px; border-radius: 8px; border-left: 3px solid #ffd700; margin: 10px 0; font-style: italic; }
 </style>
 
-<!-- КНОПКИ -->
 <button id="profile-btn">👤 Профиль</button>
 <button id="shop-btn">🛒 Магазин</button>
-<button id="help-btn">❓ Справка</button>
 
-<!-- МОДАЛЬНОЕ ОКНО ПРОФИЛЯ -->
 <div id="profile-modal" class="modal">
   <div class="modal-content">
     <h2>Профиль</h2>
@@ -3164,7 +3097,6 @@ applyWeatherByTime();
   </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО МАГАЗИНА -->
 <div id="shop-modal" class="modal">
   <div class="modal-content">
     <h2>Магазин</h2>
@@ -3179,87 +3111,15 @@ applyWeatherByTime();
   </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО СПРАВКИ -->
-<div id="help-modal" class="modal">
-  <div class="modal-content">
-    <h2>❓ Справка по Pixel Billboard</h2>
-
-    <div class="section">
-      <h3>📌 О проекте</h3>
-      <div class="help-author">
-        <p><strong>Привет! Меня зовут Евгений.</strong></p>
-        <p>Я не программист, но мне всегда хотелось создать что-то необычное и интересное, что останется в истории. <strong>Pixel Billboard</strong> – это мой эксперимент и моя мечта.</p>
-        <p>Моя цель – заработать на этом проекте и <strong>купить себе дом</strong>. Каждый купленный пиксель приближает меня к этой цели. Спасибо, что вы со мной!</p>
-      </div>
-      <p><strong>Pixel Billboard</strong> – это вечный цифровой билборд. Вы можете купить любой пиксель (или блок 10×10) и разместить на нём свой логотип, текст или картинку. Цена – <strong>50 ₽ за 1 пиксель</strong>. Минимальный блок – 10×10 (5000 ₽). Все купленные блоки навсегда остаются на холсте и кликабельны – ведут на ваш сайт или соцсеть.</p>
-      <p>Чтобы купить блок, напишите нам на почту <a href="mailto:pixelbillboard@mail.ru">pixelbillboard@mail.ru</a> или в Telegram <a href="https://t.me/PixelBillboard_ru">@PixelBillboard_ru</a>.</p>
-    </div>
-
-    <div class="section">
-      <h3>🎮 Игры и пасхалки</h3>
-      <p>В левом верхнем углу есть поле ввода с лупой 🔍. Введите одну из команд и нажмите Enter – запустится игра или пасхалка.</p>
-      <h4>🕹️ Игры (все команды здесь):</h4>
-      <ul>
-        <li><span class="help-tag">SNAKE</span> – игра «Змейка» (управление стрелками или свайпами)</li>
-        <li><span class="help-tag">BIT</span> – мини-игра «Попади в цель»</li>
-        <li><span class="help-tag">2048</span> – игра 2048</li>
-        <li><span class="help-tag">TETRIS</span> – тетрис</li>
-        <li><span class="help-tag">MEMORY</span> – игра «Мемори»</li>
-      </ul>
-      <p>После игры вы получаете <strong>монеты</strong> (за рекорды). Монеты можно тратить в магазине.</p>
-      <h4>🎭 Пасхалки (примеры):</h4>
-      <ul>
-        <li><span class="help-tag">MATRIX</span> – матричный дождь</li>
-        <li><span class="help-tag">SPIDERMAN</span> – паутина</li>
-      </ul>
-      <p><strong>Остальные пасхалки</strong> вы найдёте в нашем <a href="https://t.me/PixelBillboard_ru" target="_blank">Telegram-канале</a>, в TikTok или в чате проекта. Подписывайтесь, чтобы узнавать новые коды!</p>
-    </div>
-
-    <div class="section">
-      <h3>👤 Профиль</h3>
-      <ul>
-        <li><strong>Сменить ник</strong> – первый раз бесплатно, затем за 200 монет.</li>
-        <li><strong>Посмотреть свои рекорды</strong> по всем играм.</li>
-        <li><strong>Увидеть количество монет</strong> – они начисляются за рекорды и ежедневный бонус (+5 монет в день).</li>
-      </ul>
-    </div>
-
-    <div class="section">
-      <h3>🛒 Магазин</h3>
-      <ul>
-        <li><strong>Аватары</strong> – различные персонажи и существа.</li>
-        <li><strong>Рамки</strong> – от простых до анимированных.</li>
-        <li><strong>Цвет ника</strong> – измените цвет своего имени.</li>
-      </ul>
-      <p>Купленные предметы автоматически экипируются. Их можно менять в любое время.</p>
-    </div>
-
-    <div class="section">
-      <h3>💰 Монеты</h3>
-      <ul>
-        <li><strong>Ежедневный бонус</strong> – +5 монет при первом открытии сайта за день.</li>
-        <li><strong>Рекорды в играх</strong> – за каждый новый рекорд в играх (Змейка, Бит, 2048, Тетрис, Мемори) даётся +10 монет.</li>
-        <li><strong>Достижения</strong> – некоторые игры дают монеты за количество очков (например, 2048 даёт монеты за плитку ≥1024).</li>
-      </ul>
-    </div>
-
-    <div class="section">
-      <h3>🌤️ Погода и время</h3>
-      <p>На сайте отображается текущее время по Москве, а также идут фоновые эффекты погоды (снег, дождь, листья, кометы) – они меняются в течение дня.</p>
-    </div>
-
-    <button id="close-help" style="margin-top:10px;">Закрыть</button>
-  </div>
-</div>
-
-<!-- СКРИПТЫ ПРОФИЛЯ, МАГАЗИНА И СПРАВКИ -->
 <script>
 (function() {
   // ============================================================
   // 1. АВАТАРЫ – без дублей, смайлик первым и бесплатный
   // ============================================================
   const AVATARS = [
+    // ---- Бесплатный ----
     { id: 'default', emoji: '🙂', name: 'Смайлик', price: 0 },
+    // ---- Животные и мифические (100 монет) ----
     { id: 'cat', emoji: '🐱', name: 'Кот', price: 100 },
     { id: 'dog', emoji: '🐶', name: 'Собака', price: 100 },
     { id: 'fox', emoji: '🦊', name: 'Лис', price: 100 },
@@ -3281,6 +3141,7 @@ applyWeatherByTime();
     { id: 'chicken', emoji: '🐔', name: 'Курица', price: 100 },
     { id: 'duck', emoji: '🦆', name: 'Утка', price: 100 },
     { id: 'frog', emoji: '🐸', name: 'Лягушка', price: 100 },
+    // ---- Люди, профессии, мифические существа (150 монет) ----
     { id: 'astronaut', emoji: '👩‍🚀', name: 'Космонавт', price: 150 },
     { id: 'mermaid', emoji: '🧜‍♀️', name: 'Русалка', price: 150 },
     { id: 'genie', emoji: '🧞', name: 'Джинн', price: 150 },
@@ -3315,6 +3176,7 @@ applyWeatherByTime();
   // 2. РАМКИ – исправленные цены и категории
   // ============================================================
   const FRAMES = [
+    // ---- Простые (100 монет) ----
     { id: 'none', name: 'Без рамки', price: 0 },
     { id: 'neon', name: 'Неон', price: 100 },
     { id: 'hearts', name: 'Розовый', price: 100 },
@@ -3331,12 +3193,14 @@ applyWeatherByTime();
     { id: 'galaxy', name: 'Галактика', price: 100 },
     { id: 'darkness', name: 'Тьма', price: 100 },
     { id: 'pixel', name: 'Пиксели', price: 100 },
+    // ---- Двухцветные (150 монет) ----
     { id: 'half-gold-silver', name: 'Золото-серебро', price: 150 },
     { id: 'half-purple-pink', name: 'Фиолетово-розовый', price: 150 },
     { id: 'half-fire-ice', name: 'Вода и пламя', price: 150 },
     { id: 'double-stripe', name: 'Двойная полоса', price: 150 },
     { id: 'ruby', name: 'Рубин', price: 150 },
     { id: 'sapphire', name: 'Сапфир', price: 150 },
+    // ---- Анимированные (200 монет) ----
     { id: 'fire', name: 'Огонь', price: 200 },
     { id: 'royal-gold', name: 'Королевское золото', price: 200 },
     { id: 'rainbow-wave', name: 'Радужная волна', price: 200 },
@@ -3353,6 +3217,7 @@ applyWeatherByTime();
     { id: 'hologram', name: 'Голограмма', price: 200 },
     { id: 'pixel-chaos', name: 'Пиксельный хаос', price: 200 },
     { id: 'light', name: 'Свет', price: 200 },
+    // ---- Сложные анимированные + фон (250 монет) ----
     { id: 'storm', name: 'Грозовое небо', price: 250 },
     { id: 'gold-rain', name: 'Золотой дождь', price: 250 },
     { id: 'neon-grid', name: 'Неоновая сеть', price: 250 },
@@ -3360,7 +3225,7 @@ applyWeatherByTime();
   ];
 
   // ============================================================
-  // 3. ЦВЕТА НИКА – 15 цветов по 100 + радужный 150
+  // 3. ЦВЕТА НИКА – 15 цветов по 100 + радужный 150 (исправлено)
   // ============================================================
   const NICK_COLORS = [
     { id: 'default', name: 'Белый', color: '#ffffff', price: 0 },
@@ -3383,7 +3248,7 @@ applyWeatherByTime();
   ];
 
   // ============================================================
-  // 4. ПРОФИЛЬ
+  // 4. ПРОФИЛЬ (без питомцев)
   // ============================================================
   const DEFAULT_PROFILE = {
     nickname: 'Player',
@@ -3407,6 +3272,7 @@ applyWeatherByTime();
     if (!profile.records.memory) profile.records.memory = 0;
     if (!profile.inventory.includes('default')) profile.inventory.push('default');
     if (!profile.inventory.includes('none')) profile.inventory.push('none');
+    // Миграция старых цветов (без префикса)
     const colorIds = ['gold','neon','fire','lime','violet','rainbow','red','blue','green','brown','orange','pink','cyan','gray','black','beige'];
     colorIds.forEach(id => {
       if (profile.inventory.includes(id)) {
@@ -3419,6 +3285,7 @@ applyWeatherByTime();
 
   function save() { localStorage.setItem('pixelProfile', JSON.stringify(profile)); }
 
+  // Ежедневный бонус
   if (profile.lastDaily !== new Date().toDateString()) {
     profile.coins += 5;
     profile.lastDaily = new Date().toDateString();
@@ -3474,6 +3341,7 @@ applyWeatherByTime();
   // 6. МАГАЗИН
   // ============================================================
   function populateShop() {
+    // Аватары
     const ag = document.getElementById('avatar-list');
     ag.innerHTML = '';
     AVATARS.forEach(a => {
@@ -3485,6 +3353,7 @@ applyWeatherByTime();
       ag.appendChild(div);
     });
 
+    // Рамки
     const fg = document.getElementById('frame-list');
     fg.innerHTML = '';
     FRAMES.forEach(f => {
@@ -3497,6 +3366,7 @@ applyWeatherByTime();
       fg.appendChild(div);
     });
 
+    // Цвета
     const cg = document.getElementById('color-list');
     cg.innerHTML = '';
     NICK_COLORS.forEach(c => {
@@ -3552,40 +3422,12 @@ applyWeatherByTime();
   };
 
   // ============================================================
-  // 9. МОДАЛКИ (все три: профиль, магазин, справка)
+  // 9. МОДАЛКИ
   // ============================================================
-  document.getElementById('profile-btn').onclick = () => {
-    document.getElementById('profile-modal').classList.add('active');
-    updateUI();
-  };
-  document.getElementById('shop-btn').onclick = () => {
-    document.getElementById('shop-modal').classList.add('active');
-    updateUI();
-    populateShop();
-  };
-  document.getElementById('help-btn').onclick = () => {
-    document.getElementById('help-modal').classList.add('active');
-  };
-
+  document.getElementById('profile-btn').onclick = () => { document.getElementById('profile-modal').classList.add('active'); updateUI(); };
+  document.getElementById('shop-btn').onclick = () => { document.getElementById('shop-modal').classList.add('active'); updateUI(); populateShop(); };
   document.getElementById('close-profile').onclick = () => document.getElementById('profile-modal').classList.remove('active');
   document.getElementById('close-shop').onclick = () => document.getElementById('shop-modal').classList.remove('active');
-  document.getElementById('close-help').onclick = () => document.getElementById('help-modal').classList.remove('active');
-
-  // Закрытие по клику вне модалки
-  document.querySelectorAll('.modal').forEach(modal => {
-    modal.addEventListener('click', function(e) {
-      if (e.target === this) {
-        this.classList.remove('active');
-      }
-    });
-  });
-
-  // Закрытие по Escape
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal.active').forEach(modal => modal.classList.remove('active'));
-    }
-  });
 
   // ============================================================
   // 10. ИНИЦИАЛИЗАЦИЯ
@@ -3595,8 +3437,13 @@ applyWeatherByTime();
 })();
 </script>
 
-<!-- Замаскированный Рикролл -->
-<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" 
+
+
+
+  
+
+  <!-- Замаскированный Рикролл -->
+  <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" 
    style="position: fixed; bottom: 5px; right: 5px; width: 20px; height: 20px; background: transparent; opacity: 0; z-index: 99999; display: block;"></a>
 
 </body>
