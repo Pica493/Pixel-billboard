@@ -2906,7 +2906,66 @@ applyWeatherByTime();
  
 <!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (единый блок) ========== -->
 
+/* ===== ВСЕ ВЕРХНИЕ КНОПКИ (с увеличенным расстоянием) ===== */
+#profile-btn, #shop-btn, #help-btn {
+  position: fixed;
+  top: 15px;
+  background: #222;
+  color: #eee;
+  border-radius: 20px;
+  padding: 0 14px;
+  cursor: pointer;
+  z-index: 99999;
+  font-size: 14px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  backdrop-filter: blur(5px);
+  height: 30px;
+  line-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+#profile-btn {
+  left: 65px;
+  border: 2px solid #4caf50;
+}
+#shop-btn {
+  left: 130px;
+  border: 2px solid #4caf50;
+}
+#help-btn {
+  left: 195px;
+  border: 2px solid #ffd700;
+  padding: 0 12px;
+}
 
+/* ===== АДАПТАЦИЯ ДЛЯ ТЕЛЕФОНОВ ===== */
+@media (max-width: 600px) {
+  #profile-btn, #shop-btn, #help-btn {
+    font-size: 11px;
+    height: 26px;
+    line-height: 26px;
+    top: 10px;
+    padding: 0 10px;
+  }
+  #profile-btn { left: 90px; }
+  #shop-btn   { left: 150px; }
+  #help-btn   { left: 210px; }
+}
+@media (max-width: 420px) {
+  #profile-btn, #shop-btn, #help-btn {
+    font-size: 9px;
+    height: 22px;
+    line-height: 22px;
+    top: 8px;
+    padding: 0 6px;
+  }
+  #profile-btn { left: 75px; }
+  #shop-btn   { left: 130px; }
+  #help-btn   { left: 185px; }
+}
 
   
 
