@@ -3450,21 +3450,20 @@ applyWeatherByTime();
   
 
 
-
-<!-- ===== КНОПКА И МОДАЛЬНОЕ ОКНО СПРАВКИ (исправленное позиционирование и значки) ===== -->
+<!-- ===== КНОПКА И МОДАЛЬНОЕ ОКНО СПРАВКИ (исправленное: ссылки зелёные, упрощённые описания, наложение кнопок) ===== -->
 <style>
   #help-btn {
     position: fixed;
     top: 15px;
-    left: 370px; /* сдвинули правее, чтобы не перекрывать лупу */
+    left: 265px; /* небольшое наложение на кнопку Магазин */
     background: #222;
     color: #eee;
     border: 2px solid #ffd700;
     border-radius: 20px;
-    padding: 5px 15px;
+    padding: 5px 12px;
     cursor: pointer;
     z-index: 99999;
-    font-size: 14px;
+    font-size: 13px;
     font-family: 'Segoe UI', Arial, sans-serif;
     backdrop-filter: blur(5px);
   }
@@ -3472,6 +3471,9 @@ applyWeatherByTime();
     background: #333;
     border-color: #ffaa00;
   }
+  /* Сдвигаем кнопки, чтобы они были вплотную */
+  #profile-btn { left: 65px; }
+  #shop-btn { left: 160px; }
 
   #help-modal .modal-content {
     max-width: 600px;
@@ -3491,6 +3493,13 @@ applyWeatherByTime();
     color: #ddd;
     font-size: 0.95rem;
     line-height: 1.5;
+  }
+  #help-modal a {
+    color: #4caf50; /* зелёные ссылки */
+    text-decoration: underline;
+  }
+  #help-modal a:hover {
+    color: #66bb6a;
   }
   #help-modal ul {
     padding-left: 20px;
@@ -3582,9 +3591,9 @@ applyWeatherByTime();
       <h3>🛒 Магазин</h3>
       <p>В магазине можно купить и экипировать:</p>
       <ul>
-        <li><strong>Аватары</strong> – животные (100 монет) и люди/профессии (150 монет).</li>
-        <li><strong>Рамки</strong> – обычные (100), двухцветные (150), анимированные (200) и сложные с фоном (250 монет).</li>
-        <li><strong>Цвет ника</strong> – обычные цвета (100 монет), радужный (150 монет).</li>
+        <li><strong>Аватары</strong> – различные персонажи и существа.</li>
+        <li><strong>Рамки</strong> – от простых до анимированных.</li>
+        <li><strong>Цвет ника</strong> – измените цвет своего имени.</li>
       </ul>
       <p>Купленные предметы автоматически экипируются. Их можно менять в любое время.</p>
     </div>
