@@ -3451,7 +3451,195 @@ applyWeatherByTime();
 
 
 
+<!-- ===== КНОПКА И МОДАЛЬНОЕ ОКНО СПРАВКИ (исправленное позиционирование и значки) ===== -->
+<style>
+  #help-btn {
+    position: fixed;
+    top: 15px;
+    left: 370px; /* сдвинули правее, чтобы не перекрывать лупу */
+    background: #222;
+    color: #eee;
+    border: 2px solid #ffd700;
+    border-radius: 20px;
+    padding: 5px 15px;
+    cursor: pointer;
+    z-index: 99999;
+    font-size: 14px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    backdrop-filter: blur(5px);
+  }
+  #help-btn:hover {
+    background: #333;
+    border-color: #ffaa00;
+  }
 
+  #help-modal .modal-content {
+    max-width: 600px;
+  }
+  #help-modal h2 {
+    color: #ffd700;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  #help-modal h3 {
+    color: #4caf50;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+  }
+  #help-modal p, #help-modal li {
+    color: #ddd;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  #help-modal ul {
+    padding-left: 20px;
+    margin: 5px 0;
+  }
+  #help-modal .section {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+  }
+  #help-modal .section:last-child {
+    border-bottom: none;
+  }
+  .help-tag {
+    display: inline-block;
+    background: #333;
+    color: #0f0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+  }
+  .help-author {
+    background: #1a1a2e;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border-left: 3px solid #ffd700;
+    margin: 10px 0;
+    font-style: italic;
+  }
+</style>
+
+<button id="help-btn">❓ Справка</button>
+
+<div id="help-modal" class="modal">
+  <div class="modal-content">
+    <h2>❓ Справка по Pixel Billboard</h2>
+
+    <div class="section">
+      <h3>📌 О проекте</h3>
+      <div class="help-author">
+        <p><strong>Привет! Меня зовут Евгений.</strong></p>
+        <p>Я не программист, но мне всегда хотелось создать что-то необычное и интересное, что останется в истории. <strong>Pixel Billboard</strong> – это мой эксперимент и моя мечта.</p>
+        <p>Моя цель – заработать на этом проекте и <strong>купить себе дом</strong>. Каждый купленный пиксель приближает меня к этой цели. Спасибо, что вы со мной!</p>
+      </div>
+      <p>
+        <strong>Pixel Billboard</strong> – это вечный цифровой билборд. Вы можете купить любой пиксель (или блок 10×10) и разместить на нём свой логотип, текст или картинку. 
+        Цена – <strong>50 ₽ за 1 пиксель</strong>. Минимальный блок – 10×10 (5000 ₽). 
+        Все купленные блоки навсегда остаются на холсте и кликабельны – ведут на ваш сайт или соцсеть.
+      </p>
+      <p>
+        Чтобы купить блок, напишите нам на почту <a href="mailto:pixelbillboard@mail.ru">pixelbillboard@mail.ru</a> или в Telegram <a href="https://t.me/PixelBillboard_ru">@PixelBillboard_ru</a>.
+      </p>
+    </div>
+
+    <div class="section">
+      <h3>🎮 Игры и пасхалки</h3>
+      <p>В левом верхнем углу есть поле ввода с лупой 🔍. Введите одну из команд и нажмите Enter – запустится игра или пасхалка.</p>
+      
+      <h4>🕹️ Игры (все команды здесь):</h4>
+      <ul>
+        <li><span class="help-tag">SNAKE</span> – игра «Змейка» (управление стрелками или свайпами)</li>
+        <li><span class="help-tag">BIT</span> – мини-игра «Попади в цель»</li>
+        <li><span class="help-tag">2048</span> – игра 2048</li>
+        <li><span class="help-tag">TETRIS</span> – тетрис</li>
+        <li><span class="help-tag">MEMORY</span> – игра «Мемори»</li>
+      </ul>
+      <p>После игры вы получаете <strong>монеты</strong> (за рекорды). Монеты можно тратить в магазине.</p>
+
+      <h4>🎭 Пасхалки (примеры):</h4>
+      <ul>
+        <li><span class="help-tag">MATRIX</span> – матричный дождь</li>
+        <li><span class="help-tag">SPIDERMAN</span> – паутина</li>
+      </ul>
+      <p><strong>Остальные пасхалки</strong> вы найдёте в нашем <a href="https://t.me/PixelBillboard_ru" target="_blank">Telegram-канале</a>, в TikTok или в чате проекта. Подписывайтесь, чтобы узнавать новые коды!</p>
+    </div>
+
+    <div class="section">
+      <h3>👤 Профиль</h3>
+      <p>В профиле вы можете:</p>
+      <ul>
+        <li><strong>Сменить ник</strong> – первый раз бесплатно, затем за 200 монет.</li>
+        <li><strong>Посмотреть свои рекорды</strong> по всем играм.</li>
+        <li><strong>Увидеть количество монет</strong> – они начисляются за рекорды и ежедневный бонус (+5 монет в день).</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>🛒 Магазин</h3>
+      <p>В магазине можно купить и экипировать:</p>
+      <ul>
+        <li><strong>Аватары</strong> – животные (100 монет) и люди/профессии (150 монет).</li>
+        <li><strong>Рамки</strong> – обычные (100), двухцветные (150), анимированные (200) и сложные с фоном (250 монет).</li>
+        <li><strong>Цвет ника</strong> – обычные цвета (100 монет), радужный (150 монет).</li>
+      </ul>
+      <p>Купленные предметы автоматически экипируются. Их можно менять в любое время.</p>
+    </div>
+
+    <div class="section">
+      <h3>💰 Монеты</h3>
+      <p>Как заработать монеты:</p>
+      <ul>
+        <li><strong>Ежедневный бонус</strong> – +5 монет при первом открытии сайта за день.</li>
+        <li><strong>Рекорды в играх</strong> – за каждый новый рекорд в играх (Змейка, Бит, 2048, Тетрис, Мемори) даётся +10 монет.</li>
+        <li><strong>Достижения</strong> – некоторые игры дают монеты за количество очков (например, 2048 даёт монеты за плитку ≥1024).</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>🌤️ Погода и время</h3>
+      <p>На сайте отображается текущее время по Москве, а также идут фоновые эффекты погоды (снег, дождь, листья, кометы) – они меняются в течение дня.</p>
+    </div>
+
+    <button id="close-help" style="margin-top:10px;">Закрыть</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const helpBtn = document.getElementById('help-btn');
+  const helpModal = document.getElementById('help-modal');
+  const closeHelp = document.getElementById('close-help');
+
+  function openHelp() {
+    helpModal.classList.add('active');
+  }
+
+  function closeHelpModal() {
+    helpModal.classList.remove('active');
+  }
+
+  helpBtn.addEventListener('click', openHelp);
+  closeHelp.addEventListener('click', closeHelpModal);
+
+  // Закрытие по клику вне модального окна
+  helpModal.addEventListener('click', function(e) {
+    if (e.target === helpModal) {
+      closeHelpModal();
+    }
+  });
+
+  // Закрытие по Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && helpModal.classList.contains('active')) {
+      closeHelpModal();
+    }
+  });
+})();
+</script>
 
 
 
