@@ -2903,23 +2903,57 @@ applyWeatherByTime();
 })();
 </script>
 
- 
-<!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (исправленные кнопки) ========== -->
+ <!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (исправленные кнопки) ========== -->
 <style>
-  /* ===== ВЕРХНИЕ КНОПКИ (размер как у лупы, достаточное расстояние) ===== */
+  /* ===== ЛУПА (уменьшенная) ===== */
+  #easter-input-container {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.7);
+    border-radius: 20px;
+    padding: 0 10px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 10px rgba(0,255,0,0.3);
+    height: 34px;
+  }
+  #easter-input-container .icon {
+    font-size: 16px;
+    margin-right: 4px;
+    opacity: 0.8;
+  }
+  #easter-input {
+    background: transparent;
+    border: none;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 13px;
+    width: 80px;
+    outline: none;
+    height: 100%;
+  }
+  #easter-input::placeholder {
+    color: rgba(0,255,0,0.5);
+    font-size: 11px;
+  }
+
+  /* ===== ВЕРХНИЕ КНОПКИ (размер как у лупы, сразу после неё) ===== */
   #profile-btn, #shop-btn, #help-btn {
     position: fixed;
     top: 15px;
     background: #222;
     color: #eee;
     border-radius: 20px;
-    padding: 0 16px;
+    padding: 0 12px;
     cursor: pointer;
     z-index: 99999;
-    font-size: 14px;
+    font-size: 13px;
     font-family: 'Segoe UI', Arial, sans-serif;
     backdrop-filter: blur(5px);
-    height: 34px;               /* такая же высота, как у лупы */
+    height: 34px;
     line-height: 34px;
     display: inline-flex;
     align-items: center;
@@ -2930,17 +2964,17 @@ applyWeatherByTime();
     transition: background 0.2s, border-color 0.2s;
   }
   #profile-btn {
-    left: 160px;                /* сразу после лупы (лупа заканчивается ~145px) */
+    left: 110px;
     border-color: #4caf50;
   }
   #shop-btn {
-    left: 250px;                /* шаг 90px – не наезжают */
+    left: 190px;
     border-color: #4caf50;
   }
   #help-btn {
-    left: 340px;
+    left: 270px;
     border-color: #ffd700;
-    padding: 0 14px;
+    padding: 0 10px;
   }
   #profile-btn:hover, #shop-btn:hover {
     background: #2a2a2a;
@@ -2953,45 +2987,53 @@ applyWeatherByTime();
 
   /* ===== АДАПТАЦИЯ ДЛЯ ПЛАНШЕТОВ (≤ 768px) ===== */
   @media (max-width: 768px) {
+    #easter-input-container { height: 30px; padding: 0 8px; }
+    #easter-input { width: 60px; font-size: 12px; }
     #profile-btn, #shop-btn, #help-btn {
       font-size: 12px;
       height: 30px;
       line-height: 30px;
       top: 12px;
-      padding: 0 12px;
+      padding: 0 10px;
     }
-    #profile-btn { left: 140px; }
-    #shop-btn   { left: 218px; }
-    #help-btn   { left: 296px; }
+    #profile-btn { left: 100px; }
+    #shop-btn   { left: 170px; }
+    #help-btn   { left: 240px; }
   }
 
   /* ===== ДЛЯ ТЕЛЕФОНОВ (≤ 600px) ===== */
   @media (max-width: 600px) {
+    #easter-input-container { height: 28px; padding: 0 6px; top: 10px; }
+    #easter-input { width: 50px; font-size: 11px; }
+    #easter-input-container .icon { font-size: 14px; }
     #profile-btn, #shop-btn, #help-btn {
       font-size: 11px;
       height: 28px;
       line-height: 28px;
       top: 10px;
-      padding: 0 10px;
+      padding: 0 8px;
     }
-    #profile-btn { left: 130px; }
-    #shop-btn   { left: 198px; }
-    #help-btn   { left: 266px; }
+    #profile-btn { left: 95px; }
+    #shop-btn   { left: 155px; }
+    #help-btn   { left: 215px; }
   }
 
   /* ===== ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ (≤ 420px) ===== */
   @media (max-width: 420px) {
+    #easter-input-container { height: 24px; padding: 0 4px; top: 8px; }
+    #easter-input { width: 40px; font-size: 10px; }
+    #easter-input-container .icon { font-size: 12px; }
     #profile-btn, #shop-btn, #help-btn {
       font-size: 9px;
       height: 24px;
       line-height: 24px;
       top: 8px;
-      padding: 0 6px;
+      padding: 0 5px;
       border-width: 1.5px;
     }
-    #profile-btn { left: 110px; }
-    #shop-btn   { left: 168px; }
-    #help-btn   { left: 226px; }
+    #profile-btn { left: 85px; }
+    #shop-btn   { left: 135px; }
+    #help-btn   { left: 185px; }
   }
 
   /* ===== МОДАЛЬНЫЕ ОКНА ===== */
@@ -3623,5 +3665,7 @@ applyWeatherByTime();
    style="position: fixed; bottom: 5px; right: 5px; width: 20px; height: 20px; background: transparent; opacity: 0; z-index: 99999; display: block;"></a>
 
 </body>
-
 </html>
+
+
+  
