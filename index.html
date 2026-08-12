@@ -2904,23 +2904,23 @@ applyWeatherByTime();
 </script>
 
  
-<!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (единый блок) ========== -->
+<!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (исправленные кнопки) ========== -->
 <style>
-  /* ===== ВСЕ ВЕРХНИЕ КНОПКИ (универсальные, для ПК и телефонов) ===== */
+  /* ===== ВЕРХНИЕ КНОПКИ (размер как у лупы, достаточное расстояние) ===== */
   #profile-btn, #shop-btn, #help-btn {
     position: fixed;
     top: 15px;
     background: #222;
     color: #eee;
     border-radius: 20px;
-    padding: 0 14px;
+    padding: 0 16px;
     cursor: pointer;
     z-index: 99999;
     font-size: 14px;
     font-family: 'Segoe UI', Arial, sans-serif;
     backdrop-filter: blur(5px);
-    height: 30px;
-    line-height: 30px;
+    height: 34px;               /* такая же высота, как у лупы */
+    line-height: 34px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2930,17 +2930,17 @@ applyWeatherByTime();
     transition: background 0.2s, border-color 0.2s;
   }
   #profile-btn {
-    left: 160px;
+    left: 160px;                /* сразу после лупы (лупа заканчивается ~145px) */
     border-color: #4caf50;
   }
   #shop-btn {
-    left: 238px;
+    left: 250px;                /* шаг 90px – не наезжают */
     border-color: #4caf50;
   }
   #help-btn {
-    left: 321px;
+    left: 340px;
     border-color: #ffd700;
-    padding: 0 12px;
+    padding: 0 14px;
   }
   #profile-btn:hover, #shop-btn:hover {
     background: #2a2a2a;
@@ -2951,42 +2951,47 @@ applyWeatherByTime();
     border-color: #ffaa00;
   }
 
+  /* ===== АДАПТАЦИЯ ДЛЯ ПЛАНШЕТОВ (≤ 768px) ===== */
   @media (max-width: 768px) {
     #profile-btn, #shop-btn, #help-btn {
       font-size: 12px;
-      height: 28px;
-      line-height: 28px;
+      height: 30px;
+      line-height: 30px;
       top: 12px;
       padding: 0 12px;
     }
     #profile-btn { left: 140px; }
-    #shop-btn   { left: 208px; }
-    #help-btn   { left: 276px; }
+    #shop-btn   { left: 218px; }
+    #help-btn   { left: 296px; }
   }
+
+  /* ===== ДЛЯ ТЕЛЕФОНОВ (≤ 600px) ===== */
   @media (max-width: 600px) {
     #profile-btn, #shop-btn, #help-btn {
       font-size: 11px;
-      height: 26px;
-      line-height: 26px;
+      height: 28px;
+      line-height: 28px;
       top: 10px;
       padding: 0 10px;
     }
     #profile-btn { left: 130px; }
-    #shop-btn   { left: 193px; }
-    #help-btn   { left: 256px; }
+    #shop-btn   { left: 198px; }
+    #help-btn   { left: 266px; }
   }
+
+  /* ===== ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ (≤ 420px) ===== */
   @media (max-width: 420px) {
     #profile-btn, #shop-btn, #help-btn {
       font-size: 9px;
-      height: 22px;
-      line-height: 22px;
+      height: 24px;
+      line-height: 24px;
       top: 8px;
       padding: 0 6px;
       border-width: 1.5px;
     }
     #profile-btn { left: 110px; }
-    #shop-btn   { left: 163px; }
-    #help-btn   { left: 216px; }
+    #shop-btn   { left: 168px; }
+    #help-btn   { left: 226px; }
   }
 
   /* ===== МОДАЛЬНЫЕ ОКНА ===== */
@@ -3157,7 +3162,7 @@ applyWeatherByTime();
   .help-author { background: #1a1a2e; padding: 10px 15px; border-radius: 8px; border-left: 3px solid #ffd700; margin: 10px 0; font-style: italic; }
 </style>
 
-<!-- КНОПКИ -->
+<!-- КНОПКИ (исправленные) -->
 <button id="profile-btn">👤 Профиль</button>
 <button id="shop-btn">🛒 Магазин</button>
 <button id="help-btn">❓ Справка</button>
@@ -3618,6 +3623,5 @@ applyWeatherByTime();
    style="position: fixed; bottom: 5px; right: 5px; width: 20px; height: 20px; background: transparent; opacity: 0; z-index: 99999; display: block;"></a>
 
 </body>
-</html>
 
-  
+</html>
