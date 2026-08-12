@@ -2904,10 +2904,9 @@ applyWeatherByTime();
 </script>
 
 
-
-<!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (исправленные кнопки) ========== -->
+<!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (финальный) ========== -->
 <style>
-  /* ===== ЛУПА (уменьшенная) ===== */
+  /* ===== ЛУПА ===== */
   #easter-input-container {
     position: fixed;
     top: 15px;
@@ -2942,7 +2941,7 @@ applyWeatherByTime();
     font-size: 11px;
   }
 
-  /* ===== ВЕРХНИЕ КНОПКИ (ближе к лупе, с компактным расстоянием) ===== */
+  /* ===== ВЕРХНИЕ КНОПКИ (исправленные отступы) ===== */
   #profile-btn, #shop-btn, #help-btn {
     position: fixed;
     top: 15px;
@@ -2966,15 +2965,15 @@ applyWeatherByTime();
     transition: background 0.2s, border-color 0.2s;
   }
   #profile-btn {
-    left: 115px;               /* сразу после лупы (лупа заканчивается ~110px) */
+    left: 120px;
     border-color: #4caf50;
   }
   #shop-btn {
-    left: 200px;               /* шаг 85px – компактно, текст читается */
+    left: 210px;
     border-color: #4caf50;
   }
   #help-btn {
-    left: 285px;
+    left: 300px;
     border-color: #ffd700;
     padding: 0 10px;
   }
@@ -2998,9 +2997,9 @@ applyWeatherByTime();
       top: 12px;
       padding: 0 10px;
     }
-    #profile-btn { left: 100px; }
-    #shop-btn   { left: 178px; }
-    #help-btn   { left: 256px; }
+    #profile-btn { left: 105px; }
+    #shop-btn   { left: 185px; }
+    #help-btn   { left: 265px; }
   }
 
   /* ===== ДЛЯ ТЕЛЕФОНОВ (≤ 600px) ===== */
@@ -3015,9 +3014,9 @@ applyWeatherByTime();
       top: 10px;
       padding: 0 8px;
     }
-    #profile-btn { left: 90px; }
-    #shop-btn   { left: 158px; }
-    #help-btn   { left: 226px; }
+    #profile-btn { left: 95px; }
+    #shop-btn   { left: 165px; }
+    #help-btn   { left: 235px; }
   }
 
   /* ===== ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ (≤ 420px) ===== */
@@ -3033,9 +3032,9 @@ applyWeatherByTime();
       padding: 0 5px;
       border-width: 1.5px;
     }
-    #profile-btn { left: 80px; }
-    #shop-btn   { left: 140px; }
-    #help-btn   { left: 200px; }
+    #profile-btn { left: 85px; }
+    #shop-btn   { left: 145px; }
+    #help-btn   { left: 205px; }
   }
 
   /* ===== МОДАЛЬНЫЕ ОКНА ===== */
@@ -3206,7 +3205,7 @@ applyWeatherByTime();
   .help-author { background: #1a1a2e; padding: 10px 15px; border-radius: 8px; border-left: 3px solid #ffd700; margin: 10px 0; font-style: italic; }
 </style>
 
-<!-- КНОПКИ (исправленные) -->
+<!-- КНОПКИ -->
 <button id="profile-btn">👤 Профиль</button>
 <button id="shop-btn">🛒 Магазин</button>
 <button id="help-btn">❓ Справка</button>
@@ -3321,12 +3320,9 @@ applyWeatherByTime();
   </div>
 </div>
 
-<!-- СКРИПТЫ ПРОФИЛЯ, МАГАЗИНА И СПРАВКИ -->
+<!-- СКРИПТЫ -->
 <script>
 (function() {
-  // ============================================================
-  // 1. АВАТАРЫ – без дублей, смайлик первым и бесплатный
-  // ============================================================
   const AVATARS = [
     { id: 'default', emoji: '🙂', name: 'Смайлик', price: 0 },
     { id: 'cat', emoji: '🐱', name: 'Кот', price: 100 },
@@ -3380,9 +3376,6 @@ applyWeatherByTime();
     { id: 'crystal', emoji: '💎', name: 'Кристалл', price: 150 }
   ];
 
-  // ============================================================
-  // 2. РАМКИ – исправленные цены и категории
-  // ============================================================
   const FRAMES = [
     { id: 'none', name: 'Без рамки', price: 0 },
     { id: 'neon', name: 'Неон', price: 100 },
@@ -3428,9 +3421,6 @@ applyWeatherByTime();
     { id: 'matrix-code', name: 'Матричный код', price: 250 }
   ];
 
-  // ============================================================
-  // 3. ЦВЕТА НИКА – 15 цветов по 100 + радужный 150
-  // ============================================================
   const NICK_COLORS = [
     { id: 'default', name: 'Белый', color: '#ffffff', price: 0 },
     { id: 'red', name: 'Красный', color: '#ff0000', price: 100 },
@@ -3451,9 +3441,6 @@ applyWeatherByTime();
     { id: 'rainbow', name: 'Радужный', color: 'rainbow', price: 150 }
   ];
 
-  // ============================================================
-  // 4. ПРОФИЛЬ
-  // ============================================================
   const DEFAULT_PROFILE = {
     nickname: 'Player',
     coins: 0,
@@ -3500,9 +3487,6 @@ applyWeatherByTime();
     return false;
   };
 
-  // ============================================================
-  // 5. UI
-  // ============================================================
   function updateUI() {
     document.getElementById('profile-coins').textContent = profile.coins;
     document.getElementById('shop-coins').textContent = profile.coins;
@@ -3539,9 +3523,6 @@ applyWeatherByTime();
     }
   }
 
-  // ============================================================
-  // 6. МАГАЗИН
-  // ============================================================
   function populateShop() {
     const ag = document.getElementById('avatar-list');
     ag.innerHTML = '';
@@ -3580,9 +3561,6 @@ applyWeatherByTime();
     });
   }
 
-  // ============================================================
-  // 7. ПОКУПКА / ЭКИПИРОВКА
-  // ============================================================
   function buy(type, item) {
     let inventoryKey = item.id;
     if (type === 'nickColor') inventoryKey = 'color_' + item.id;
@@ -3605,9 +3583,6 @@ applyWeatherByTime();
     alert('Куплено и экипировано: ' + item.name);
   }
 
-  // ============================================================
-  // 8. СМЕНА НИКА
-  // ============================================================
   document.getElementById('change-nickname-btn').onclick = () => {
     const cost = profile.nicknameChanges === 0 ? 0 : 200;
     if (cost > 0 && profile.coins < cost) { alert('Нужно 200 монет'); return; }
@@ -3620,9 +3595,6 @@ applyWeatherByTime();
     }
   };
 
-  // ============================================================
-  // 9. МОДАЛКИ
-  // ============================================================
   document.getElementById('profile-btn').onclick = () => {
     document.getElementById('profile-modal').classList.add('active');
     updateUI();
@@ -3654,9 +3626,6 @@ applyWeatherByTime();
     }
   });
 
-  // ============================================================
-  // 10. ИНИЦИАЛИЗАЦИЯ
-  // ============================================================
   updateUI();
   window.PixelProfile = { addCoins: window.addCoins, updateRecord: window.updateRecord };
 })();
@@ -3668,5 +3637,4 @@ applyWeatherByTime();
 
 </body>
 </html>
-
   
