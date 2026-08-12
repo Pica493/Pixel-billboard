@@ -2907,66 +2907,24 @@ applyWeatherByTime();
 <!-- ========== ПРОФИЛЬ И МАГАЗИН (исправленный, без дублей, с новыми цветами) ========== -->
 <style>
   
-/* ===== ВСЕ ВЕРХНИЕ КНОПКИ (едва касаются друг друга) ===== */
-#profile-btn, #shop-btn, #help-btn {
-  position: fixed;
-  top: 15px;
-  background: #222;
-  color: #eee;
-  border-radius: 20px;
-  padding: 0 14px;
-  cursor: pointer;
-  z-index: 99999;
-  font-size: 14px;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  backdrop-filter: blur(5px);
-  height: 30px;
-  line-height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-}
-#profile-btn {
-  left: 160px;
-  border: 2px solid #4caf50;
-}
-#shop-btn {
-  left: 238px;  /* 160 + 78 (ширина Профиль ~80 - 2px перекрытия) */
-  border: 2px solid #4caf50;
-}
-#help-btn {
-  left: 321px;  /* 238 + 83 (ширина Магазин ~85 - 2px) */
-  border: 2px solid #ffd700;
-  padding: 0 12px;
-}
 
-/* ===== АДАПТАЦИЯ ДЛЯ ТЕЛЕФОНОВ ===== */
-@media (max-width: 600px) {
-  #profile-btn, #shop-btn, #help-btn {
-    font-size: 11px;
-    height: 26px;
-    line-height: 26px;
-    top: 10px;
-    padding: 0 10px;
+#profile-btn, #shop-btn {
+    position: fixed;
+    top: 15px;
+    background: #222;
+    color: #eee;
+    border: 2px solid #4caf50;
+    border-radius: 20px;
+    padding: 5px 15px;
+    cursor: pointer;
+    z-index: 99999;
+    font-size: 14px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    backdrop-filter: blur(5px);
   }
-  #profile-btn { left: 130px; }
-  #shop-btn   { left: 193px; }  /* 130 + 63 (ширина ~65 - 2) */
-  #help-btn   { left: 256px; }  /* 193 + 63 */
-}
-@media (max-width: 420px) {
-  #profile-btn, #shop-btn, #help-btn {
-    font-size: 9px;
-    height: 22px;
-    line-height: 22px;
-    top: 8px;
-    padding: 0 6px;
-  }
-  #profile-btn { left: 110px; }
-  #shop-btn   { left: 163px; }  /* 110 + 53 (ширина ~55 - 2) */
-  #help-btn   { left: 216px; }  /* 163 + 53 */
-}
+  #profile-btn { left: 160px; }
+  #shop-btn { left: 260px; }
+
 
     
 
