@@ -2903,7 +2903,7 @@ applyWeatherByTime();
 })();
 </script>
 
- <!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (исправленные кнопки) ========== -->
+<!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (исправленные кнопки) ========== -->
 <style>
   /* ===== ЛУПА (уменьшенная) ===== */
   #easter-input-container {
@@ -2940,7 +2940,7 @@ applyWeatherByTime();
     font-size: 11px;
   }
 
-  /* ===== ВЕРХНИЕ КНОПКИ (размер как у лупы, сразу после неё) ===== */
+  /* ===== ВЕРХНИЕ КНОПКИ (ближе к лупе, с увеличенным расстоянием) ===== */
   #profile-btn, #shop-btn, #help-btn {
     position: fixed;
     top: 15px;
@@ -2964,15 +2964,15 @@ applyWeatherByTime();
     transition: background 0.2s, border-color 0.2s;
   }
   #profile-btn {
-    left: 110px;
+    left: 115px;               /* сразу после лупы (лупа заканчивается ~120px) */
     border-color: #4caf50;
   }
   #shop-btn {
-    left: 190px;
+    left: 215px;               /* шаг 100px – увеличенное расстояние */
     border-color: #4caf50;
   }
   #help-btn {
-    left: 270px;
+    left: 315px;
     border-color: #ffd700;
     padding: 0 10px;
   }
@@ -2997,8 +2997,8 @@ applyWeatherByTime();
       padding: 0 10px;
     }
     #profile-btn { left: 100px; }
-    #shop-btn   { left: 170px; }
-    #help-btn   { left: 240px; }
+    #shop-btn   { left: 190px; }
+    #help-btn   { left: 280px; }
   }
 
   /* ===== ДЛЯ ТЕЛЕФОНОВ (≤ 600px) ===== */
@@ -3013,9 +3013,9 @@ applyWeatherByTime();
       top: 10px;
       padding: 0 8px;
     }
-    #profile-btn { left: 95px; }
-    #shop-btn   { left: 155px; }
-    #help-btn   { left: 215px; }
+    #profile-btn { left: 90px; }
+    #shop-btn   { left: 170px; }
+    #help-btn   { left: 250px; }
   }
 
   /* ===== ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ (≤ 420px) ===== */
@@ -3031,9 +3031,9 @@ applyWeatherByTime();
       padding: 0 5px;
       border-width: 1.5px;
     }
-    #profile-btn { left: 85px; }
-    #shop-btn   { left: 135px; }
-    #help-btn   { left: 185px; }
+    #profile-btn { left: 80px; }
+    #shop-btn   { left: 150px; }
+    #help-btn   { left: 220px; }
   }
 
   /* ===== МОДАЛЬНЫЕ ОКНА ===== */
@@ -3666,6 +3666,5 @@ applyWeatherByTime();
 
 </body>
 </html>
-
 
   
