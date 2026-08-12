@@ -2903,6 +2903,8 @@ applyWeatherByTime();
 })();
 </script>
 
+
+
 <!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (исправленные кнопки) ========== -->
 <style>
   /* ===== ЛУПА (уменьшенная) ===== */
@@ -2940,7 +2942,7 @@ applyWeatherByTime();
     font-size: 11px;
   }
 
-  /* ===== ВЕРХНИЕ КНОПКИ (ближе к лупе, с увеличенным расстоянием) ===== */
+  /* ===== ВЕРХНИЕ КНОПКИ (ближе к лупе, с компактным расстоянием) ===== */
   #profile-btn, #shop-btn, #help-btn {
     position: fixed;
     top: 15px;
@@ -2964,15 +2966,15 @@ applyWeatherByTime();
     transition: background 0.2s, border-color 0.2s;
   }
   #profile-btn {
-    left: 115px;               /* сразу после лупы (лупа заканчивается ~120px) */
+    left: 115px;               /* сразу после лупы (лупа заканчивается ~110px) */
     border-color: #4caf50;
   }
   #shop-btn {
-    left: 215px;               /* шаг 100px – увеличенное расстояние */
+    left: 200px;               /* шаг 85px – компактно, текст читается */
     border-color: #4caf50;
   }
   #help-btn {
-    left: 315px;
+    left: 285px;
     border-color: #ffd700;
     padding: 0 10px;
   }
@@ -2997,8 +2999,8 @@ applyWeatherByTime();
       padding: 0 10px;
     }
     #profile-btn { left: 100px; }
-    #shop-btn   { left: 190px; }
-    #help-btn   { left: 280px; }
+    #shop-btn   { left: 178px; }
+    #help-btn   { left: 256px; }
   }
 
   /* ===== ДЛЯ ТЕЛЕФОНОВ (≤ 600px) ===== */
@@ -3014,8 +3016,8 @@ applyWeatherByTime();
       padding: 0 8px;
     }
     #profile-btn { left: 90px; }
-    #shop-btn   { left: 170px; }
-    #help-btn   { left: 250px; }
+    #shop-btn   { left: 158px; }
+    #help-btn   { left: 226px; }
   }
 
   /* ===== ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ (≤ 420px) ===== */
@@ -3032,8 +3034,8 @@ applyWeatherByTime();
       border-width: 1.5px;
     }
     #profile-btn { left: 80px; }
-    #shop-btn   { left: 150px; }
-    #help-btn   { left: 220px; }
+    #shop-btn   { left: 140px; }
+    #help-btn   { left: 200px; }
   }
 
   /* ===== МОДАЛЬНЫЕ ОКНА ===== */
