@@ -3205,9 +3205,7 @@ applyWeatherByTime();
   .help-author { background: #1a1a2e; padding: 10px 15px; border-radius: 8px; border-left: 3px solid #ffd700; margin: 10px 0; font-style: italic; }
 
 .favaframe {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   width: 24px;
   height: 24px;
   border-radius: 4px;
@@ -3216,17 +3214,18 @@ applyWeatherByTime();
   box-sizing: border-box;
   padding: 0 !important;
   margin: 0 !important;
-  line-height: 1;
+  line-height: 24px !important;   /* ровно по высоте контейнера */
+  text-align: center !important;
+  vertical-align: middle;
   flex-shrink: 0;
-  text-align: center;
+  border: 2px solid transparent !important; /* временно, чтобы избежать сдвигов */
 }
 
-/* Обнуляем любые отступы/границы от рамок */
+/* Для всех рамок – убираем любые отступы и фиксируем рамку */
 .favaframe[class*="frame-"] {
   padding: 0 !important;
   margin: 0 !important;
-  border-width: 2px !important; /* устанавливаем желаемую толщину рамки, чтобы не было смещения */
-  border-style: solid !important;
+  border: 2px solid currentColor !important;
 }
 
 
