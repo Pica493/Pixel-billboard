@@ -3203,6 +3203,19 @@ applyWeatherByTime();
   #help-modal .section:last-child { border-bottom: none; }
   .help-tag { display: inline-block; background: #333; color: #0f0; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
   .help-author { background: #1a1a2e; padding: 10px 15px; border-radius: 8px; border-left: 3px solid #ffd700; margin: 10px 0; font-style: italic; }
+
+.favaframe {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 4px;
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+  
 </style>
 
 <!-- КНОПКИ -->
@@ -4015,20 +4028,33 @@ window.FRAMES = FRAMES;
   });
 
   // ===== ОТОБРАЖЕНИЕ =====
-  function displayMessage(msg) {
-    const div = document.createElement('div');
-    div.className = 'fire-msg';
-    const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-    let avatarEmoji = '🙂';
-    let frameCSS = '';
-    if (typeof AVATARS !== 'undefined') {
-      const av = AVATARS.find(a => a.id === msg.avatar);
-      if (av) avatarEmoji = av.emoji;
+
+function displayMessage(msg) {
+  const div = document.createElement('div');
+  div.className = 'fire-msg';
+  const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+  let avatarEmoji = '🙂';
+  let frameClass = '';
+  if (typeof AVATARS !== 'undefined') {
+    const av = AVATARS.find(a => a.id === msg.avatar);
+    if (av) avatarEmoji = av.emoji;
+  }
+  if (typeof FRAMES !== 'undefined') {
+    const fr = FRAMES.find(f => f.id === msg.frame);
+    if (fr && fr.id !== 'none') {
+      frameClass = 'frame-' + fr.id;
     }
-    if (typeof FRAMES !== 'undefined') {
-      const fr = FRAMES.find(f => f.id === msg.frame);
-      if (fr && fr.css) frameCSS = fr.css;
-    }
+  }
+  div.innerHTML = `
+    <span class="favaframe ${frameClass}">${avatarEmoji}</span>
+    <span class="fnick" style="color:${escapeHtml(msg.color || '#fff')}">${escapeHtml(msg.nickname)}</span>
+    <span class="ftime">${time}</span><br>
+    ${escapeHtml(msg.text)}
+  `;
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+  
 
     // Обработка упоминаний
     let textHtml = escapeHtml(msg.text);
