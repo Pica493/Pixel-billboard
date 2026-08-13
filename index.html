@@ -4029,11 +4029,12 @@ window.FRAMES = FRAMES;
 
   // ===== ОТОБРАЖЕНИЕ =====
 
+
 function displayMessage(msg) {
   const div = document.createElement('div');
   div.className = 'fire-msg';
   const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-  
+
   // Аватар (эмодзи)
   let avatarEmoji = '🙂';
   if (typeof AVATARS !== 'undefined') {
@@ -4041,7 +4042,7 @@ function displayMessage(msg) {
     if (av) avatarEmoji = av.emoji;
   }
 
-  // Рамка (добавляем класс)
+  // Рамка (класс)
   let frameClass = '';
   if (typeof FRAMES !== 'undefined') {
     const fr = FRAMES.find(f => f.id === msg.frame);
@@ -4050,44 +4051,35 @@ function displayMessage(msg) {
     }
   }
 
-  // Цвет ника (если передан)
+  // Цвет ника
   const nickColor = msg.color || '#fff';
+
+  // Обработка упоминаний
+  let textHtml = escapeHtml(msg.text);
+  const currentNick = getProfile().nickname; // берём свежий ник пользователя
+  textHtml = textHtml.replace(/@([а-яА-Яa-zA-Z0-9_]+)/g, (match, name) => {
+    if (currentNick && name === currentNick) {
+      return `<span class="mention mention-me">@${escapeHtml(name)}</span>`;
+    } else {
+      return `<span class="mention">@${escapeHtml(name)}</span>`;
+    }
+  });
 
   div.innerHTML = `
     <span class="favaframe ${frameClass}">${avatarEmoji}</span>
     <span class="fnick" style="color:${escapeHtml(nickColor)}">${escapeHtml(msg.nickname)}</span>
     <span class="ftime">${time}</span>
 
-    ${escapeHtml(msg.text)}
+    ${textHtml}
+    <div class="msg-actions">
+      <button data-action="report" data-key="${msg.key}">⚠️</button>
+      <button data-action="ignore" data-uid="${msg.uid}">🚫</button>
+    </div>
   `;
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
   
-
-    // Обработка упоминаний
-    let textHtml = escapeHtml(msg.text);
-    textHtml = textHtml.replace(/@([а-яА-Яa-zA-Z0-9_]+)/g, (match, name) => {
-      if (profile.nickname && name === profile.nickname) {
-        return `<span class="mention mention-me">@${escapeHtml(name)}</span>`;
-      } else {
-        return `<span class="mention">@${escapeHtml(name)}</span>`;
-      }
-    });
-
-    div.innerHTML = `
-      <span class="favaframe" style="${frameCSS}">${avatarEmoji}</span>
-      <span class="fnick" style="color:${escapeHtml(msg.color || '#fff')}">${escapeHtml(msg.nickname)}</span>
-      <span class="ftime">${time}</span><br>
-      ${textHtml}
-      <div class="msg-actions">
-        <button data-action="report" data-key="${msg.key}">⚠️</button>
-        <button data-action="ignore" data-uid="${msg.uid}">🚫</button>
-      </div>
-    `;
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  }
 
   // ===== ЖАЛОБЫ =====
   messagesDiv.addEventListener('click', async (e) => {
