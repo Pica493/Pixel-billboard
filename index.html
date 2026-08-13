@@ -3639,7 +3639,501 @@ window.FRAMES = FRAMES;
 
 
 
+<!-- ЖИВОЙ ЧАТ (Firebase) – исправленный, с профилем, звуком, упоминаниями, эмодзи, жалобами, игнорированием, антиспамом, банами -->
+<style>
+  #fire-chat-btn {
+    position: fixed;
+    top: 50px;
+    left: 15px;
+    z-index: 9999;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(231,76,60,0.5);
+  }
+  #fire-chat-modal {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 360px;
+    height: 500px;
+    background: #1a1a2e;
+    border: 2px solid #e74c3c;
+    border-radius: 15px;
+    z-index: 100001;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #fire-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fire-msg {
+    background: #2a2a3e;
+    padding: 8px 12px;
+    border-radius: 10px;
+    color: white;
+    font-family: sans-serif;
+    font-size: 13px;
+    word-break: break-word;
+    position: relative;
+  }
+  .fire-msg .fnick {
+    font-weight: bold;
+  }
+  .fire-msg .ftime {
+    color: #aaa;
+    font-size: 0.8em;
+    float: right;
+    margin-left: 10px;
+  }
+  .fire-msg .favaframe {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 16px;
+  }
+  .mention {
+    color: #ffd700;
+    font-weight: bold;
+  }
+  .mention-me {
+    background: rgba(255,215,0,0.3);
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+  .msg-actions {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    gap: 5px;
+  }
+  .fire-msg:hover .msg-actions {
+    opacity: 1;
+  }
+  .msg-actions button {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px;
+  }
+  #fire-chat-typing {
+    padding: 4px 12px;
+    color: #aaa;
+    font-size: 0.8em;
+    min-height: 18px;
+  }
+  #emoji-panel {
+    display: none;
+    position: absolute;
+    bottom: 60px;
+    left: 10px;
+    background: #2a2a3e;
+    border: 1px solid #e74c3c;
+    border-radius: 10px;
+    padding: 5px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    z-index: 100002;
+  }
+  #emoji-panel button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  #fire-chat-modal.active {
+    display: flex;
+  }
+</style>
 
+<button id="fire-chat-btn">💬 Чат</button>
+
+<div id="fire-chat-modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#111;border-bottom:2px solid #e74c3c;">
+    <span style="color:white;font-weight:bold;">💬 Общий чат</span>
+    <button id="fire-chat-close" style="background:none;border:none;color:white;font-size:18px;cursor:pointer;">✕</button>
+  </div>
+  <div id="fire-chat-messages"></div>
+  <div id="fire-chat-typing"></div>
+  <div style="display:flex;padding:10px;background:#111;border-top:2px solid #e74c3c;position:relative;">
+    <button id="emoji-btn" style="background:none;border:none;font-size:18px;cursor:pointer;">😀</button>
+    <input type="text" id="fire-chat-input" maxlength="200" placeholder="Введите сообщение..." style="flex:1;padding:8px;border:none;border-radius:10px;background:#2a2a3e;color:white;outline:none;margin:0 5px;">
+    <button id="fire-chat-send" style="padding:8px 15px;border:none;border-radius:10px;background:#e74c3c;color:white;cursor:pointer;">➤</button>
+    <div id="emoji-panel"></div>
+  </div>
+</div>
+
+<!-- FIREBASE SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<script>
+(function() {
+  // ===== КОНФИГ =====
+  const firebaseConfig = {
+    apiKey: "AIzaSyCDyyer9lSbVexCJuwt8fhWoE3DPg04tS8",
+    authDomain: "pixelbillboard-chat.firebaseapp.com",
+    databaseURL: "https://pixelbillboard-chat-default-rtdb.firebaseio.com",
+    projectId: "pixelbillboard-chat",
+    storageBucket: "pixelbillboard-chat.firebasestorage.app",
+    messagingSenderId: "704083995474",
+    appId: "1:704083995474:web:a0e9227d94113e8a21688b"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const chatRef = db.ref('public-chat/messages');
+  const bansRef = db.ref('bans');
+  const spamRef = db.ref('spamProtection');
+  const typingRef = db.ref('typing');
+  const reportsRef = db.ref('reports');
+
+  // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+  const uid = (function getUserId() {
+    let id = localStorage.getItem('pixelUserId');
+    if (!id) {
+      id = Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+      localStorage.setItem('pixelUserId', id);
+    }
+    return id;
+  })();
+
+  let profile = getProfile();
+  const ignoredUsers = new Set(JSON.parse(localStorage.getItem('ignoredUsers') || '[]'));
+
+  function getProfile() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('pixelProfile'));
+      return saved || { nickname: 'Гость', equipped: { avatar: 'default', frame: 'none', nickColor: '#fff' } };
+    } catch(e) {
+      return { nickname: 'Гость', equipped: { avatar: 'default', frame: 'none', nickColor: '#fff' } };
+    }
+  }
+
+  // ===== ФИЛЬТРЫ =====
+  const bannedWords = ['сука','блядь','пиздец','хуй','пизда','ебать','залупа','жопа','гавно','fuck','shit','ass','bitch','dick','pussy','bastard','cunt','whore','идиот','дебил','мудак','сволочь','ублюдок','кретин','придурок'];
+  const allowedDomains = ['pixelbillboard.ru','pixelbillboard.github.io','t.me/pixelbillboard_ru','t.me/yourtelegram'];
+
+  function containsBanned(text) { return bannedWords.some(w => text.toLowerCase().includes(w)); }
+  function containsLink(text) { return /(https?:\/\/|www\.|\.(com|ru|org|net|io|gg|me|tv|info|biz|su|рф|укр))/i.test(text); }
+  function isAllowedLink(text) {
+    const urls = text.match(/(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9-]+\.(com|ru|org|net|io|gg|me|tv|info|biz|su|рф|укр)[^\s]*)/gi) || [];
+    return urls.every(url => allowedDomains.some(d => url.toLowerCase().includes(d)));
+  }
+
+  // ===== ЭЛЕМЕНТЫ =====
+  const chatBtn = document.getElementById('fire-chat-btn');
+  const chatModal = document.getElementById('fire-chat-modal');
+  const chatClose = document.getElementById('fire-chat-close');
+  const messagesDiv = document.getElementById('fire-chat-messages');
+  const input = document.getElementById('fire-chat-input');
+  const sendBtn = document.getElementById('fire-chat-send');
+  const typingDiv = document.getElementById('fire-chat-typing');
+  const emojiBtn = document.getElementById('emoji-btn');
+  const emojiPanel = document.getElementById('emoji-panel');
+
+  // ===== ЗВУК =====
+  function playBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = 600;
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+    } catch(e) {}
+  }
+
+  // ===== ИНДИКАТОР "ПЕЧАТАЕТ" =====
+  let typingTimeout = null;
+  input.addEventListener('input', () => {
+    if (input.value.trim() === '') return;
+    typingRef.child(uid).set({
+      nickname: profile.nickname || 'Гость',
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      typingRef.child(uid).remove();
+    }, 2000);
+  });
+
+  // Обработка изменений в typing
+  typingRef.on('value', (snapshot) => {
+    const typings = [];
+    snapshot.forEach(child => {
+      const data = child.val();
+      if (data && data.timestamp && Date.now() - data.timestamp < 2000) {
+        typings.push(data.nickname);
+      }
+    });
+    if (typings.length > 0) {
+      typingDiv.textContent = typings.join(', ') + ' печатает...';
+    } else {
+      typingDiv.textContent = '';
+    }
+  });
+
+  // ===== ПАНЕЛЬ ЭМОДЗИ =====
+  const emojis = ['😀','😂','👍','🔥','💀','🎉','😍','🤔','😢','😡','❤️','🎁'];
+  emojis.forEach(emoji => {
+    const btn = document.createElement('button');
+    btn.textContent = emoji;
+    btn.addEventListener('click', () => {
+      input.value += emoji;
+      input.focus();
+      emojiPanel.style.display = 'none';
+    });
+    emojiPanel.appendChild(btn);
+  });
+  emojiBtn.addEventListener('click', () => {
+    emojiPanel.style.display = emojiPanel.style.display === 'grid' ? 'none' : 'grid';
+  });
+
+  // ===== БАНЫ =====
+  async function isBanned() {
+    const snap = await bansRef.child(uid).once('value');
+    const data = snap.val();
+    if (!data) return false;
+    if (data.permanent) return true;
+    if (data.bannedUntil && data.bannedUntil > Date.now()) return true;
+    return false;
+  }
+  async function applyBan() {
+    const banRef = bansRef.child(uid);
+    const snap = await banRef.once('value');
+    let data = snap.val() || { count: 0, permanent: false, bannedUntil: 0 };
+    data.count = (data.count || 0) + 1;
+    if (data.count >= 3) { data.permanent = true; data.bannedUntil = 0; }
+    else if (data.count === 1) data.bannedUntil = Date.now() + 5*60*1000;
+    else if (data.count === 2) data.bannedUntil = Date.now() + 5*24*60*60*1000;
+    await banRef.set(data);
+  }
+
+  // ===== АНТИСПАМ =====
+  async function isMuted() {
+    const snap = await spamRef.child(uid).once('value');
+    const data = snap.val();
+    return data && data.mutedUntil && data.mutedUntil > Date.now();
+  }
+  async function updateSpamTimestamps() {
+    const snap = await spamRef.child(uid).once('value');
+    let data = snap.val() || { messages: [], mutedUntil: 0 };
+    const now = Date.now();
+    data.messages = data.messages.filter(ts => now - ts < 15000);
+    data.messages.push(now);
+    if (data.messages.length >= 3 && data.mutedUntil <= now) {
+      data.mutedUntil = now + 60*1000;
+    }
+    data.messages = data.messages.slice(-10);
+    await spamRef.child(uid).set(data);
+  }
+
+  // ===== ОТПРАВКА =====
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+    profile = getProfile(); // обновляем профиль на случай изменений
+
+    if (profile.nickname === 'Гость') {
+      alert('Установите ник в профиле, чтобы писать в чат.');
+      return;
+    }
+    if (await isBanned()) {
+      alert('Вы заблокированы в чате.');
+      return;
+    }
+    if (await isMuted()) {
+      alert('Вы временно заблокированы за спам. Подождите минуту.');
+      return;
+    }
+    if (containsBanned(text)) {
+      await applyBan();
+      alert('Маты запрещены. Вы получили бан.');
+      input.value = '';
+      return;
+    }
+
+    let shouldDelete = false;
+    if (containsLink(text) && !isAllowedLink(text)) {
+      shouldDelete = true;
+    }
+
+    const msg = {
+      uid: uid,
+      nickname: profile.nickname,
+      avatar: profile.equipped.avatar || 'default',
+      frame: profile.equipped.frame || 'none',
+      color: profile.equipped.nickColor || '#fff',
+      text: text,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const newMsgRef = await chatRef.push(msg);
+    if (shouldDelete) {
+      setTimeout(() => newMsgRef.remove(), 1000);
+      alert('Ссылка была автоматически удалена.');
+    } else {
+      await updateSpamTimestamps();
+    }
+    input.value = '';
+    typingRef.child(uid).remove();
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+  // ===== ПОЛУЧЕНИЕ СООБЩЕНИЙ =====
+  chatRef.limitToLast(60).on('child_added', snapshot => {
+    const msg = snapshot.val();
+    msg.key = snapshot.key;
+    if (ignoredUsers.has(msg.uid)) return;
+    displayMessage(msg);
+    // Звук, если чат не активен или вкладка скрыта
+    if (chatModal.style.display !== 'flex' || document.hidden) {
+      playBeep();
+    }
+  });
+
+  // ===== ОТОБРАЖЕНИЕ =====
+  function displayMessage(msg) {
+    const div = document.createElement('div');
+    div.className = 'fire-msg';
+    const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+    let avatarEmoji = '🙂';
+    let frameCSS = '';
+    if (typeof AVATARS !== 'undefined') {
+      const av = AVATARS.find(a => a.id === msg.avatar);
+      if (av) avatarEmoji = av.emoji;
+    }
+    if (typeof FRAMES !== 'undefined') {
+      const fr = FRAMES.find(f => f.id === msg.frame);
+      if (fr && fr.css) frameCSS = fr.css;
+    }
+
+    // Обработка упоминаний
+    let textHtml = escapeHtml(msg.text);
+    textHtml = textHtml.replace(/@([а-яА-Яa-zA-Z0-9_]+)/g, (match, name) => {
+      if (profile.nickname && name === profile.nickname) {
+        return `<span class="mention mention-me">@${escapeHtml(name)}</span>`;
+      } else {
+        return `<span class="mention">@${escapeHtml(name)}</span>`;
+      }
+    });
+
+    div.innerHTML = `
+      <span class="favaframe" style="${frameCSS}">${avatarEmoji}</span>
+      <span class="fnick" style="color:${escapeHtml(msg.color || '#fff')}">${escapeHtml(msg.nickname)}</span>
+      <span class="ftime">${time}</span><br>
+      ${textHtml}
+      <div class="msg-actions">
+        <button data-action="report" data-key="${msg.key}">⚠️</button>
+        <button data-action="ignore" data-uid="${msg.uid}">🚫</button>
+      </div>
+    `;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  // ===== ЖАЛОБЫ =====
+  messagesDiv.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const key = btn.dataset.key;
+    const msgUid = btn.dataset.uid;
+
+    if (action === 'report') {
+      // Защита от повторной жалобы
+      const reportKey = localStorage.getItem('reported_' + key);
+      if (reportKey === uid) {
+        alert('Вы уже жаловались на это сообщение.');
+        return;
+      }
+      // Добавляем жалобу в Firebase
+      const reportsForMsg = reportsRef.child(key);
+      const existing = await reportsForMsg.child(uid).once('value');
+      if (!existing.exists()) {
+        await reportsForMsg.child(uid).set(Date.now());
+        localStorage.setItem('reported_' + key, uid);
+        // Проверяем количество жалоб
+        const allReports = await reportsForMsg.once('value');
+        let count = 0;
+        allReports.forEach(() => count++);
+        if (count >= 3) {
+          chatRef.child(key).remove();
+          reportsForMsg.remove();
+        }
+      }
+    } else if (action === 'ignore') {
+      if (msgUid === uid) return;
+      ignoredUsers.add(msgUid);
+      localStorage.setItem('ignoredUsers', JSON.stringify([...ignoredUsers]));
+      // Удаляем сообщения этого пользователя из видимости
+      const msgs = messagesDiv.children;
+      for (let i = msgs.length - 1; i >= 0; i--) {
+        const el = msgs[i];
+        // Предполагаем, что у нас нет прямого доступа к uid в DOM, поэтому перезагрузим сообщения?
+        // Проще перезагрузить все сообщения заново.
+      }
+      // Перезагружаем сообщения, чтобы скрыть игнорируемые
+      messagesDiv.innerHTML = '';
+      chatRef.limitToLast(60).once('value', snapshot => {
+        snapshot.forEach(child => {
+          const msg = child.val();
+          msg.key = child.key;
+          if (!ignoredUsers.has(msg.uid)) displayMessage(msg);
+        });
+      });
+    }
+  });
+
+  // ===== ОЧИСТКА СТАРЫХ СООБЩЕНИЙ (60) =====
+  chatRef.on('value', snapshot => {
+    const messages = [];
+    snapshot.forEach(child => messages.push({ key: child.key, timestamp: child.val().timestamp }));
+    if (messages.length > 60) {
+      messages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+      const toRemove = messages.slice(0, messages.length - 60);
+      toRemove.forEach(m => chatRef.child(m.key).remove());
+    }
+  });
+
+  // ===== ОТКРЫТИЕ/ЗАКРЫТИЕ =====
+  chatBtn.addEventListener('click', () => {
+    chatModal.style.display = 'flex';
+    input.focus();
+  });
+  chatClose.addEventListener('click', () => {
+    chatModal.style.display = 'none';
+  });
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+})();
+</script>
 
 
 
