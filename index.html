@@ -3215,14 +3215,26 @@ applyWeatherByTime();
   font-size: 16px;
   box-sizing: border-box;
   padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1;
   flex-shrink: 0;
+  text-align: center;
 }
 
-/* Принудительно убираем padding у всех рамок */
+/* Принудительно убираем отступы у всех рамок */
 .favaframe[class*="frame-"] {
   padding: 0 !important;
+  margin: 0 !important;
 }
 
+
+  /* Радужный цвет ника в чате */
+.fire-msg .fnick.rainbow {
+  background: linear-gradient(90deg, red, orange, yellow, green, blue, violet);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
   
 </style>
 
@@ -3514,19 +3526,19 @@ applyWeatherByTime();
     document.getElementById('profile-nickname').textContent = profile.nickname;
 
     const nickEl = document.getElementById('profile-nickname');
-    const colorItem = NICK_COLORS.find(c => c.id === (profile.equipped.nickColor || 'default'));
-    if (colorItem && colorItem.color === 'rainbow') {
-      nickEl.style.background = 'linear-gradient(90deg, red, orange, yellow, green, blue, violet)';
-      nickEl.style.webkitBackgroundClip = 'text';
-      nickEl.style.webkitTextFillColor = 'transparent';
-      nickEl.style.backgroundClip = 'text';
-    } else {
-      nickEl.style.color = colorItem ? colorItem.color : '#ffffff';
-      nickEl.style.background = '';
-      nickEl.style.webkitBackgroundClip = '';
-      nickEl.style.webkitTextFillColor = '';
-      nickEl.style.backgroundClip = '';
-    }
+const nickColor = profile.equipped.nickColor || '#ffffff';
+if (nickColor === 'rainbow') {
+  nickEl.style.background = 'linear-gradient(90deg, red, orange, yellow, green, blue, violet)';
+  nickEl.style.webkitBackgroundClip = 'text';
+  nickEl.style.webkitTextFillColor = 'transparent';
+  nickEl.style.backgroundClip = 'text';
+} else {
+  nickEl.style.color = nickColor;
+  nickEl.style.background = '';
+  nickEl.style.webkitBackgroundClip = '';
+  nickEl.style.webkitTextFillColor = '';
+  nickEl.style.backgroundClip = '';
+}
 
     document.getElementById('rec-snake').textContent = profile.records.snake || 0;
     document.getElementById('rec-bit').textContent = profile.records.bit || 0;
@@ -3589,7 +3601,7 @@ applyWeatherByTime();
     if (profile.inventory.includes(inventoryKey)) {
       if (type === 'avatar') profile.equipped.avatar = item.id;
       else if (type === 'frame') profile.equipped.frame = item.id;
-      else if (type === 'nickColor') profile.equipped.nickColor = item.id;
+      else if (type === 'nickColor') profile.equipped.nickColor = item.color;
       save(); updateUI();
       alert('Экипировано: ' + item.name);
       return;
@@ -4004,7 +4016,7 @@ window.FRAMES = FRAMES;
       nickname: profile.nickname,
       avatar: profile.equipped.avatar || 'default',
       frame: profile.equipped.frame || 'none',
-      color: profile.equipped.nickColor || '#fff',
+      color: profile.equipped.nickColor || '#ffffff',
       text: text,
       timestamp: firebase.database.ServerValue.TIMESTAMP
     };
@@ -4060,11 +4072,18 @@ function displayMessage(msg) {
   }
 
   // Цвет ника
-  const nickColor = msg.color || '#fff';
+  const nickColor = msg.color || '#ffffff';
+  let nickClass = 'fnick';
+  let colorStyle = '';
+  if (nickColor === 'rainbow') {
+    nickClass += ' rainbow';
+  } else {
+    colorStyle = `style="color:${escapeHtml(nickColor)}"`;
+  }
 
   // Обработка упоминаний
   let textHtml = escapeHtml(msg.text);
-  const currentNick = getProfile().nickname; // берём свежий ник пользователя
+  const currentNick = getProfile().nickname;
   textHtml = textHtml.replace(/@([а-яА-Яa-zA-Z0-9_]+)/g, (match, name) => {
     if (currentNick && name === currentNick) {
       return `<span class="mention mention-me">@${escapeHtml(name)}</span>`;
@@ -4075,9 +4094,8 @@ function displayMessage(msg) {
 
   div.innerHTML = `
     <span class="favaframe ${frameClass}">${avatarEmoji}</span>
-    <span class="fnick" style="color:${escapeHtml(nickColor)}">${escapeHtml(msg.nickname)}</span>
+    <span class="${nickClass}" ${colorStyle}>${escapeHtml(msg.nickname)}</span>
     <span class="ftime">${time}</span>
-
     ${textHtml}
     <div class="msg-actions">
       <button data-action="report" data-key="${msg.key}">⚠️</button>
