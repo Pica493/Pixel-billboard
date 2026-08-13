@@ -3221,10 +3221,12 @@ applyWeatherByTime();
   text-align: center;
 }
 
-/* Принудительно убираем отступы у всех рамок */
+/* Обнуляем любые отступы/границы от рамок */
 .favaframe[class*="frame-"] {
   padding: 0 !important;
   margin: 0 !important;
+  border-width: 2px !important; /* устанавливаем желаемую толщину рамки, чтобы не было смещения */
+  border-style: solid !important;
 }
 
 
