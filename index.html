@@ -3205,23 +3205,30 @@ applyWeatherByTime();
   .help-author { background: #1a1a2e; padding: 10px 15px; border-radius: 8px; border-left: 3px solid #ffd700; margin: 10px 0; font-style: italic; }
 
 .favaframe {
+  position: relative;
   display: inline-block;
   width: 24px;
   height: 24px;
   border-radius: 4px;
   margin-right: 5px;
-  font-size: 16px;
   box-sizing: border-box;
   padding: 0 !important;
   margin: 0 !important;
-  line-height: 24px !important;   /* ровно по высоте контейнера */
-  text-align: center !important;
-  vertical-align: middle;
   flex-shrink: 0;
-  border: 2px solid transparent !important; /* временно, чтобы избежать сдвигов */
+  border: 2px solid transparent !important;
 }
 
-/* Для всех рамок – убираем любые отступы и фиксируем рамку */
+/* Внутренний контейнер для эмодзи (создаётся в JS) */
+.favaframe .emoji {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Для рамок сохраняем классы, но без лишних отступов */
 .favaframe[class*="frame-"] {
   padding: 0 !important;
   margin: 0 !important;
@@ -4093,8 +4100,11 @@ function displayMessage(msg) {
     }
   });
 
+  // Контейнер для аватара с внутренним span для эмодзи
   div.innerHTML = `
-    <span class="favaframe ${frameClass}">${avatarEmoji}</span>
+    <span class="favaframe ${frameClass}">
+      <span class="emoji">${avatarEmoji}</span>
+    </span>
     <span class="${nickClass}" ${colorStyle}>${escapeHtml(msg.nickname)}</span>
     <span class="ftime">${time}</span>
     ${textHtml}
