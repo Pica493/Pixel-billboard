@@ -872,11 +872,16 @@ easterInput.addEventListener('keydown', function(e) {
     const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
     const easeInCubic = t => t * t * t;
 
-    const gateH = Math.min(560, h * 0.74);
+    // высота ворот ограничена не только высотой экрана, но и шириной —
+    // на узких телефонах ворота не должны вылезать за края экрана
+    const gateH = Math.min(560, h * 0.74, (w * 0.82) / 0.62);
     const gateW = gateH * 0.62;
     const gateCX = w / 2;
-    const gateTopY = h / 2 - gateH / 2;
-    const gateBottomY = h / 2 + gateH / 2;
+    // на узких телефонах опускаем центр ворот ниже — иначе крыша и дымка
+    // сверху упираются в край экрана и верх ворот плохо видно
+    const gateCenterY = w < 700 ? h * 0.56 : h * 0.5;
+    const gateTopY = gateCenterY - gateH / 2;
+    const gateBottomY = gateCenterY + gateH / 2;
     const pillarW = gateW * 0.13;
     const leftPillarX = gateCX - gateW / 2;
     const rightPillarX = gateCX + gateW / 2 - pillarW;
@@ -976,7 +981,7 @@ easterInput.addEventListener('keydown', function(e) {
       bctx.fillRect(openingCX - halfW, gateTopY + 4, halfW * 2, (gateBottomY - gateTopY) - 8);
       // мягкое свечение по краям проёма
       bctx.globalAlpha = alpha * 0.6;
-      const glow = bctx.createRadialGradient(openingCX, h / 2, 0, openingCX, h / 2, halfW * 1.6 + 40);
+      const glow = bctx.createRadialGradient(openingCX, gateCenterY, 0, openingCX, gateCenterY, halfW * 1.6 + 40);
       glow.addColorStop(0, 'rgba(255,255,255,0.55)');
       glow.addColorStop(1, 'rgba(255,255,255,0)');
       bctx.fillStyle = glow;
@@ -1142,6 +1147,254 @@ easterInput.addEventListener('keydown', function(e) {
     requestAnimationFrame(animate);
   }
   addEasterEgg('bleach', 'BLEACH', triggerBleachPortal);
+
+  // terminator – отсылка на финал "Терминатор 2": лава поднимается снизу
+  // сайта до середины экрана, из неё выпрыгивают искры, через 2 секунды
+  // резко поднимается кулак терминатора (запястье остаётся в лаве),
+  // держится секунду и опускается обратно, растворяясь в лаве.
+  function triggerTerminator() {
+    const w = window.innerWidth, h = window.innerHeight;
+    const tcanvas = document.createElement('canvas');
+    tcanvas.width = w; tcanvas.height = h;
+    tcanvas.style.cssText = 'position:fixed;top:0;left:0;z-index:300000;pointer-events:none;background:transparent;';
+    document.body.appendChild(tcanvas);
+    const tctx = tcanvas.getContext('2d');
+
+    const clamp01 = t => Math.max(0, Math.min(1, t));
+    const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+    const easeInCubic = t => t * t * t;
+    const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    const restY = h + 20;         // лава полностью скрыта (ниже экрана)
+    const settledY = h * 0.5;     // лава "до середины сайта"
+    const armX = w / 2 + (Math.random() - 0.5) * w * 0.12;
+    // общая "длина" механической руки и то, насколько высоко над лавой
+    // должна подниматься видимая часть (кисть+палец), пока предплечье
+    // остаётся у поверхности лавы
+    const ARM_LEN = Math.min(300, h * 0.38);
+    const ARM_RISE_OFFSET = ARM_LEN * 0.55;
+
+    const total = 6900;
+    const lavaRiseEnd = 1200;
+    const armStart = 2000, armRiseEnd = 2450;
+    const armHoldEnd = 3450, armSinkEnd = 5150; // погружение теперь заметно медленнее (1700мс вместо 700)
+    const lavaRecedeStart = 5300, lavaRecedeEnd = 6300;
+
+    function lavaSurfaceY(elapsed) {
+      if (elapsed < lavaRiseEnd) return restY + (settledY - restY) * easeOutCubic(clamp01(elapsed / lavaRiseEnd));
+      if (elapsed < lavaRecedeStart) return settledY;
+      if (elapsed < lavaRecedeEnd) return settledY + (restY - settledY) * easeInCubic(clamp01((elapsed - lavaRecedeStart) / (lavaRecedeEnd - lavaRecedeStart)));
+      return restY;
+    }
+
+    function drawLava(surfaceY, tsec, alpha) {
+      if (surfaceY >= h + 5 || alpha <= 0.01) return;
+      tctx.save();
+      tctx.globalAlpha = alpha;
+      const segments = 44;
+      tctx.beginPath();
+      tctx.moveTo(0, h);
+      tctx.lineTo(0, surfaceY);
+      for (let i = 0; i <= segments; i++) {
+        const x = (i / segments) * w;
+        const wob = Math.sin(x * 0.018 + tsec * 1.4) * 8 + Math.sin(x * 0.05 - tsec * 2.1) * 4;
+        tctx.lineTo(x, surfaceY + wob);
+      }
+      tctx.lineTo(w, h);
+      tctx.closePath();
+      const grad = tctx.createLinearGradient(0, surfaceY - 10, 0, h);
+      grad.addColorStop(0, '#fff2b0');
+      grad.addColorStop(0.08, '#ffcf3d');
+      grad.addColorStop(0.25, '#ff8a1f');
+      grad.addColorStop(0.55, '#c62f0a');
+      grad.addColorStop(1, '#4a0d05');
+      tctx.fillStyle = grad;
+      tctx.fill();
+      tctx.restore();
+
+      tctx.save();
+      tctx.globalAlpha = alpha * 0.55;
+      const glow = tctx.createLinearGradient(0, surfaceY - 70, 0, surfaceY + 10);
+      glow.addColorStop(0, 'rgba(255,180,60,0)');
+      glow.addColorStop(1, 'rgba(255,180,60,0.55)');
+      tctx.fillStyle = glow;
+      tctx.fillRect(0, surfaceY - 70, w, 80);
+      tctx.restore();
+    }
+
+    // рука терминатора: механическая, с открытым каркасом предплечья
+    // (видны красные/синие "жилы"-провода), суставами-кольцами на
+    // пальцах и поднятым вверх большим пальцем — по референсу
+    // Рука — цельный непрерывный контур (как на референсе), а не набор
+    // отдельных блоков: палец с выемкой у основания, ступенчатые
+    // костяшки кулака, плавный переход в предплечье. Металлическая
+    // заливка с бегущим диагональным бликом по всей форме.
+    // Полностью механическая, явно роботическая рука: отдельные
+    // сегменты пальцев с суставами-кольцами, блочный корпус кулака,
+    // шаровой сустав запястья и труба предплечья с кольцами-поршнями.
+    // Показывает "лайк" (большой палец вверх) и заметно ЗАХОДИТ в лаву
+    // (не зависает над ней) — точка касания подсвечивается отдельно.
+    // Рука полностью удалена и пересобрана как честный пиксель-арт
+    // (сетка отдельных квадратов, двухтоновая штриховка светлый/тёмный
+    // серый) — та же техника, что у робота-трансформера, ворона и Олафа,
+    // а не гладкие векторные кривые. Большой палец вверх, кулак с
+    // зубчатым краем костяшек слева, предплечье уходит в лаву.
+    function buildTerminatorHandSprite() {
+      const LIGHT = '#c2c6ca', MID = '#8a8f94', DARK = '#5c6166', DARKER = '#34373a';
+      const map = new Map();
+      function paint(gx, gy, gw, gh, color) {
+        for (let y = gy; y < gy + gh; y++) for (let x = gx; x < gx + gw; x++) map.set(x + ',' + y, color);
+      }
+
+      // большой палец — узкий, двухтоновый (светлый слева, тёмный справа),
+      // с лёгкой "лесенкой" по краям, как в пиксель-арте
+      paint(14, 0, 3, 2, LIGHT);
+      paint(13, 2, 2, 3, LIGHT); paint(15, 2, 2, 3, MID);
+      paint(13, 5, 2, 3, LIGHT); paint(15, 5, 3, 3, MID);
+      paint(12, 8, 3, 2, LIGHT); paint(15, 8, 3, 2, DARK);
+
+      // кулак — двухтоновый блок, с зубчатым (костяшки) левым краем
+      paint(6, 9, 6, 11, LIGHT);
+      paint(12, 9, 6, 11, DARK);
+      paint(4, 10, 2, 2, LIGHT);
+      paint(4, 13, 2, 2, LIGHT);
+      paint(4, 16, 2, 2, LIGHT);
+      paint(4, 19, 2, 2, MID);
+      paint(5, 12, 1, 1, DARKER);
+      paint(5, 15, 1, 1, DARKER);
+      paint(5, 18, 1, 1, DARKER);
+
+      // предплечье — тот же двухтоновый блок, слегка сужается книзу,
+      // уходит в лаву
+      paint(7, 20, 5, 5, LIGHT); paint(12, 20, 5, 5, DARK);
+      paint(8, 25, 4, 6, LIGHT); paint(12, 25, 4, 6, DARK);
+      paint(8, 31, 3, 3, LIGHT); paint(11, 31, 3, 3, DARK);
+
+      const cells = [];
+      for (const [key, color] of map) {
+        const [gx, gy] = key.split(',').map(Number);
+        cells.push({ gx, gy, color });
+      }
+      return cells;
+    }
+    const TERMINATOR_HAND_CELLS = buildTerminatorHandSprite();
+    const TERMINATOR_GRID_H = 34;
+
+    function drawTerminatorArm(x, tipY, alpha) {
+      if (alpha <= 0.01) return;
+      const pixelSize = ARM_LEN / TERMINATOR_GRID_H;
+
+      tctx.save();
+      tctx.globalAlpha = alpha;
+      tctx.translate(x, tipY);
+
+      for (const c of TERMINATOR_HAND_CELLS) {
+        tctx.fillStyle = c.color;
+        tctx.fillRect(
+          (c.gx - 12.5) * pixelSize,
+          c.gy * pixelSize,
+          pixelSize + 0.6,
+          pixelSize + 0.6
+        );
+      }
+
+      tctx.restore();
+    }
+
+
+
+    const embers = [];
+    function spawnEmber(surfaceY) {
+      embers.push({
+        x: Math.random() * w, y: surfaceY,
+        vx: (Math.random() - 0.5) * 30, vy: -(50 + Math.random() * 60),
+        life: 0, maxLife: 450 + Math.random() * 350, size: 2 + Math.random() * 3
+      });
+    }
+
+    let startTime = null, lastEmberSpawn = 0;
+
+    function animate(ts) {
+      if (!startTime) startTime = ts;
+      const elapsed = ts - startTime;
+      const tsec = elapsed / 1000;
+      tctx.clearRect(0, 0, w, h);
+
+      const surfaceY = lavaSurfaceY(elapsed);
+      const lavaAlpha = 1;
+
+      // рука: поднимается быстро в 2.0-2.45с, держится до 3.45с,
+      // затем медленно и плавно тонет до 5.15с — видна только часть выше
+      // поверхности лавы (клип). Предплечье намеренно заходит В лаву
+      // (не зависает над ней) — запястье и кулак целиком видны сверху.
+      let fistTipY = surfaceY + ARM_LEN;
+      if (elapsed >= armStart && elapsed < armRiseEnd) {
+        const t = easeOutCubic(clamp01((elapsed - armStart) / (armRiseEnd - armStart)));
+        fistTipY = (surfaceY + ARM_LEN) + ((surfaceY - ARM_RISE_OFFSET) - (surfaceY + ARM_LEN)) * t;
+      } else if (elapsed >= armRiseEnd && elapsed < armHoldEnd) {
+        fistTipY = surfaceY - ARM_RISE_OFFSET;
+      } else if (elapsed >= armHoldEnd && elapsed < armSinkEnd) {
+        const t = easeInOutCubic(clamp01((elapsed - armHoldEnd) / (armSinkEnd - armHoldEnd)));
+        fistTipY = (surfaceY - ARM_RISE_OFFSET) + ((surfaceY + ARM_LEN) - (surfaceY - ARM_RISE_OFFSET)) * t;
+      }
+
+      if (elapsed >= armStart && elapsed < armSinkEnd + 200) {
+        tctx.save();
+        tctx.beginPath();
+        tctx.rect(0, 0, w, surfaceY + 4);
+        tctx.clip();
+        drawTerminatorArm(armX, fistTipY, 1);
+        tctx.restore();
+
+        // яркое свечение ровно в точке, где рука пересекает лаву —
+        // подчёркивает, что она в неё заходит, а не висит над ней
+        tctx.save();
+        tctx.globalAlpha = 0.5 + 0.15 * Math.sin(tsec * 8);
+        const contactGlow = tctx.createRadialGradient(armX, surfaceY, 0, armX, surfaceY, ARM_LEN * 0.22);
+        contactGlow.addColorStop(0, 'rgba(255,230,150,0.85)');
+        contactGlow.addColorStop(1, 'rgba(255,150,40,0)');
+        tctx.fillStyle = contactGlow;
+        tctx.beginPath();
+        tctx.arc(armX, surfaceY, ARM_LEN * 0.22, 0, Math.PI * 2);
+        tctx.fill();
+        tctx.restore();
+      }
+
+      drawLava(surfaceY, tsec, lavaAlpha);
+
+      // искры из лавы, пока она присутствует
+      if (surfaceY < h - 5 && elapsed - lastEmberSpawn > 70 && elapsed < lavaRecedeEnd) {
+        spawnEmber(surfaceY);
+        lastEmberSpawn = elapsed;
+      }
+      for (let i = embers.length - 1; i >= 0; i--) {
+        const e = embers[i];
+        e.life += 16.7;
+        e.x += e.vx * 0.0167; e.y += e.vy * 0.0167;
+        e.vy += 220 * 0.0167; // гравитация — искры не взлетают высоко и падают обратно
+        if (e.life >= e.maxLife || e.y > h + 10) { embers.splice(i, 1); continue; }
+        const a = 1 - e.life / e.maxLife;
+        tctx.save();
+        tctx.globalAlpha = a;
+        tctx.fillStyle = a > 0.5 ? '#ffcf4d' : '#ff6a1f';
+        tctx.shadowColor = '#ff8a20';
+        tctx.shadowBlur = 6;
+        tctx.beginPath();
+        tctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+        tctx.fill();
+        tctx.restore();
+      }
+
+      if (elapsed < total) {
+        requestAnimationFrame(animate);
+      } else {
+        tcanvas.remove();
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+  addEasterEgg('terminator', 'TERMINATOR', triggerTerminator);
 
   // snake
   
@@ -4850,7 +5103,9 @@ addEasterEgg('up', 'UP', function() {
     const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
     const cx = w / 2, cy = h / 2;
-    const digitH = Math.min(300, h * 0.34);
+    // высота цифры ограничена не только высотой экрана, но и шириной —
+    // на узких телефонах суммарная ширина двух цифр с зазором не должна вылезать за экран
+    const digitH = Math.min(300, h * 0.34, (w * 0.82) / (2.45 * (200 / 300)));
     const digitW = digitH * (200 / 300);
     const gap = digitW * 0.45;
     const leftCX = cx - gap / 2 - digitW / 2;   // тут сначала 5, потом 4
@@ -7332,6 +7587,8 @@ window.BACKGROUNDS = BACKGROUNDS;
   const spamRef = db.ref('spamProtection');
   const typingRef = db.ref('typing');
   const reportsRef = db.ref('reports');
+  const moderationLogRef = db.ref('moderationLog');   // журнал модерации: кто/когда/за что
+  const reporterActivityRef = db.ref('reporterActivity'); // недавние жалобы каждого пользователя — для защиты от серийных жалобщиков
 
   // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
   const uid = (function getUserId() {
@@ -7359,16 +7616,39 @@ window.BACKGROUNDS = BACKGROUNDS;
   const allowedDomains = ['pixelbillboard.ru','pixelbillboard.github.io','t.me/pixelbillboard_ru','t.me/yourtelegram'];
 
   // ---------- ПРОДВИНУТЫЙ ФИЛЬТР МАТА И ОСКОРБЛЕНИЙ ----------
+  // Многоязычный: русский, украинский, белорусский (общий кириллический
+  // пайплайн — эти языки делят большую часть бранной лексики и обходов)
+  // + отдельный английский пайплайн (латиница).
+  //
   // Устойчив к типичным обходам:
   //  - похожие символы вместо букв:  х->x/}{/)( , а->@/4, о->0, у->y/u, и->1/!, е->3 ...
   //  - разделители между буквами:    х.у.й, х_у_й, х-у-й, х у й
   //  - повтор букв:                  хууууй, пииииздец
-  //  - пропуск одной буквы с разделителем вместо неё: х.й, ху.й (буква "у" выпала,
-  //    но осталась точка/символ на её месте) — ловится через fuzzy-сравнение
-  //    (расстояние Левенштейна) с корнем слова, а не точным совпадением строки.
+  //  - буквы других славянских алфавитов: і/ї/є/ґ (укр.), ў (бел.)
+  //  - маскировка эмодзи/символами с сохранением части букв: f👍ck, с..а
+  //    (первая+последняя буква совпадают с корнем, а "утраченные" буквы
+  //    компенсируются количеством использованных символов-разделителей)
+  //
+  // ВАЖНО (исправленный баг): раньше строка очищалась только до кириллицы
+  // (regex вырезал вообще все латинские буквы), из-за чего английские
+  // корни мата физически не могли сработать. Теперь кириллица и латиница
+  // проверяются раздельными пайплайнами, не мешая друг другу.
 
-  // Карта похожих по написанию символов -> кириллица
-  const PF_HOMOGLYPHS = {
+  const COL_BAN = 'ban', COL_WARN = 'warn';
+
+  // Приведение букв других кириллических алфавитов к общему знаменателю
+  // (укр. і/ї/є/ґ, бел. ў) — чтобы один список корней ловил обходы во всех
+  // языках сразу, без дублирования словарей
+  function pfNormalizeCyrillicScript(text) {
+    return text
+      .replace(/і/g, 'и').replace(/ї/g, 'и')
+      .replace(/є/g, 'е').replace(/ґ/g, 'г')
+      .replace(/ў/g, 'у');
+  }
+
+  // Похожие по начертанию латинские символы -> кириллица (для обхода
+  // мата русскими/укр./бел. буквами, написанными "на латинице")
+  const PF_HOMOGLYPHS_CYR = {
     'a': 'а', '@': 'а', '4': 'а',
     'b': 'в', '6': 'б',
     'c': 'с', '(': 'с',
@@ -7390,48 +7670,96 @@ window.BACKGROUNDS = BACKGROUNDS;
     'w': 'ш',
     'z': 'з'
   };
+  // Лёгкий leet-обход для английских слов (не трогаем буквы — только цифры/символы)
+  const PF_LEET_LAT = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '$': 's', '@': 'a' };
 
-  // Корни слов с уровнем строгости: 'ban' — мат (мгновенный бан, как и раньше),
-  // 'warn' — грубость/оскорбление (сообщение блокируется, но без бана).
-  const PF_ROOTS = [
-    { root: 'хуй', severity: 'ban' }, { root: 'хуя', severity: 'ban' }, { root: 'хуе', severity: 'ban' },
-    { root: 'пизд', severity: 'ban' },
-    { root: 'ебат', severity: 'ban' }, { root: 'ебал', severity: 'ban' }, { root: 'ебан', severity: 'ban' }, { root: 'ебуч', severity: 'ban' },
-    { root: 'бляд', severity: 'ban' }, { root: 'бля', severity: 'ban' },
-    { root: 'сука', severity: 'ban' }, { root: 'суки', severity: 'ban' }, { root: 'суче', severity: 'ban' },
-    { root: 'мудак', severity: 'ban' },
-    { root: 'мраз', severity: 'ban' },
-    { root: 'гандон', severity: 'ban' },
-    { root: 'долбоеб', severity: 'ban' },
-    { root: 'залуп', severity: 'ban' },
-    { root: 'манда', severity: 'ban' },
-    { root: 'пидор', severity: 'ban' }, { root: 'пидар', severity: 'ban' },
-    { root: 'гавно', severity: 'ban' }, { root: 'говно', severity: 'ban' },
-    { root: 'fuck', severity: 'ban' }, { root: 'shit', severity: 'ban' }, { root: 'bitch', severity: 'ban' },
-    { root: 'cunt', severity: 'ban' }, { root: 'whore', severity: 'ban' }, { root: 'dick', severity: 'ban' }, { root: 'pussy', severity: 'ban' }, { root: 'bastard', severity: 'ban' },
-    { root: 'идиот', severity: 'warn' },
-    { root: 'дебил', severity: 'warn' },
-    { root: 'кретин', severity: 'warn' },
-    { root: 'придурок', severity: 'warn' },
-    { root: 'ублюдок', severity: 'warn' },
-    { root: 'сволоч', severity: 'warn' },
-    { root: 'тварь', severity: 'warn' },
-    { root: 'урод', severity: 'warn' }
+  const PF_ROOTS_CYR = [
+    // --- мат (severity: ban), общий для ru/ua/by ---
+    { root: 'хуй', severity: COL_BAN }, { root: 'хуя', severity: COL_BAN }, { root: 'хуе', severity: COL_BAN },
+    { root: 'пизд', severity: COL_BAN },
+    { root: 'ебат', severity: COL_BAN }, { root: 'ебал', severity: COL_BAN }, { root: 'ебан', severity: COL_BAN },
+    { root: 'ебуч', severity: COL_BAN }, { root: 'ибат', severity: COL_BAN }, // ibat — після нормалізації "їбати" (укр.)
+    { root: 'бляд', severity: COL_BAN }, { root: 'бля', severity: COL_BAN },
+    { root: 'сука', severity: COL_BAN }, { root: 'суки', severity: COL_BAN }, { root: 'суче', severity: COL_BAN }, { root: 'сучк', severity: COL_BAN },
+    { root: 'мудак', severity: COL_BAN }, { root: 'мудил', severity: COL_BAN },
+    { root: 'мраз', severity: COL_BAN },
+    { root: 'гандон', severity: COL_BAN },
+    { root: 'долбоеб', severity: COL_BAN },
+    { root: 'залуп', severity: COL_BAN },
+    { root: 'манда', severity: COL_BAN },
+    { root: 'пидор', severity: COL_BAN }, { root: 'пидар', severity: COL_BAN },
+    { root: 'гавно', severity: COL_BAN }, { root: 'говно', severity: COL_BAN },
+    { root: 'падл', severity: COL_BAN },   // падло/падлюка — оскорбление, общее для ru/ua/by
+
+    // --- грубые/оскорбительные, не мат (severity: warn) ---
+    { root: 'идиот', severity: COL_WARN },
+    { root: 'дебил', severity: COL_WARN },
+    { root: 'кретин', severity: COL_WARN },
+    { root: 'придурок', severity: COL_WARN },
+    { root: 'ублюдок', severity: COL_WARN },
+    { root: 'сволоч', severity: COL_WARN },
+    { root: 'тварь', severity: COL_WARN },
+    { root: 'урод', severity: COL_WARN },
+    { root: 'быдл', severity: COL_WARN },   // быдло/быдла
+    { root: 'вирод', severity: COL_WARN },  // виродок (укр.)
+    { root: 'вырад', severity: COL_WARN },  // вырадак (бел.)
+    { root: 'йолоп', severity: COL_WARN },  // йолоп (укр., "дурень")
+    { root: 'идыё', severity: COL_WARN }    // ідыёт (бел. написание "идиот")
   ];
 
-  // Слова-исключения, чтобы не резать легитимные слова, случайно похожие на корень
-  const PF_WHITELIST = ['сук', 'сучок', 'сукно'];
+  const PF_ROOTS_LAT = [
+    { root: 'fuck', severity: COL_BAN }, { root: 'shit', severity: COL_BAN }, { root: 'bitch', severity: COL_BAN },
+    { root: 'cunt', severity: COL_BAN }, { root: 'whore', severity: COL_BAN }, { root: 'dick', severity: COL_BAN },
+    { root: 'pussy', severity: COL_BAN }, { root: 'bastard', severity: COL_BAN }, { root: 'asshole', severity: COL_BAN },
+    { root: 'slut', severity: COL_BAN }, { root: 'retard', severity: COL_BAN },
+    { root: 'idiot', severity: COL_WARN }, { root: 'moron', severity: COL_WARN },
+    { root: 'jerk', severity: COL_WARN }, { root: 'loser', severity: COL_WARN }
+  ];
 
-  function pfNormalize(rawText) {
-    let text = rawText.toLowerCase();
-    text = text.replace(/\}\{/g, 'х').replace(/\)\(/g, 'х'); // }{  и  )( как "х"
-    text = text.replace(/[a-z0-9@$!()]/g, ch => PF_HOMOGLYPHS[ch] !== undefined ? PF_HOMOGLYPHS[ch] : ch);
-    return text;
-  }
-  function pfStripNonLetters(word) { return word.replace(/[^а-яё]/gi, ''); }
+  // Слова-исключения, чтобы не резать легитимные слова
+  const PF_WHITELIST = ['сук', 'сучок', 'сукно', 'дурак'];
+
   function pfCollapseRepeats(word) { return word.replace(/(.)\1{1,}/g, '$1'); }
 
-  // Расстояние Левенштейна с порогом (для коротких слов чата — дёшево по CPU)
+  // Проверка "маскировки" символами/эмодзи с сохранением части букв:
+  // "с..а" -> буквы "са" — это подпоследовательность корня "сука", а
+  // "утраченные" 2 буквы (у,к) правдоподобно спрятаны за 2 разделителями.
+  // Применяется только к самым грубым словам (ban) и только когда в
+  // токене реально что-то похоже на маскировку — иначе риск ложных срабатываний.
+  function pfIsSubsequence(sub, str) {
+    let i = 0;
+    for (let j = 0; j < str.length && i < sub.length; j++) {
+      if (str[j] === sub[i]) i++;
+    }
+    return i === sub.length;
+  }
+  function pfCheckMasked(rawToken, strippedToken, roots) {
+    if (strippedToken.length < 2) return null;
+    const separatorBudget = rawToken.length - strippedToken.length;
+    if (separatorBudget < 1) return null;
+    for (const { root, severity } of roots) {
+      if (severity !== COL_BAN) continue;
+      if (root.length < 4) continue;
+      if (strippedToken.length + 3 < root.length) continue;
+      if (root.length - strippedToken.length > separatorBudget + 1) continue;
+      if (pfIsSubsequence(strippedToken, root)) return severity;
+    }
+    return null;
+  }
+
+  function pfCheckTokenAgainst(rawToken, strippedToken, roots) {
+    if (!strippedToken || PF_WHITELIST.includes(strippedToken)) return null;
+    for (const { root, severity } of roots) {
+      if (strippedToken.includes(root)) return severity;
+      if (root.length >= 3 && strippedToken.length >= root.length - 1 && strippedToken.length <= root.length + 2) {
+        if (pfLevenshteinLE(strippedToken, root, 1)) return severity;
+      }
+    }
+    const masked = pfCheckMasked(rawToken, strippedToken, roots);
+    if (masked) return masked;
+    return null;
+  }
+
   function pfLevenshteinLE(a, b, maxDist) {
     if (Math.abs(a.length - b.length) > maxDist) return false;
     const dp = Array.from({ length: a.length + 1 }, (_, i) => [i]);
@@ -7443,18 +7771,6 @@ window.BACKGROUNDS = BACKGROUNDS;
       }
     }
     return dp[a.length][b.length] <= maxDist;
-  }
-
-  function pfCheckToken(token) {
-    if (!token || PF_WHITELIST.includes(token)) return null;
-    for (const { root, severity } of PF_ROOTS) {
-      if (token.includes(root)) return severity; // прямое вхождение / склонения
-      // Fuzzy: ловит пропуск/замену ровно одной буквы (например "х.й" -> "хй" вместо "хуй")
-      if (root.length >= 3 && token.length >= root.length - 1 && token.length <= root.length + 2) {
-        if (pfLevenshteinLE(token, root, 1)) return severity;
-      }
-    }
-    return null;
   }
 
   // Склеивает подряд идущие очень короткие "слова" (<=2 букв) в одно —
@@ -7475,15 +7791,53 @@ window.BACKGROUNDS = BACKGROUNDS;
   }
 
   function pfCheckText(text) {
-    const normalized = pfNormalize(text);
-    const rawTokens = normalized.split(/\s+/).filter(Boolean).map(w => pfCollapseRepeats(pfStripNonLetters(w)));
-    const tokens = pfMergeShortTokens(rawTokens);
+    if (!text) return 'clean';
+    const lower = text.toLowerCase();
     let worst = 'clean';
-    for (const token of tokens) {
-      const sev = pfCheckToken(token);
+
+    // ---- Пайплайн 1: кириллица (ru/ua/by) ----
+    let cyrText = pfNormalizeCyrillicScript(lower);
+    cyrText = cyrText.replace(/\}\{/g, 'х').replace(/\)\(/g, 'х');
+    cyrText = cyrText.replace(/[a-z0-9@$!()]/g, ch => PF_HOMOGLYPHS_CYR[ch] !== undefined ? PF_HOMOGLYPHS_CYR[ch] : ch);
+    const cyrRawWords = cyrText.split(/\s+/).filter(Boolean);
+    const cyrStrippedWords = cyrRawWords.map(w => pfCollapseRepeats(w.replace(/[^а-яё]/gi, '')));
+    const cyrMergedStripped = pfMergeShortTokens(cyrStrippedWords);
+    for (let i = 0; i < cyrRawWords.length; i++) {
+      const sev = pfCheckTokenAgainst(cyrRawWords[i], cyrStrippedWords[i], PF_ROOTS_CYR);
       if (sev === 'ban') return 'ban';
       if (sev === 'warn') worst = 'warn';
     }
+    for (const merged of cyrMergedStripped) {
+      const sev = pfCheckTokenAgainst(merged, merged, PF_ROOTS_CYR);
+      if (sev === 'ban') return 'ban';
+      if (sev === 'warn') worst = 'warn';
+    }
+    // "слипшийся" текст без пробелов — ловит "х у й" по всей строке целиком
+    const cyrCompact = cyrText.replace(/[^а-яё]/gi, '');
+    for (const { root, severity } of PF_ROOTS_CYR) {
+      if (cyrCompact.includes(root)) { if (severity === 'ban') return 'ban'; worst = 'warn'; }
+    }
+
+    // ---- Пайплайн 2: латиница (английский) ----
+    let latText = lower.replace(/[013457$@]/g, ch => PF_LEET_LAT[ch] || ch);
+    const latRawWords = latText.split(/\s+/).filter(Boolean);
+    const latStrippedWords = latRawWords.map(w => pfCollapseRepeats(w.replace(/[^a-z]/gi, '')));
+    const latMergedStripped = pfMergeShortTokens(latStrippedWords);
+    for (let i = 0; i < latRawWords.length; i++) {
+      const sev = pfCheckTokenAgainst(latRawWords[i], latStrippedWords[i], PF_ROOTS_LAT);
+      if (sev === 'ban') return 'ban';
+      if (sev === 'warn') worst = 'warn';
+    }
+    for (const merged of latMergedStripped) {
+      const sev = pfCheckTokenAgainst(merged, merged, PF_ROOTS_LAT);
+      if (sev === 'ban') return 'ban';
+      if (sev === 'warn') worst = 'warn';
+    }
+    const latCompact = latText.replace(/[^a-z]/gi, '');
+    for (const { root, severity } of PF_ROOTS_LAT) {
+      if (latCompact.includes(root)) { if (severity === 'ban') return 'ban'; worst = 'warn'; }
+    }
+
     return worst;
   }
   // ---------- конец фильтра мата ----------
@@ -7601,8 +7955,15 @@ window.BACKGROUNDS = BACKGROUNDS;
     if (data.bannedUntil && data.bannedUntil > Date.now()) return true;
     return false;
   }
-  async function applyBan() {
-    const banRef = bansRef.child(uid);
+  // Журнал модерации: пишем каждое действие (бан, удаление) с указанием
+  // кого, когда и за что — чтобы потом можно было разобрать спорные
+  // случаи и найти лазейки в фильтре, а не гадать задним числом.
+  function logModeration(entry) {
+    moderationLogRef.push({ ...entry, timestamp: Date.now() }).catch(() => {});
+  }
+
+  async function applyBanTo(targetUid, reason) {
+    const banRef = bansRef.child(targetUid);
     const snap = await banRef.once('value');
     let data = snap.val() || { count: 0, permanent: false, bannedUntil: 0 };
     data.count = (data.count || 0) + 1;
@@ -7610,6 +7971,32 @@ window.BACKGROUNDS = BACKGROUNDS;
     else if (data.count === 1) data.bannedUntil = Date.now() + 5*60*1000;
     else if (data.count === 2) data.bannedUntil = Date.now() + 5*24*60*60*1000;
     await banRef.set(data);
+    logModeration({
+      action: 'ban',
+      targetUid,
+      strikeCount: data.count,
+      permanent: !!data.permanent,
+      reason: reason || 'unspecified'
+    });
+  }
+  async function applyBan() { return applyBanTo(uid, 'own_message_flagged_on_send'); }
+
+  // Защита от серийных жалобщиков: если один и тот же человек подал много
+  // жалоб за короткое время, его СЛЕДУЮЩИЕ жалобы временно не учитываются
+  // в счётчике порога (но сама жалоба всё равно фиксируется — не тайно
+  // отбрасывается, просто не засчитывается, пока активность не уляжется).
+  const REPORTER_WINDOW_MS = 10 * 60 * 1000;   // окно наблюдения — 10 минут
+  const REPORTER_THROTTLE_AFTER = 5;           // после 5 жалоб за окно — следующие не считаются
+  async function isReporterThrottled(reporterUid) {
+    const now = Date.now();
+    const activityRef = reporterActivityRef.child(reporterUid);
+    const snap = await activityRef.once('value');
+    let timestamps = snap.val() || [];
+    timestamps = timestamps.filter(t => now - t < REPORTER_WINDOW_MS);
+    const throttled = timestamps.length >= REPORTER_THROTTLE_AFTER;
+    timestamps.push(now);
+    await activityRef.set(timestamps.slice(-30)); // не храним историю бесконечно
+    return throttled;
   }
 
   // ===== АНТИСПАМ =====
@@ -7661,9 +8048,14 @@ window.BACKGROUNDS = BACKGROUNDS;
       input.value = '';
       return;
     }
-    if (pfResult === 'warn') {
-      alert('Пожалуйста, будьте вежливы в чате. Сообщение не отправлено.');
-      return;
+    // 'warn' — подозрительный, но не стопроцентно однозначный случай
+    // (грубость, а не явный мат). Вместо мгновенной блокировки с явным
+    // предупреждением — теневой мут: сообщение "отправляется" как обычно,
+    // автор не замечает никакой разницы и не начинает целенаправленно
+    // подбирать обход фильтра, но остальные участники чата его не видят.
+    const isShadowMuted = pfResult === 'warn';
+    if (isShadowMuted) {
+      logModeration({ action: 'shadow_mute', targetUid: uid, reason: 'warn_severity_on_send', messageText: text });
     }
 
     let shouldDelete = false;
@@ -7679,6 +8071,7 @@ window.BACKGROUNDS = BACKGROUNDS;
       background: profile.equipped.background || 'none',
       color: profile.equipped.nickColor || '#ffffff',
       text: text,
+      shadowMuted: isShadowMuted,
       timestamp: firebase.database.ServerValue.TIMESTAMP
     };
 
@@ -7701,6 +8094,9 @@ window.BACKGROUNDS = BACKGROUNDS;
     const msg = snapshot.val();
     msg.key = snapshot.key;
     if (ignoredUsers.has(msg.uid)) return;
+    // Теневой мут: сообщение видно только самому автору — для всех
+    // остальных оно как будто не существует, автор об этом не знает
+    if (msg.shadowMuted && msg.uid !== uid) return;
     displayMessage(msg);
     // Звук, если чат не активен или вкладка скрыта
     if (chatModal.style.display !== 'flex' || document.hidden) {
@@ -7781,7 +8177,7 @@ function displayMessage(msg) {
     <span class="ftime">${time}</span>
     ${textHtml}
     <div class="msg-actions">
-      <button data-action="report" data-key="${msg.key}" title="Пожаловаться на сообщение (после 3 жалоб оно будет удалено)">⚠️</button>
+      <button data-action="report" data-key="${msg.key}" title="Пожаловаться: если сообщение распознано как мат/оскорбление — удалится сразу, иначе нужно 5 жалоб от разных людей">⚠️</button>
       <button data-action="ignore" data-uid="${msg.uid}" title="Заблокировать пользователя: скрыть все его сообщения у себя в чате">🚫</button>
     </div>
   `;
@@ -7805,20 +8201,47 @@ function displayMessage(msg) {
         alert('Вы уже жаловались на это сообщение.');
         return;
       }
-      // Добавляем жалобу в Firebase
       const reportsForMsg = reportsRef.child(key);
       const existing = await reportsForMsg.child(uid).once('value');
-      if (!existing.exists()) {
-        await reportsForMsg.child(uid).set(Date.now());
-        localStorage.setItem('reported_' + key, uid);
-        // Проверяем количество жалоб
-        const allReports = await reportsForMsg.once('value');
-        let count = 0;
-        allReports.forEach(() => count++);
-        if (count >= 3) {
-          chatRef.child(key).remove();
-          reportsForMsg.remove();
+      if (existing.exists()) return;
+
+      // Проверяем, не серийный ли это жалобщик — если да, его жалоба всё
+      // равно фиксируется (не тайно отбрасывается), но временно не идёт
+      // в счётчик порога для неоднозначных случаев ниже
+      const throttled = await isReporterThrottled(uid);
+      await reportsForMsg.child(uid).set({ time: Date.now(), throttled });
+      localStorage.setItem('reported_' + key, uid);
+
+      // Перепроверяем текст сообщения тем же фильтром, что и при отправке.
+      // Если фильтр САМ распознаёт мат/оскорбление — одной жалобы достаточно
+      // для немедленного удаления и бана автора (значит, что-то проскочило
+      // мимо проверки при отправке — обходить фильтр смысла нет).
+      const msgSnap = await chatRef.child(key).once('value');
+      const msgData = msgSnap.val();
+      if (msgData && msgData.text) {
+        const severity = pfCheckText(msgData.text);
+        if (severity !== 'clean') {
+          await chatRef.child(key).remove();
+          await reportsForMsg.remove();
+          if (msgData.uid) await applyBanTo(msgData.uid, 'reported_and_filter_confirmed:' + severity);
+          logModeration({ action: 'delete_message', messageKey: key, reason: 'filter_confirmed_on_report', reportedBy: uid });
+          return;
         }
+      }
+
+      // Если фильтр не считает сообщение оскорблением — это спорный,
+      // субъективный случай (не мат, а что-то другое), и для его удаления
+      // нужен более широкий консенсус, а не 1-3 человека, которые решили
+      // "задавить" кого-то жалобами. Порог поднят до 5, а жалобы серийных
+      // жалобщиков (throttled) в счётчик не идут.
+      const REPORT_THRESHOLD_UNFLAGGED = 5;
+      const allReports = await reportsForMsg.once('value');
+      let count = 0;
+      allReports.forEach(child => { if (!child.val() || !child.val().throttled) count++; });
+      if (count >= REPORT_THRESHOLD_UNFLAGGED) {
+        await chatRef.child(key).remove();
+        await reportsForMsg.remove();
+        logModeration({ action: 'delete_message', messageKey: key, reason: 'report_threshold_reached', reportCount: count });
       }
     } else if (action === 'ignore') {
       if (msgUid === uid) return;
@@ -7837,7 +8260,9 @@ function displayMessage(msg) {
         snapshot.forEach(child => {
           const msg = child.val();
           msg.key = child.key;
-          if (!ignoredUsers.has(msg.uid)) displayMessage(msg);
+          if (ignoredUsers.has(msg.uid)) return;
+          if (msg.shadowMuted && msg.uid !== uid) return;
+          displayMessage(msg);
         });
       });
     }
