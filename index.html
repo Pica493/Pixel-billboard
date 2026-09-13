@@ -7566,9 +7566,10 @@ window.BACKGROUNDS = BACKGROUNDS;
 <!-- FIREBASE SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
 <script>
-(function() {
+(async function() {
   // ===== КОНФИГ =====
   const firebaseConfig = {
     apiKey: "AIzaSyCDyyer9lSbVexCJuwt8fhWoE3DPg04tS8",
@@ -7590,15 +7591,27 @@ window.BACKGROUNDS = BACKGROUNDS;
   const moderationLogRef = db.ref('moderationLog');   // журнал модерации: кто/когда/за что
   const reporterActivityRef = db.ref('reporterActivity'); // недавние жалобы каждого пользователя — для защиты от серийных жалобщиков
 
-  // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
-  const uid = (function getUserId() {
-    let id = localStorage.getItem('pixelUserId');
-    if (!id) {
-      id = Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-      localStorage.setItem('pixelUserId', id);
+  // ===== АВТОРИЗАЦИЯ =====
+  // Настоящий, проверяемый сервером uid (не случайная строка в
+  // localStorage, как раньше) — на нём и держатся правила безопасности
+  // в Firebase: auth.uid нельзя подделать из браузера.
+  let uid;
+  try {
+    let currentUser = firebase.auth().currentUser;
+    if (!currentUser) {
+      const cred = await firebase.auth().signInAnonymously();
+      currentUser = cred.user;
     }
-    return id;
-  })();
+    uid = currentUser.uid;
+  } catch (authError) {
+    console.error('Не удалось выполнить анонимный вход в Firebase:', authError);
+    // Если в консоли Firebase не включён Anonymous Sign-In — чат не сможет
+    // писать/читать данные по новым правилам безопасности. Останавливаемся
+    // здесь, а не продолжаем с несуществующим uid.
+    return;
+  }
+
+  // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
 
   let profile = getProfile();
   const ignoredUsers = new Set(JSON.parse(localStorage.getItem('ignoredUsers') || '[]'));
