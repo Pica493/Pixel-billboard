@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Billboard — купи пиксель навсегда | Вечная пиксельная реклама</title>
+
+  <!-- ===== SEO: основные метатеги ===== -->
+  <meta name="description" content="Pixel Billboard — вечный цифровой билборд. Купи пиксель или блок 10×10 за 50 ₽/пиксель, размести логотип, картинку или ссылку на своей рекламе навсегда. Игры, чат и магазин внутри.">
+  <meta name="keywords" content="pixel billboard, пиксельный биллборд, купить пиксель, реклама в интернете, вечная реклама, пиксельная реклама, разместить логотип">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="author" content="Pixel Billboard">
+
+  <!-- ===== SEO: Open Graph (превью в соцсетях/мессенджерах) ===== -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pixel Billboard">
+  <meta property="og:title" content="Pixel Billboard — купи пиксель навсегда">
+  <meta property="og:description" content="Вечный цифровой билборд: купи пиксель за 50 ₽ и размести свой логотип или ссылку навсегда. Игры, чат, магазин.">
+  <meta property="og:locale" content="ru_RU">
+
+  <!-- ===== SEO: Twitter/X Card ===== -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Pixel Billboard — купи пиксель навсегда">
+  <meta name="twitter:description" content="Вечный цифровой билборд: купи пиксель за 50 ₽ и размести свой логотип или ссылку навсегда.">
+
+  <!-- ===== Ускорение загрузки внешних ресурсов ===== -->
+  <link rel="preconnect" href="https://mc.yandex.ru">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
+
+  <!-- ===== Структурированные данные (Schema.org) для поисковиков ===== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Pixel Billboard",
+    "description": "Вечный цифровой билборд: купи пиксель и размести свой логотип, картинку или ссылку навсегда.",
+    "inLanguage": "ru"
+  }
+  </script>
+
+  <!-- ↓↓↓ Иконка ↓↓↓ -->
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+ 
+  
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=111437817', 'ym');
+
+    ym(111437817, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/111437817" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #111;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      padding-top: 65px; /* место под фикс-панель кнопок и часы сверху */
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .subtitle {
+      font-size: 1rem;
+      color: #aaa;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .stats {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    .stats span { color: #4caf50; font-weight: bold; }
+    #canvas-container {
+      position: relative;
+      width: 100%;
+      max-width: 800px; /* можно менять */
+      margin: 0 auto;
+      border: 2px solid #333;
+      cursor: crosshair;
+      background: #fff; /* белый фон холста */
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: crisp-edges; /* для чёткости пикселей */
+    }
+    .cta {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    .cta p {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .cta a {
+      color: #4caf50;
+      font-weight: bold;
+      text-decoration: none;
+      border-bottom: 1px dashed #4caf50;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    footer {
+      margin-top: 2rem;
+      color: #666;
+      font-size: 0.8rem;
+    }
+
+
+canvas:not(#pixel-canvas) {
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+    
+  </style>
+</head>
+<body>
+  <h1>PixelBillboard</h1>
+  <div class="subtitle">Купи пиксель навсегда. 1 пиксель = 50 ₽. Минимальный блок 10×10 (5000 ₽).</div>
+  <div class="stats">
+    <div>Продано: <span id="sold-count">0</span> пикселей</div>
+    <div>Свободно: <span id="free-count">1000000</span> пикселей</div>
+  </div>
+  <div id="canvas-container">
+    <canvas id="pixel-canvas" width="1000" height="1000"></canvas>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+  <div style="text-align: center; margin: 1.5rem 0;">
+  <a href="https://www.donationalerts.com/r/pixelbillboard" target="_blank" 
+     style="display: inline-block; background: #ff6b6b; color: #fff; padding: 12px 30px; 
+            border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1rem;">
+    💛 Поддержать проект
+  </a>
+</div>
+  <div class="cta">
+    <p>Хочешь разместить логотип? Напиши нам: <a href="mailto:pixelbillboard@mail.ru">PixelBillboard@mail.ru</a> или в Telegram: <a href="https://t.me/PixelBillboard_ru">PixelBillboard_ru</a></p>
+  </div>
+  <footer>
+    * Все логотипы кликабельны и ведут на сайты владельцев.
+  </footer>
+
+  <script src="js/board.js"></script>
+
+  <!-- ========== ПОГОДА, КАЛЕНДАРЬ, ВРЕМЯ, DVD, ЛУПА + ВСЕ ПАСХАЛКИ ========== -->
+<style>
+  #effects-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; overflow: hidden; }
+  /* Единая панель верхних кнопок: лупа, чат, профиль, магазин, справка.
+     Раньше каждая кнопка позиционировалась вручную по px (left: 120px, 210px, 300px...),
+     из-за чего на телефонах они могли наезжать друг на друга или на часы.
+     Теперь это один flex-ряд: кнопки идут по порядку и никогда не перекрываются;
+     если места не хватает — появляется горизонтальная прокрутка вместо наложения. */
+  #top-toolbar-left {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    max-width: calc(100vw - 200px); /* оставляем место справа под часы/дату */
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  #top-toolbar-left::-webkit-scrollbar { display: none; }
+
+  /* Лёгкое наложение "лупа → магазин → профиль → ?": кнопки слегка
+     заходят друг на друга скруглёнными краями (текст/иконки не задеты,
+     перекрывается только пустой отступ по краям кнопки). */
+  #easter-input-container { position: relative; z-index: 2; }
+  #shop-btn { position: relative; z-index: 3; margin-left: -8px; }
+  #profile-btn { position: relative; z-index: 4; margin-left: -8px; }
+  #help-btn { position: relative; z-index: 5; margin-left: -6px; }
+
+  /* Кнопка чата и часы/дата — единая вытянутая таблетка в правом верхнем
+     углу (а не часть панели профиль/магазин). Кнопка — левый скруглённый
+     сегмент, время/дата — правый, без зазора между ними, одна общая тень. */
+  #chat-time-pill {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 9999;
+    display: flex;
+    align-items: stretch;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+  #fire-chat-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0 11px;
+    font-size: 12px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .msk-clock-widget {
+    position: static;
+    display: flex;
+    align-items: center;
+    color: white;
+    background: rgba(0,0,0,0.65);
+    padding: 4px 10px;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: right;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  @media (max-width: 768px) {
+    #chat-time-pill { top: 12px; right: 12px; }
+    .msk-clock-widget { font-size: 10px; padding: 4px 9px; }
+  }
+  @media (max-width: 600px) {
+    #chat-time-pill { top: 10px; right: 10px; }
+    .msk-clock-widget { font-size: 9px; padding: 3px 8px; }
+  }
+  @media (max-width: 420px) {
+    .msk-clock-widget { font-size: 8px; padding: 3px 6px; line-height: 1.3; }
+  }
+  @media (max-width: 360px) {
+    #chat-time-pill { top: 8px; right: 8px; }
+    .msk-clock-widget { font-size: 7px; padding: 2px 5px; }
+  }
+  #easter-input-container { display: flex; align-items: center; background: rgba(0,0,0,0.7); border-radius: 20px; padding: 5px 10px; backdrop-filter: blur(5px); border: 2px solid #1b5e20; box-shadow: 0 0 4px rgba(27,94,32,0.5); flex-shrink: 0; }
+  #easter-input-container .icon { font-size: 18px; margin-right: 5px; opacity: 0.8; }
+  #easter-input { background: transparent; border: none; color: #0f0; font-family: monospace; font-size: 14px; width: 120px; outline: none; }
+  #easter-input::placeholder { color: rgba(0,255,0,0.5); }
+
+  body.night-mode { background-color: #0a1a2e !important; color: #c0d0e0 !important; }
+  body.night-mode canvas { filter: brightness(0.9) hue-rotate(5deg); }
+
+  .snowflake, .raindrop, .leaf, .comet { position: absolute; top: -30px; z-index: 300; pointer-events: none; animation-timing-function: linear; }
+  .snowflake { width: 8px; height: 8px; background: white; border-radius: 50%; animation: snowfall linear infinite; }
+  .raindrop { width: 2px; height: 12px; background: #a0c0f0; animation: rainfall linear infinite; }
+  .leaf { width: 12px; height: 12px; background: orange; border-radius: 50% 0; animation: leafall linear infinite; }
+  .comet { width: 3px; height: 3px; background: white; border-radius: 50%; box-shadow: 0 0 6px 2px #ffd700; animation: cometFall linear infinite; }
+  @keyframes snowfall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(360deg); } }
+  @keyframes rainfall { 0% { transform: translateY(0); } 100% { transform: translateY(100vh); } }
+  @keyframes leafall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(100vh) rotate(720deg); } }
+  @keyframes cometFall { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-80px, 80vh) scale(0.2); opacity: 0; } }
+
+  /* Снеговик Олаф — теперь пиксель-арт canvas, а не эмодзи */
+  .olaf {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 400;
+    cursor: pointer;
+    pointer-events: auto;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.35));
+  }
+  .olaf-speech {
+    position: fixed;
+    z-index: 401;
+    background: #fff;
+    color: #1a1a1a;
+    border: 2px solid #1a1a1a;
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+    max-width: 190px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    transform: translateY(6px);
+  }
+  .olaf-speech.show { opacity: 1; transform: translateY(0); }
+  .olaf-speech::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; left: 22px;
+    width: 0; height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #1a1a1a;
+  }
+  .olaf-speech::before {
+    content: '';
+    position: absolute;
+    bottom: -5px; left: 24px;
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #fff;
+    z-index: 1;
+  }
+
+  /* Большой лист (особый) */
+  .special-leaf {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 400;
+    width: 30px;
+    height: 30px;
+    background: #f90;
+    border-radius: 50% 0;
+    cursor: pointer;
+    pointer-events: auto;
+    transform: rotate(45deg);
+    transition: transform 0.5s, opacity 0.5s;
+  }
+
+  /* Расенган — вращающийся элемент, следующий за курсором/пальцем
+     (CSS-курсор не умеет анимироваться, поэтому это настоящий DOM-элемент) */
+  .rasengan-el {
+    position: fixed;
+    width: 84px; height: 84px;
+    margin-left: -42px; margin-top: -42px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 999999;
+    background: radial-gradient(circle at center,
+      #ffffff 0%, #d3f3ff 10%, #8fe0ff 24%, #3fa9f5 42%, #1a63c9 60%, rgba(20,50,140,0.25) 74%, transparent 80%);
+    box-shadow: 0 0 22px 6px rgba(70,160,255,0.55), 0 0 46px 16px rgba(40,110,255,0.3);
+  }
+  .rasengan-el::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,
+      rgba(255,255,255,0) 0deg, rgba(170,225,255,0.65) 35deg, rgba(255,255,255,0) 80deg,
+      rgba(170,225,255,0.65) 150deg, rgba(255,255,255,0) 195deg,
+      rgba(170,225,255,0.65) 260deg, rgba(255,255,255,0) 310deg,
+      rgba(170,225,255,0.65) 360deg);
+    mix-blend-mode: screen;
+    animation: rasenganSpin 0.9s linear infinite;
+  }
+  .rasengan-el::after {
+    content: '';
+    position: absolute; inset: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #ffffff 0%, #eafcff 40%, transparent 75%);
+    animation: rasenganPulse 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes rasenganSpin { to { transform: rotate(360deg); } }
+  @keyframes rasenganPulse { from { opacity: 0.75; transform: scale(0.92); } to { opacity: 1; transform: scale(1.05); } }
+  .rasengan-star {
+    position: fixed;
+    width: 3px; height: 3px;
+    background: #bfe9ff;
+    border-radius: 50%;
+    box-shadow: 0 0 5px 1px #6fc3ff;
+    pointer-events: none;
+    z-index: 999998;
+    animation: rasenganStarFade linear infinite;
+  }
+  @keyframes rasenganStarFade { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+
+  /* Шляпа Хайзенберга */
+  .heisenberg-hat { position: relative; width: 240px; height: 140px; margin: 0 auto; }
+  .hat-brim { width: 240px; height: 40px; background: radial-gradient(ellipse at center, #2a2a2a 0%, #111 80%); border-radius: 50%; position: absolute; bottom: 0; }
+  .hat-crown { width: 140px; height: 110px; background: linear-gradient(175deg, #3a3a3a 5%, #1a1a1a 50%, #0d0d0d 95%); border-radius: 45% 45% 0 0 / 60% 60% 0 0; position: absolute; top: 0; left: 50%; transform: translateX(-50%); box-shadow: inset 0 -15px 20px rgba(0,0,0,0.6); }
+  .hat-band { position: absolute; bottom: 25px; width: 100%; height: 16px; background: linear-gradient(180deg, #b8860b, #8b6508 50%, #5c4305); }
+
+  /* Пикачу */
+  .pikachu-container { position: fixed; top: 50%; left: -120px; transform: translateY(-50%); z-index: 500; animation: runRight 4s linear forwards; cursor: pointer; }
+  @keyframes runRight { from { left: -120px; } to { left: calc(100% + 120px); } }
+  .pikachu-head { width: 80px; height: 80px; background: #ffd700; border-radius: 50%; position: relative; box-shadow: 0 4px 0 #cc9900; }
+  .pikachu-ear-left, .pikachu-ear-right { position: absolute; top: -30px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 35px solid #222; }
+  .pikachu-ear-left { left: 5px; transform: rotate(-15deg); }
+  .pikachu-ear-right { right: 5px; transform: rotate(15deg); }
+  .pikachu-eye { position: absolute; top: 25px; width: 10px; height: 10px; background: #222; border-radius: 50%; }
+  .eye-left { left: 20px; } .eye-right { right: 20px; }
+  .pikachu-cheek { position: absolute; top: 45px; width: 15px; height: 10px; background: #ff0000; border-radius: 50%; }
+  .cheek-left { left: 5px; } .cheek-right { right: 5px; }
+  .pikachu-mouth { position: absolute; top: 55px; left: 50%; transform: translateX(-50%); width: 10px; height: 6px; border-bottom: 2px solid #222; border-radius: 0 0 10px 10px; }
+
+  /* Покебол */
+  .pokeball { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(to bottom, #ff3b3b 50%, #ffffff 50%); border: 4px solid #222; position: relative; margin: auto; }
+  .pokeball::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: #fff; border: 3px solid #222; border-radius: 50%; }
+
+  /* Марио */
+  .mario-block { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: #f5a623; border: 4px solid #8b4513; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; text-shadow: 2px 2px 0 #000; cursor: pointer; z-index: 500; }
+  .mario-coin { position: absolute; width: 30px; height: 30px; background: gold; border-radius: 50%; animation: coinBounce 0.5s ease-out forwards; pointer-events: none; }
+  @keyframes coinBounce { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-80px) scale(1); opacity: 0; } }
+
+  /* ТАРДИС */
+  .tardis-box { width: 100px; height: 140px; background: #1a3b5c; border: 4px solid #0d2137; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; color: white; font-family: 'Arial', sans-serif; font-size: 10px; text-align: center; padding: 5px; box-sizing: border-box; }
+  .tardis-box .windows { display: flex; flex-direction: column; gap: 5px; margin: 10px 0; }
+  .tardis-box .window-row { display: flex; gap: 5px; }
+  .tardis-box .window-pane { width: 20px; height: 20px; background: #87ceeb; border: 2px solid white; }
+
+  /* Пентаграмма Supernatural */
+  .pentagram { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 350px; height: 350px; }
+  .pentagram svg { width: 100%; height: 100%; }
+  .pentagram-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; font-weight: bold; color: #ffd700; text-shadow: 0 0 15px black; font-family: 'Times New Roman', serif; letter-spacing: 3px; animation: textFlicker 0.8s infinite; }
+  @keyframes textFlicker { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+  .blue-flame { position: absolute; width: 100%; height: 100%; pointer-events: none; background: radial-gradient(circle, rgba(0,100,255,0.4) 0%, transparent 70%); animation: flamePulse 1.5s infinite; }
+  @keyframes flamePulse { 0% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.7; } }
+
+
+  /* Aard сдувание пикселей */
+  @keyframes pixelBlowDown { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(100vh); opacity: 0; } }
+  .pixel-particle { position: absolute; width: 4px; height: 4px; background: white; pointer-events: none; z-index: 400; animation: pixelBlowDown 0.8s ease-in forwards; }
+
+
+</style>
+
+<div id="effects-layer"></div>
+
+<div id="top-toolbar-left">
+  <div id="easter-input-container">
+    <span class="icon">🔍</span>
+    <input type="text" id="easter-input" placeholder="Код...">
+  </div>
+  <button id="shop-btn">🛒 Магазин</button>
+  <button id="profile-btn">👤 Профиль</button>
+  <button id="help-btn">❓</button>
+</div>
+
+<div id="chat-time-pill">
+  <button id="fire-chat-btn">💬 <span id="fire-chat-btn-label">Чат</span></button>
+</div>
+
+<script src="js/easter-eggs.js"></script>
+<script src="js/games.js"></script>
+<script src="js/weather.js"></script>
+
+  
+
+
+<!-- ========== ПРОФИЛЬ, МАГАЗИН И СПРАВКА (финальный) ========== -->
+<style>
+  /* ===== ЛУПА ===== */
+  #easter-input-container {
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.7);
+    border-radius: 20px;
+    padding: 0 10px;
+    backdrop-filter: blur(5px);
+    border: 2px solid #1b5e20;
+    box-shadow: 0 0 4px rgba(27,94,32,0.5);
+    height: 34px;
+    flex-shrink: 0;
+  }
+  #easter-input-container .icon {
+    font-size: 16px;
+    margin-right: 4px;
+    opacity: 0.8;
+  }
+  #easter-input {
+    background: transparent;
+    border: none;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 13px;
+    width: 80px;
+    outline: none;
+    height: 100%;
+  }
+  #easter-input::placeholder {
+    color: rgba(0,255,0,0.5);
+    font-size: 11px;
+  }
+
+  /* ===== ВЕРХНИЕ КНОПКИ ===== */
+  /* Позиционирование теперь берёт на себя #top-toolbar-left (flex),
+     здесь остаётся только внешний вид и адаптивные размеры. */
+  #profile-btn, #shop-btn, #help-btn {
+    background: #222;
+    color: #eee;
+    border-radius: 20px;
+    padding: 0 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    backdrop-filter: blur(5px);
+    height: 34px;
+    line-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    border: 2px solid transparent;
+    transition: background 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+  }
+  #profile-btn { border-color: #4caf50; }
+  #shop-btn { border-color: #4caf50; }
+  #help-btn { border-color: #ffd700; padding: 0 6px; }
+  #profile-btn:hover, #shop-btn:hover {
+    background: #2a2a2a;
+    border-color: #66bb6a;
+  }
+  #help-btn:hover {
+    background: #2a2a2a;
+    border-color: #ffaa00;
+  }
+
+  /* ===== АДАПТАЦИЯ ДЛЯ ПЛАНШЕТОВ (≤ 768px) ===== */
+  @media (max-width: 768px) {
+    #top-toolbar-left { top: 12px; left: 12px; max-width: calc(100vw - 170px); }
+    #easter-input-container { height: 30px; padding: 0 8px; }
+    #easter-input { width: 60px; font-size: 12px; }
+    #profile-btn, #shop-btn, #help-btn {
+      font-size: 12px;
+      height: 30px;
+      line-height: 30px;
+      padding: 0 10px;
+    }
+    #shop-btn, #profile-btn { margin-left: -6px; }
+    #help-btn { margin-left: -5px; }
+    #fire-chat-btn { font-size: 12px; padding: 0 11px; }
+  }
+
+  /* ===== ДЛЯ ТЕЛЕФОНОВ (≤ 600px) ===== */
+  @media (max-width: 600px) {
+    #top-toolbar-left { top: 10px; left: 10px; max-width: calc(100vw - 140px); }
+    #easter-input-container { height: 28px; padding: 0 6px; }
+    #easter-input { width: 50px; font-size: 11px; }
+    #easter-input-container .icon { font-size: 14px; }
+    #profile-btn, #shop-btn, #help-btn {
+      font-size: 11px;
+      height: 28px;
+      line-height: 28px;
+      padding: 0 8px;
+    }
+    #shop-btn, #profile-btn { margin-left: -5px; }
+    #help-btn { margin-left: -4px; }
+    #fire-chat-btn { font-size: 11px; padding: 0 9px; }
+    #fire-chat-btn-label { margin-left: 3px; }
+  }
+
+  /* ===== ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ (≤ 420px) ===== */
+  @media (max-width: 420px) {
+    #top-toolbar-left { top: 8px; left: 8px; max-width: calc(100vw - 115px); }
+    #easter-input-container { height: 24px; padding: 0 4px; border-width: 1.5px; }
+    #easter-input { width: 40px; font-size: 10px; }
+    #easter-input-container .icon { font-size: 12px; }
+    #profile-btn, #shop-btn, #help-btn {
+      font-size: 9px;
+      height: 24px;
+      line-height: 24px;
+      padding: 0 5px;
+      border-width: 1.5px;
+    }
+    #help-btn { padding: 0 3px; }
+    #shop-btn, #profile-btn { margin-left: -3px; }
+    #help-btn { margin-left: -2px; }
+    #fire-chat-btn { font-size: 9px; padding: 0 7px; }
+    #fire-chat-btn-label { margin-left: 3px; }
+  }
+/* ===== МОДАЛЬНЫЕ ОКНА ===== */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 200000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal.active { display: flex; }
+  .modal-content {
+    background: #1a1a2e;
+    border: 2px solid #4caf50;
+    border-radius: 15px;
+    padding: 20px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+  }
+/* ===== ЕДИНЫЙ КРАСИВЫЙ СТИЛЬ ИГРОВЫХ ОКОН (2048/Тетрис/Мемори) ===== */
+  .game-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 200000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+  .game-panel {
+    background: linear-gradient(180deg, #1e1e35, #14142a);
+    border: 2px solid #4caf50;
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 0 20px rgba(76,175,80,0.25);
+    max-width: 95vw;
+    max-height: 95vh;
+    overflow: auto;
+  }
+  .game-panel-title {
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #4caf50;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(76,175,80,0.4);
+  }
+  .game-btn {
+    padding: 9px 16px;
+    background: #333a52;
+    color: #fff;
+    border: 1px solid #4caf50;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .game-btn:hover { background: #4caf50; }
+  .game-btn:active { transform: scale(0.94); }
+  .game-btn-close {
+    margin-top: 10px;
+    flex-shrink: 0;
+    padding: 8px 18px;
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: bold;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .game-btn-close:hover { background: #e74c3c; }
+  .game-btn-close:active { transform: scale(0.94); }
+  .game-controls-row {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px;
+  }
+  @keyframes bitPop { 0% { transform: scale(0.3); opacity: 0.4; } 100% { transform: scale(1); opacity: 1; } }
+
+  /* ===== СЕТКИ МАГАЗИНА ===== */
+  .avatar-grid, .frame-grid, .color-grid, .background-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 8px;
+    margin: 10px 0;
+  }
+  .shop-item {
+    width: 60px;
+    height: 75px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    border: 2px solid #444;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #0d0d1a;
+    position: relative;
+    overflow: hidden;
+  }
+  .shop-item.owned { border-color: #ffd700; }
+  .shop-item { transition: transform 0.12s, border-color 0.12s; }
+  .shop-item:active { transform: scale(0.94); }
+  /* Подсказка с названием предмета при касании на телефоне */
+  .shop-tap-tooltip {
+    position: fixed;
+    transform: translate(-50%, -100%);
+    background: rgba(0,0,0,0.92);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 300000;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .shop-tap-tooltip.visible { opacity: 1; }
+  .shop-item .item-icon {
+    font-size: 28px;
+    line-height: 1;
+    margin-top: 8px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  .shop-item .frame-preview {
+    font-size: 24px;
+    margin-top: 8px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  .shop-item .color-swatch {
+    width: 100%;
+    height: 60%;
+    flex-shrink: 0;
+    border-radius: 8px 8px 0 0;
+  }
+  .shop-item .item-price {
+    background: #000;
+    color: #ffd700;
+    font-size: 10px;
+    text-align: center;
+    width: 100%;
+    padding: 2px 0;
+    border-radius: 0 0 8px 8px;
+    margin-top: auto;
+    line-height: 1.2;
+  }
+
+  /* ===== АНИМИРОВАННЫЕ АВАТАРЫ И СМАЙЛИКИ ===== */
+  @keyframes anim-spin-kf { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .anim-spin { display: inline-block; animation: anim-spin-kf 3s linear infinite; }
+
+  @keyframes anim-laser-kf {
+    0%, 100% { filter: drop-shadow(0 0 2px #ff0000); }
+    50% { filter: drop-shadow(0 0 10px #ff1111) drop-shadow(0 0 16px #ff0000); }
+  }
+  .anim-laser { display: inline-block; animation: anim-laser-kf 1s ease-in-out infinite; }
+
+  @keyframes anim-laser-green-kf {
+    0%, 100% { filter: drop-shadow(0 0 2px #00ff33); }
+    50% { filter: drop-shadow(0 0 10px #11ff44) drop-shadow(0 0 16px #00ff33); }
+  }
+  .anim-laser-green { display: inline-block; animation: anim-laser-green-kf 1s ease-in-out infinite; }
+
+  @keyframes anim-flame-kf {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px orange); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 12px #ff5500); }
+  }
+  .anim-flame { display: inline-block; animation: anim-flame-kf 0.8s ease-in-out infinite; }
+
+  @keyframes anim-shiver-kf {
+    0%, 100% { transform: translate(0,0) rotate(0); }
+    20% { transform: translate(-2px,1px) rotate(-3deg); }
+    40% { transform: translate(2px,-1px) rotate(3deg); }
+    60% { transform: translate(-1px,1px) rotate(-2deg); }
+    80% { transform: translate(1px,-1px) rotate(2deg); }
+  }
+  .anim-shiver { display: inline-block; animation: anim-shiver-kf 0.35s linear infinite; }
+
+  @keyframes anim-vanish-kf { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+  .anim-vanish { display: inline-block; animation: anim-vanish-kf 1.6s ease-in-out infinite; }
+
+  /* Тролль Крушила — приседает и с размаху бьёт кулаком/ногой вниз,
+     а из-под него расходится ударная волна (расширяющееся кольцо). */
+  @keyframes anim-smash-kf {
+    0%, 60% { transform: translateY(0) scaleY(1); }
+    68% { transform: translateY(-9px) scaleY(1.08); }
+    76% { transform: translateY(2px) scaleY(0.76); }
+    84% { transform: translateY(-2px) scaleY(1.05); }
+    92%, 100% { transform: translateY(0) scaleY(1); }
+  }
+  .anim-smash { display: inline-block; position: relative; animation: anim-smash-kf 2.6s ease-in-out infinite; transform-origin: bottom center; }
+  .anim-smash::after {
+    content: '';
+    position: absolute;
+    left: 50%; bottom: -1px;
+    width: 0; height: 4px;
+    border-radius: 50%;
+    border: 2px solid rgba(190,150,90,0);
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 4;
+    animation: anim-smash-ring-kf 2.6s ease-in-out infinite;
+  }
+  @keyframes anim-smash-ring-kf {
+    0%, 74% { width: 0; height: 4px; opacity: 0; border-color: rgba(190,150,90,0); }
+    78% { width: 6px; height: 4px; opacity: 0.9; border-color: rgba(190,150,90,0.9); }
+    90% { width: 36px; height: 10px; opacity: 0; border-color: rgba(190,150,90,0); }
+    100% { width: 36px; height: 10px; opacity: 0; border-color: rgba(190,150,90,0); }
+  }
+
+  /* Комета Вэйл — один объект, мягко "падает" вверх-вниз, но не покидает
+     центр рамки (лёгкое движение + затухание создают ощущение падения). */
+  @keyframes anim-streak-kf {
+    0% { transform: translateY(-30%) scale(0.88) rotate(-16deg); opacity: 0.55; }
+    50% { transform: translateY(0) scale(1) rotate(-16deg); opacity: 1; }
+    100% { transform: translateY(30%) scale(0.88) rotate(-16deg); opacity: 0.55; }
+  }
+  .anim-streak { display: inline-block; animation: anim-streak-kf 1.6s ease-in-out infinite alternate; }
+
+  @keyframes anim-pulse-red-kf {
+    0%, 100% { filter: drop-shadow(0 0 3px #ff0033); transform: scale(1); }
+    50% { filter: drop-shadow(0 0 14px #ff0033); transform: scale(1.12); }
+  }
+  .anim-pulse-red { display: inline-block; animation: anim-pulse-red-kf 1.1s ease-in-out infinite; }
+
+  @keyframes anim-rainbow-kf { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+  .anim-rainbow { display: inline-block; animation: anim-rainbow-kf 2.5s linear infinite; }
+
+  @keyframes anim-wobble-kf {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-12deg); }
+    75% { transform: rotate(12deg); }
+  }
+  .anim-wobble { display: inline-block; animation: anim-wobble-kf 1.4s ease-in-out infinite; }
+
+  @keyframes anim-float-kf { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .anim-float { display: inline-block; animation: anim-float-kf 2s ease-in-out infinite; }
+
+  @keyframes anim-shake-kf {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-4px); } 20% { transform: translateX(4px); }
+    30% { transform: translateX(-4px); } 40% { transform: translateX(4px); }
+    50% { transform: translateX(-3px); } 60% { transform: translateX(3px); }
+    70% { transform: translateX(-2px); } 80% { transform: translateX(2px); }
+    90% { transform: translateX(-1px); }
+  }
+  .anim-shake { display: inline-block; animation: anim-shake-kf 0.9s ease-in-out infinite; }
+
+  @keyframes anim-glitch-kf {
+    0%, 100% { text-shadow: 2px 0 #0ff, -2px 0 #f0f; transform: translate(0,0); }
+    20% { text-shadow: -2px 0 #0ff, 2px 0 #f0f; transform: translate(1px,-1px); }
+    40% { text-shadow: 2px 0 #0ff, -2px 0 #f0f; transform: translate(-1px,1px); }
+    60% { text-shadow: -3px 0 #0ff, 3px 0 #f0f; transform: translate(1px,1px); }
+    80% { text-shadow: 3px 0 #0ff, -3px 0 #f0f; transform: translate(-1px,-1px); }
+  }
+  .anim-glitch { display: inline-block; animation: anim-glitch-kf 0.6s steps(2) infinite; }
+
+  @keyframes anim-ember-kf {
+    0%, 100% { filter: drop-shadow(0 0 5px #ff8800) brightness(1); transform: scale(1) rotate(0); }
+    50% { filter: drop-shadow(0 0 14px #ff3300) brightness(1.3); transform: scale(1.08) rotate(3deg); }
+  }
+  .anim-ember { display: inline-block; animation: anim-ember-kf 1s ease-in-out infinite; }
+
+  @keyframes anim-orbit-kf {
+    from { transform: rotate(0deg) translateX(16px) rotate(0deg); }
+    to { transform: rotate(360deg) translateX(16px) rotate(-360deg); }
+  }
+  .anim-orbit { display: inline-block; position: relative; }
+  .anim-orbit::after {
+    content: ''; position: absolute; width: 6px; height: 6px; border-radius: 50%;
+    background: #ffd700; box-shadow: 0 0 6px #ffd700; top: 50%; left: 50%; margin: -3px;
+    animation: anim-orbit-kf 1.6s linear infinite; pointer-events: none;
+  }
+
+  @keyframes anim-bounce-kf {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    30% { transform: translateY(-10px) scaleY(1.05); }
+    50% { transform: translateY(0) scaleY(0.85); }
+    70% { transform: translateY(-4px) scaleY(1.02); }
+  }
+  .anim-bounce { display: inline-block; animation: anim-bounce-kf 1s ease-in-out infinite; }
+eyframes anim-drift-kf {
+    0%, 100% { transform: translateY(0) translateX(0); opacity: 1; }
+    50% { transform: translateY(-6px) translateX(4px); opacity: 0.7; }
+  }
+  .anim-drift { display: inline-block; animation: anim-drift-kf 2.4s ease-in-out infinite; }
+
+  @keyframes anim-pulse-green-kf {
+    0%, 100% { filter: drop-shadow(0 0 3px #33ff66); transform: scale(1); }
+    50% { filter: drop-shadow(0 0 14px #33ff66); transform: scale(1.1); }
+  }
+  .anim-pulse-green { display: inline-block; animation: anim-pulse-green-kf 1.2s ease-in-out infinite; }
+
+  @keyframes anim-sway-kf { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+  .anim-sway { display: inline-block; animation: anim-sway-kf 2s ease-in-out infinite; transform-origin: bottom center; }
+
+  /* Месяц — медленно покачивается, как маятник, подвешенный сверху */
+  @keyframes anim-moonsway-kf { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+  .anim-moonsway { display: inline-block; animation: anim-moonsway-kf 4s ease-in-out infinite; transform-origin: top center; }
+
+  @keyframes anim-lightning-kf {
+    0%, 89%, 100% { filter: brightness(1); }
+    90% { filter: brightness(2.2) drop-shadow(0 0 12px #fff600); }
+    92% { filter: brightness(1); }
+    94% { filter: brightness(2.5) drop-shadow(0 0 16px #fff600); }
+    96% { filter: brightness(1); }
+  }
+  .anim-lightning { display: inline-block; animation: anim-lightning-kf 2.2s linear infinite; }
+
+  @keyframes anim-flicker-kf {
+    0%, 19%, 21%, 100% { opacity: 1; }
+    20% { opacity: 0.2; } 60% { opacity: 1; } 62% { opacity: 0.3; } 64% { opacity: 1; }
+  }
+  .anim-flicker { display: inline-block; animation: anim-flicker-kf 2.4s infinite; }
+
+  @keyframes anim-heartbeat-kf {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.25); } 30% { transform: scale(1); }
+    45% { transform: scale(1.2); } 60% { transform: scale(1); }
+  }
+  .anim-heartbeat { display: inline-block; animation: anim-heartbeat-kf 1.2s ease-in-out infinite; }
+
+  @keyframes anim-walk-kf {
+    0%   { transform: translateX(-3px) scaleX(1)  translateY(0); }
+    12%  { transform: translateX(-2px) scaleX(1)  translateY(-1px); }
+    25%  { transform: translateX(-1px) scaleX(1)  translateY(0); }
+    37%  { transform: translateX(0px)  scaleX(1)  translateY(-1px); }
+    50%  { transform: translateX(1px)  scaleX(1)  translateY(0); }
+    62%  { transform: translateX(2px)  scaleX(1)  translateY(-1px); }
+    74%  { transform: translateX(3px)  scaleX(1)  translateY(0); }
+    75%  { transform: translateX(3px)  scaleX(-1) translateY(0); }
+    87%  { transform: translateX(1px)  scaleX(-1) translateY(-1px); }
+    100% { transform: translateX(-3px) scaleX(-1) translateY(0); }
+  }
+  .anim-walk { display: inline-block; animation: anim-walk-kf 3.2s steps(1) infinite; }
+
+  @keyframes anim-dance-kf {
+    0%   { transform: translateY(0) rotate(-10deg); filter: hue-rotate(0deg); }
+    20%  { transform: translateY(-6px) rotate(10deg); filter: hue-rotate(72deg); }
+    40%  { transform: translateY(0) rotate(-8deg); filter: hue-rotate(144deg); }
+    60%  { transform: translateY(-6px) rotate(8deg); filter: hue-rotate(216deg); }
+    80%  { transform: translateY(0) rotate(-10deg); filter: hue-rotate(288deg); }
+    100% { transform: translateY(-6px) rotate(10deg); filter: hue-rotate(360deg); }
+  }
+  .anim-dance { display: inline-block; animation: anim-dance-kf 1.2s ease-in-out infinite; }
+
+  @keyframes anim-hohoho-move-kf {
+    0%, 100% { transform: translateX(-6px) rotate(-4deg); }
+    50% { transform: translateX(6px) rotate(4deg); }
+  }
+  @keyframes anim-hohoho-text-kf {
+    0%, 55% { opacity: 0; transform: translateX(-50%) scale(0.6); }
+    70%, 88% { opacity: 1; transform: translateX(-50%) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) scale(0.6); }
+  }
+  .anim-hohoho { display: inline-block; position: relative; animation: anim-hohoho-move-kf 1.6s ease-in-out infinite; overflow: visible; }
+  .anim-hohoho::after {
+    content: 'ХО-ХО-ХО';
+    position: absolute;
+    top: -0.85em; left: 50%;
+    transform: translateX(-50%) scale(0.6);
+    font-size: 0.32em;
+    font-weight: bold;
+    color: #ff3b3b;
+    white-space: nowrap;
+    opacity: 0;
+    animation: anim-hohoho-text-kf 3.2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  @keyframes anim-swim-move-kf {
+    0%   { transform: translateX(-10px) translateY(0) rotate(-6deg); }
+    25%  { transform: translateX(-5px) translateY(-4px) rotate(0deg); }
+    50%  { transform: translateX(0) translateY(0) rotate(6deg); }
+    75%  { transform: translateX(5px) translateY(-4px) rotate(0deg); }
+    100% { transform: translateX(10px) translateY(0) rotate(-6deg); }
+  }
+  @keyframes anim-swim-splash-kf {
+    0%, 40% { opacity: 0; transform: translateY(0) scale(0.5); }
+    50% { opacity: 1; transform: translateY(-0.35em) scale(1); }
+    65% { opacity: 0; transform: translateY(-0.6em) scale(0.8); }
+    100% { opacity: 0; }
+  }
+  .anim-swim { display: inline-block; position: relative; animation: anim-swim-move-kf 2.4s ease-in-out infinite alternate; overflow: visible; }
+  .anim-swim::after {
+    content: '💦';
+    position: absolute;
+    font-size: 0.4em;
+    top: -0.2em; right: -0.3em;
+    opacity: 0;
+    animation: anim-swim-splash-kf 2.4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  /* Тыква-джек — кусается: резкий двойной укус (сжатие+поворот), а не свечение */
+  @keyframes anim-pumpkinbite-kf {
+    0%, 80% { transform: scale(1) rotate(0deg); }
+    85% { transform: scale(1.22, 0.8) rotate(-6deg); }
+    89% { transform: scale(0.92, 1.1) rotate(4deg); }
+    93% { transform: scale(1.14, 0.88) rotate(-3deg); }
+    97% { transform: scale(1) rotate(0deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .anim-pumpkinbite { display: inline-block; transform-origin: 50% 62%; animation: anim-pumpkinbite-kf 2.4s ease-in-out infinite; }
+
+  /* Позволяем эффектам, выходящим за рамку иконки в магазине (брызги,
+     реплики), быть видимыми, а не обрезаться контейнером */
+  .shop-item:has(.anim-hohoho),
+  .shop-item:has(.anim-swim),
+  .shop-item:has(.anim-pumpkinbite),
+  .shop-item:has(.anim-smash) {
+    overflow: visible;
+  }
+
+  /* ===== РАМКИ (стили) ===== */
+  .frame-neon { border: 3px solid #0ff; box-shadow: 0 0 15px #0ff; }
+  .frame-hearts { border: 3px solid #f66; box-shadow: 0 0 10px #f99; }
+  .frame-hearts-decor { border: 3px solid #ff1493; box-shadow: 0 0 10px #ff1493; }
+  .frame-stars-decor { border: 3px solid #ffd700; box-shadow: 0 0 15px #ffd700; }
+  .frame-diamonds-decor { border: 3px solid #b9f2ff; box-shadow: 0 0 15px #b9f2ff; }
+  .frame-obsidian { border: 4px solid #111; box-shadow: 0 0 10px #000, inset 0 0 5px #333; background: #0a0a0a; }
+  .frame-skulls-decor { border: 3px solid #8b0000; box-shadow: 0 0 10px #8b0000; }
+  .frame-cosmic { border: 3px solid #fff; box-shadow: 0 0 20px #639, 0 0 60px #63f; background: radial-gradient(circle, #1a0033, #0d0d2b); animation: cosmicPulse 3s infinite alternate; }
+  .frame-matrix { border: 3px solid #0f0; box-shadow: 0 0 15px #0f0; background: #000; }
+  .frame-ice { border: 3px solid #6cf; box-shadow: 0 0 15px #6cf; }
+  .frame-moon { border: 3px solid #ffd; box-shadow: 0 0 20px #ffd; background: #111; }
+  .frame-chrome { border: 4px solid transparent; border-image: linear-gradient(135deg, #eee, #999, #eee, #666, #eee) 1; box-shadow: 0 0 15px rgba(255,255,255,0.5); animation: chromeShine 3s infinite; }
+  .frame-galaxy { border: 3px solid #63f; box-shadow: 0 0 30px #63f; background: radial-gradient(circle at 20% 30%, #210042, #000); }
+  .frame-darkness { border: 3px solid #222; box-shadow: 0 0 20px #000, inset 0 0 30px #0a0a0a; background: #050505; animation: darkPulse 2s infinite alternate; }
+  .frame-pixel { border: 4px solid #555; border-image: repeating-linear-gradient(45deg, #555, #555 4px, #222 4px, #222 8px) 4; }
+
+  .frame-half-gold-silver { border: 4px solid transparent; border-image: linear-gradient(to right, gold 50%, silver 50%) 1; box-shadow: 0 0 10px gold; }
+  .frame-half-purple-pink { border: 4px solid transparent; border-image: linear-gradient(to right, #8a2be2 50%, #ff69b4 50%) 1; box-shadow: 0 0 10px #8a2be2; }
+  .frame-half-fire-ice { border: 4px solid transparent; border-image: linear-gradient(to right, #00bfff 50%, #ff4500 50%) 1; box-shadow: 0 0 10px #00bfff; }
+  .frame-double-stripe { border: 2px solid #fff; outline: 3px solid #ffd700; outline-offset: 2px; box-shadow: 0 0 10px rgba(255,215,0,0.5); }
+  .frame-ruby { border: 4px solid #c00; box-shadow: 0 0 20px #c00, inset 0 0 10px #c00; background: #400; }
+  .frame-sapphire { border: 4px solid #06c; box-shadow: 0 0 20px #06c, inset 0 0 10px #06c; background: #001a33; }
+
+  .frame-fire { border: 3px solid #f90; box-shadow: 0 0 15px #f60, inset 0 0 10px #f90; animation: flameFlicker 0.3s infinite alternate; }
+  .frame-royal-gold { border: 4px solid transparent; background: linear-gradient(#1a1a2e, #1a1a2e) padding-box, linear-gradient(45deg, #ffd700, #fff8dc, #b8860b, #ffd700) border-box; animation: rotateBorder 4s linear infinite; box-shadow: 0 0 15px #ffd700; }
+  .frame-rainbow-wave { border: 4px solid transparent; background: linear-gradient(#1a1a2e, #1a1a2e) padding-box, linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet) border-box; background-size: 200% 100%; animation: rainbowSlide 2s linear infinite; }
+  .frame-crystal-flash { border: 3px solid #fff; box-shadow: 0 0 10px #fff, 0 0 25px #e0f7fa, 0 0 50px #b2ebf2; animation: crystalFlash 1.2s ease-in-out infinite alternate; }
+  .frame-flame { border: 3px solid transparent; border-image: linear-gradient(to bottom, #ff4500, #ff8c00) 1; box-shadow: 0 0 15px #ff4500, inset 0 0 10px #ff8c00; animation: flameFlicker 0.3s infinite alternate; }
+  .frame-cyberpunk { border: 3px solid #f0f; box-shadow: 0 0 15px #f0f, 0 0 5px #0ff, inset 0 0 10px rgba(0,255,255,0.2); animation: glitchBorder 0.5s infinite; }
+  .frame-emerald { border: 4px solid #0c0; box-shadow: 0 0 20px #0c0, inset 0 0 10px #0c0; background: #003300; }
+  .frame-sun { border: 3px solid #fc0; box-shadow: 0 0 25px #fc0, 0 0 50px #f90; animation: sunGlow 2s infinite alternate; }
+  .frame-storm { border: 3px solid #555; box-shadow: 0 0 15px #aaa; background: repeating-linear-gradient(45deg, #333, #333 2px, #444 2px, #444 4px); animation: lightning 1.5s infinite; }
+  .frame-candy { border: 3px dashed #ff69b4; box-shadow: 0 0 10px #ff69b4; background: rgba(255,105,180,0.1); animation: candySpin 4s linear infinite; }
+  .frame-vortex { border: 3px solid transparent; border-image: conic-gradient(from 0deg, #ff00ff, #00ffff, #ff00ff) 1; animation: spinBorder 2s linear infinite; }
+  .frame-lightning { border: 2px solid #ff0; box-shadow: 0 0 10px #ff0, 0 0 30px #f90, inset 0 0 10px #ff0; animation: lightningFlash 0.8s infinite alternate; }
+  .frame-fire-ice { border: 4px solid transparent; border-image: linear-gradient(45deg, #ff4500 25%, #00bfff 75%) 1; animation: fireIceShift 2s infinite alternate; }
+  .frame-chameleon { border: 3px solid #0f0; animation: chameleonColor 2s infinite; }
+  .frame-hologram { border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 0 15px #fff, 0 0 30px #8af; animation: hologramFlicker 0.5s infinite alternate; }
+  .frame-pixel-chaos { border: 4px solid #555; border-image: repeating-linear-gradient(45deg, #555 0px, #555 4px, #ff0 4px, #ff0 8px, #0ff 8px, #0ff 12px) 4; animation: pixelShift 0.5s infinite; }
+  .frame-light { border: 3px solid #fff; box-shadow: 0 0 30px #ff0, 0 0 60px #fff; background: #222; animation: lightPulse 1s infinite alternate; }
+  .frame-gold-rain { border: 3px solid #ffd700; background: repeating-linear-gradient(45deg, #000, #000 5px, #ffd700 5px, #ffd700 10px); animation: goldRain 0.5s linear infinite; }
+  .frame-neon-grid { border: 3px solid #0ff; background: repeating-linear-gradient(0deg, #000, #000 4px, #0ff 4px, #0ff 5px); background-size: 100% 10px; animation: neonGridScroll 1s linear infinite; }
+  .frame-matrix-code { border: 3px solid #0f0; box-shadow: 0 0 15px #0f0; background: repeating-linear-gradient(0deg, #000, #000 4px, #0f0 4px, #0f0 6px); animation: matrixRain 1s linear infinite; background-size: 100% 6px; }
+
+  @keyframes rotateBorder { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+  @keyframes rainbowSlide { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
+  @keyframes crystalFlash { 0% { box-shadow: 0 0 5px #fff, 0 0 15px #e0f7fa, 0 0 30px #b2ebf2; } 100% { box-shadow: 0 0 15px #fff, 0 0 30px #e0f7fa, 0 0 60px #b2ebf2; } }
+  @keyframes flameFlicker { 0% { box-shadow: 0 0 10px #ff4500; border-color: #ff4500; } 100% { box-shadow: 0 0 25px #ff8c00; border-color: #ff8c00; } }
+  @keyframes glitchBorder { 0% { border-color: #f0f; } 20% { border-color: #0ff; } 40% { border-color: #f0f; } 60% { border-color: #ff0; } 80% { border-color: #0ff; } 100% { border-color: #f0f; } }
+  @keyframes matrixRain { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
+  @keyframes chromeShine { 0% { border-image: linear-gradient(135deg, #eee, #999, #eee, #666, #eee) 1; } 50% { border-image: linear-gradient(135deg, #fff, #ccc, #fff, #888, #fff) 1; } 100% { border-image: linear-gradient(135deg, #eee, #999, #eee, #666, #eee) 1; } }
+  @keyframes sunGlow { 0% { box-shadow: 0 0 20px #fc0; } 100% { box-shadow: 0 0 40px #fc0, 0 0 80px #f90; } }
+  @keyframes lightning { 0%, 100% { border-color: #555; } 10% { border-color: #fff; box-shadow: 0 0 20px #fff; } 12% { border-color: #555; } }
+  @keyframes candySpin { 0% { border-color: #ff69b4; } 50% { border-color: #ffd700; } 100% { border-color: #ff69b4; } }
+  @keyframes pixelShift { 0% { border-image: repeating-linear-gradient(45deg, #555 0px, #555 4px, #ff0 4px, #ff0 8px, #0ff 8px, #0ff 12px) 4; } 100% { border-image: repeating-linear-gradient(45deg, #ff0 0px, #ff0 4px, #0ff 4px, #0ff 8px, #555 8px, #555 12px) 4; } }
+  @keyframes spinBorder { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+  @keyframes lightningFlash { 0% { border-color: #ff0; box-shadow: 0 0 10px #ff0; } 100% { border-color: #f90; box-shadow: 0 0 30px #f90; } }
+  @keyframes cosmicPulse { 0% { box-shadow: 0 0 20px #639; } 100% { box-shadow: 0 0 60px #63f; } }
+  @keyframes fireIceShift { 0% { border-image: linear-gradient(45deg, #ff4500 25%, #00bfff 75%) 1; } 100% { border-image: linear-gradient(45deg, #00bfff 25%, #ff4500 75%) 1; } }
+  @keyframes goldRain { 0% { background-position: 0 0; } 100% { background-position: 20px 20px; } }
+  @keyframes chameleonColor { 0% { border-color: #f00; } 20% { border-color: #ff0; } 40% { border-color: #0f0; } 60% { border-color: #0ff; } 80% { border-color: #00f; } 100% { border-color: #f0f; } }
+  @keyframes neonGridScroll { 0% { background-position: 0 0; } 100% { background-position: 0 10px; } }
+  @keyframes hologramFlicker { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+  @keyframes darkPulse { 0% { box-shadow: 0 0 10px #000; } 100% { box-shadow: 0 0 40px #000; } }
+  @keyframes lightPulse { 0% { box-shadow: 0 0 20px #ff0; } 100% { box-shadow: 0 0 60px #fff; } }
+
+  /* ===== СТИЛИ ДЛЯ СПРАВКИ ===== */
+  #help-modal .modal-content { max-width: 600px; }
+  #help-modal h2 { color: #ffd700; text-align: center; margin-bottom: 10px; }
+  #help-modal h3 { color: #4caf50; margin-top: 15px; margin-bottom: 5px; font-size: 1.1rem; }
+  #help-modal h4 { color: #66bb6a; margin-top: 10px; margin-bottom: 3px; font-size: 1rem; }
+  #help-modal p, #help-modal li { color: #ddd; font-size: 0.95rem; line-height: 1.5; }
+  #help-modal a { color: #4caf50; text-decoration: underline; }
+  #help-modal a:hover { color: #66bb6a; }
+  #help-modal ul { padding-left: 20px; margin: 5px 0; }
+  #help-modal .section { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333; }
+  #help-modal .section:last-child { border-bottom: none; }
+  .help-tag { display: inline-block; background: #333; color: #0f0; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
+  .help-author { background: #1a1a2e; padding: 10px 15px; border-radius: 8px; border-left: 3px solid #ffd700; margin: 10px 0; font-style: italic; }
+
+.favaframe {
+  position: relative;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  margin-right: 5px;
+  box-sizing: border-box;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-shrink: 0;
+  border: 2px solid transparent !important;
+  overflow: hidden;
+}
+
+/* Базовый вид превью аватара в профиле (тот же принцип, что у .favaframe:
+   анимации аватара не должны вылезать за пределы рамки) */
+.frame-preview {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Внутренний контейнер для эмодзи (создаётся в JS) */
+.favaframe .emoji {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Для рамок сохраняем классы, но без лишних отступов */
+.favaframe[class*="frame-"] {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 2px solid currentColor !important;
+}
+
+
+  /* Радужный цвет ника в чате */
+.fire-msg .fnick.rainbow {
+  background: linear-gradient(90deg, red, orange, yellow, green, blue, violet);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+  
+</style>
+
+<!-- Кнопки профиль/магазин/справка перенесены в #top-toolbar-left в начале body -->
+
+<!-- МОДАЛЬНОЕ ОКНО ПРОФИЛЯ -->
+<div id="profile-modal" class="modal">
+  <div class="modal-content">
+    <h2>Профиль</h2>
+    <div style="display:flex; align-items:center; gap:15px; margin:10px 0;">
+      <div id="profile-avatar-preview" class="frame-preview" style="font-size:40px; width:60px; height:60px;"></div>
+      <div>
+        <div id="profile-nickname" style="font-size:1.5em; font-weight:bold;">Player</div>
+        <div style="color:#aaa;">Монеты: <span id="profile-coins">0</span> 💰</div>
+      </div>
+    </div>
+    <button id="change-nickname-btn">✏️ Сменить ник (200 монет)</button>
+    <h3>Рекорды</h3>
+    <div>🐍 Змейка: <span id="rec-snake">0</span></div>
+    <div>🎯 Бит: <span id="rec-bit">0</span></div>
+    <div>🧱 Тетрис: <span id="rec-tetris">0</span> линий</div>
+    <div>🔢 2048: <span id="rec-2048">0</span> макс. плитка</div>
+    <div>🧠 Мемори: <span id="rec-memory">0</span> уровней</div>
+    <button id="close-profile" style="margin-top:10px;">Закрыть</button>
+  </div>
+</div>
+
+
+<!-- МОДАЛЬНОЕ ОКНО МАГАЗИНА -->
+<div id="shop-modal" class="modal">
+  <div class="modal-content">
+    <h2>Магазин</h2>
+    <div>Ваши монеты: <span id="shop-coins">0</span> 💰</div>
+    <h3>Аватары</h3>
+    <div class="avatar-grid" id="avatar-list"></div>
+    <h3>Рамки</h3>
+    <div class="frame-grid" id="frame-list"></div>
+    <h3>Цвет ника</h3>
+    <div class="color-grid" id="color-list"></div>
+    <h3>Смайлики для чата</h3>
+    <div class="avatar-grid" id="emoji-list"></div>
+    <h3>Фоны</h3>
+    <div class="background-grid" id="background-list"></div>
+    <button id="close-shop" style="margin-top:10px;">Закрыть</button>
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО СПРАВКИ -->
+<div id="help-modal" class="modal">
+  <div class="modal-content">
+    <h2>❓ Справка по Pixel Billboard</h2>
+
+    <div class="section">
+      <h3>📌 О проекте</h3>
+      <div class="help-author">
+        <p><strong>Привет! Меня зовут Евгений.</strong></p>
+        <p>Я не программист, но мне всегда хотелось создать что-то необычное и интересное, что останется в истории. <strong>Pixel Billboard</strong> – это мой эксперимент и моя мечта.</p>
+      </div>
+      <p><strong>Pixel Billboard</strong> – это вечный цифровой билборд. Вы можете купить любой пиксель (или блок 10×10) и разместить на нём свой логотип, текст или картинку. Цена – <strong>50 ₽ за 1 пиксель</strong>. Минимальный блок – 10×10 (5000 ₽). Все купленные блоки навсегда остаются на холсте и кликабельны – ведут на ваш сайт или соцсеть.</p>
+      <p>Чтобы купить блок, напишите нам на почту <a href="mailto:pixelbillboard@mail.ru">pixelbillboard@mail.ru</a> или в Telegram <a href="https://t.me/PixelBillboard_ru">@PixelBillboard_ru</a>.</p>
+    </div>
+
+    <div class="section">
+      <h3>🎮 Игры и пасхалки</h3>
+      <p>В левом верхнем углу есть поле ввода с лупой 🔍. Введите одну из команд и нажмите Enter – запустится игра или пасхалка.</p>
+      <h4>🕹️ Игры (все команды здесь):</h4>
+      <ul>
+        <li><span class="help-tag">SNAKE</span> – игра «Змейка» (управление стрелками или свайпами)</li>
+        <li><span class="help-tag">BIT</span> – мини-игра «Попади в цель»</li>
+        <li><span class="help-tag">2048</span> – игра 2048</li>
+        <li><span class="help-tag">TETRIS</span> – тетрис</li>
+        <li><span class="help-tag">MEMORY</span> – игра «Мемори»</li>
+      </ul>
+      <p>После игры вы получаете <strong>монеты</strong> (за рекорды). Монеты можно тратить в магазине.</p>
+      <h4>🎭 Пасхалки (примеры):</h4>
+      <ul>
+        <li><span class="help-tag">MATRIX</span> – матричный дождь</li>
+        <li><span class="help-tag">SPIDERMAN</span> – паутина</li>
+      </ul>
+      <p><strong>Остальные пасхалки</strong> вы найдёте в нашем <a href="https://t.me/PixelBillboard_ru" target="_blank">Telegram-канале</a>, в TikTok или в чате проекта. Подписывайтесь, чтобы узнавать новые коды!</p>
+    </div>
+
+    <div class="section">
+      <h3>👤 Профиль</h3>
+      <ul>
+        <li><strong>Сменить ник</strong> – первый раз бесплатно, затем за 200 монет.</li>
+        <li><strong>Посмотреть свои рекорды</strong> по всем играм.</li>
+        <li><strong>Увидеть количество монет</strong> – они начисляются за рекорды и ежедневный бонус (+5 монет в день).</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>🛒 Магазин</h3>
+      <ul>
+        <li><strong>Аватары</strong> – различные персонажи и существа.</li>
+        <li><strong>Рамки</strong> – от простых до анимированных.</li>
+        <li><strong>Цвет ника</strong> – измените цвет своего имени.</li>
+      </ul>
+      <p>Купленные предметы автоматически экипируются. Их можно менять в любое время.</p>
+    </div>
+
+    <div class="section">
+      <h3>💰 Монеты</h3>
+      <ul>
+        <li><strong>Ежедневный бонус</strong> – +5 монет при первом открытии сайта за день.</li>
+        <li><strong>Рекорды в играх</strong> – за каждый новый рекорд в играх (Змейка, Бит, 2048, Тетрис, Мемори) даётся +10 монет.</li>
+        <li><strong>Достижения</strong> – некоторые игры дают монеты за количество очков (например, 2048 даёт монеты за плитку ≥1024).</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>🌤️ Погода и время</h3>
+      <p>На сайте отображается текущее время по Москве, а также идут фоновые эффекты погоды (снег, дождь, листья, кометы) – они меняются в течение дня.</p>
+    </div>
+
+    <button id="close-help" style="margin-top:10px;">Закрыть</button>
+  </div>
+</div>
+
+
+
+
+<!-- СКРИПТЫ -->
+<script src="js/shop-profile.js"></script>
+
+<!-- Замаскированный Рикролл -->
+<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" 
+   style="position: fixed; bottom: 5px; right: 5px; width: 20px; height: 20px; background: transparent; opacity: 0; z-index: 99999; display: block;"></a>
+
+
+
+
+<!-- ЖИВОЙ ЧАТ (Firebase) – исправленный, с профилем, звуком, упоминаниями, эмодзи, жалобами, игнорированием, антиспамом, банами -->
+<style>
+  #fire-chat-modal {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 360px;
+    height: 500px;
+    background: #1a1a2e;
+    border: 2px solid #e74c3c;
+    border-radius: 15px;
+    z-index: 100001;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  @media (max-width: 480px) {
+    #fire-chat-modal {
+      right: 10px;
+      left: 10px;
+      width: auto;
+      bottom: 70px;
+      height: 65vh;
+      max-height: 500px;
+    }
+  }
+  #fire-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fire-msg {
+    background: #2a2a3e;
+    padding: 8px 12px;
+    border-radius: 10px;
+    color: white;
+    font-family: sans-serif;
+    font-size: 13px;
+    word-break: break-word;
+    position: relative;
+  }
+  .fire-msg .fnick {
+    font-weight: bold;
+  }
+  .fire-msg .ftime {
+    color: #aaa;
+    font-size: 0.8em;
+    float: right;
+    margin-left: 10px;
+  }
+  .fire-msg .favaframe {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 16px;
+  }
+  .mention {
+    color: #ffd700;
+    font-weight: bold;
+  }
+  .mention-me {
+    background: rgba(255,215,0,0.3);
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+  .msg-actions {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    gap: 5px;
+  }
+  .fire-msg:hover .msg-actions {
+    opacity: 1;
+  }
+  .msg-actions button {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px;
+  }
+  #fire-chat-typing {
+    padding: 4px 12px;
+    color: #aaa;
+    font-size: 0.8em;
+    min-height: 18px;
+  }
+  #emoji-panel {
+    display: none;
+    position: absolute;
+    bottom: 60px;
+    left: 10px;
+    background: #2a2a3e;
+    border: 1px solid #e74c3c;
+    border-radius: 10px;
+    padding: 5px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    z-index: 100002;
+    max-height: 220px;
+    max-width: 90vw;
+    overflow-y: auto;
+  }
+  #emoji-panel button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  #fire-chat-modal.active {
+    display: flex;
+  }
+</style>
+
+
+<!-- Кнопка чата перенесена в #top-toolbar-left в начале body -->
+
+<div id="fire-chat-modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#111;border-bottom:2px solid #e74c3c;">
+    <span style="color:white;font-weight:bold;">💬 Общий чат</span>
+    <button id="fire-chat-close" style="background:none;border:none;color:white;font-size:18px;cursor:pointer;">✕</button>
+  </div>
+  <div id="fire-chat-messages"></div>
+  <div id="fire-chat-typing"></div>
+  <div style="display:flex;padding:10px;background:#111;border-top:2px solid #e74c3c;position:relative;">
+    <button id="emoji-btn" style="background:none;border:none;font-size:18px;cursor:pointer;">😀</button>
+    <input type="text" id="fire-chat-input" maxlength="80" placeholder="Введите сообщение..." style="flex:1;padding:8px;border:none;border-radius:10px;background:#2a2a3e;color:white;outline:none;margin:0 5px;">
+    <button id="fire-chat-send" style="padding:8px 15px;border:none;border-radius:10px;background:#e74c3c;color:white;cursor:pointer;">➤</button>
+    <div id="emoji-panel"></div>
+  </div>
+</div>
+
+<!-- FIREBASE SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+<script src="js/chat.js"></script>
+
+
+
+  
+</body>
+</html>
