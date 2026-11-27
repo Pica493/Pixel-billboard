@@ -23,6 +23,7 @@ window.PIXEL_GAMES = [
   id: 'builder',
   title: 'Строитель',
   description: 'Бесконечный забег.',
+  cover: 'games/covers/1000057293.png',
   url: 'https://s3.gamepush.com/games/32317/v4/?_platform=custom&_platform-key=my_platform'
 },
    
