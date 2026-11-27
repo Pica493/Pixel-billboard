@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>PixelGames — играй в игры прямо в браузере | Pixel Billboard</title>
+  <meta name="description" content="PixelGames — бесплатные браузерные игры от Pixel Billboard. Играй прямо на сайте, без установки.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pixel Billboard">
+  <meta property="og:title" content="PixelGames — играй в игры прямо в браузере">
+  <meta property="og:description" content="Бесплатные браузерные игры от Pixel Billboard.">
+  <meta property="og:locale" content="ru_RU">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
+      (function(m,e,t,r,i,k,a){
+          m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+          m[i].l=1*new Date();
+          for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+          k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+      })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=111437817', 'ym');
+      ym(111437817, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/111437817" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+  <!-- /Yandex.Metrika counter -->
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: #111;
+      color: #fff;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      padding: 14px 14px 40px;
+    }
+    body.player-open { overflow: hidden; }
+    .wrap { max-width: 900px; margin: 0 auto; }
+
+    /* Кнопка «Назад» */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      height: 40px; padding: 0 18px 0 12px;
+      background: #222; color: #fff; text-decoration: none;
+      border: 2px solid #4caf50; border-radius: 22px;
+      font-size: 15px; font-weight: 600;
+      box-shadow: 0 0 8px rgba(76,175,80,0.35);
+      transition: background .2s, border-color .2s;
+    }
+    .back-btn:hover { background: #2a2a2a; border-color: #66bb6a; }
+    .back-btn svg { width: 20px; height: 20px; }
+
+    h1 { text-align: center; font-size: 3rem; font-weight: 500; margin-top: 28px; letter-spacing: .5px; }
+    .subtitle { text-align: center; color: #bbb; font-size: 1.15rem; margin: 6px 0 22px; }
+
+    /* Сетка карточек */
+    .games-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (min-width: 700px) { .games-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
+
+    .game-card {
+      background: linear-gradient(180deg, #1a1a1a, #121212);
+      border: 1px solid #2a2a2a; border-radius: 20px;
+      padding: 10px 10px 12px;
+      display: flex; flex-direction: column;
+      box-shadow: 0 4px 14px rgba(0,0,0,.45);
+    }
+    .game-cover {
+      width: 100%; aspect-ratio: 16 / 7; border-radius: 12px; overflow: hidden;
+      background: #0d0d1a; margin-bottom: 10px;
+    }
+    .game-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .game-cover.no-cover {
+      display: flex; align-items: center; justify-content: center; font-size: 2.2rem;
+      background: linear-gradient(135deg, #1e1e35, #14142a);
+    }
+    .game-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 6px; padding: 0 2px; }
+    .game-desc { color: #aaa; font-size: .9rem; line-height: 1.35; padding: 0 2px; flex: 1; margin-bottom: 12px; min-height: 2.4em; }
+    .game-play {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; height: 44px;
+      background: #0e0e0e; color: #fff;
+      border: 2px solid #4caf50; border-radius: 22px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      box-shadow: 0 0 8px rgba(76,175,80,0.3);
+      transition: background .15s, transform .1s;
+    }
+    .game-play:hover { background: #4caf50; }
+    .game-play:active { transform: scale(.96); }
+    .game-play-icon { font-size: .9rem; }
+
+    .games-empty { display: none; text-align: center; color: #888; padding: 30px 10px; font-size: 1rem; }
+
+    .more-soon {
+      display: flex; align-items: center; gap: 14px; margin-top: 30px; color: #bbb; font-size: 1.05rem;
+    }
+    .more-soon::before, .more-soon::after { content: ''; flex: 1; height: 1px; background: #333; }
+
+    /* Окно игры на весь экран */
+    .game-player {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: #000; flex-direction: column;
+    }
+    .game-player.active { display: flex; }
+    .game-player-bar {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      padding: 8px 10px; padding-top: max(8px, env(safe-area-inset-top));
+      background: #111; border-bottom: 2px solid #4caf50;
+    }
+    .game-player-title { flex: 1; font-weight: 700; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-btn {
+      height: 34px; padding: 0 14px; border-radius: 17px; cursor: pointer;
+      background: #222; color: #fff; border: 2px solid #4caf50; font-size: 13px; font-weight: 600;
+    }
+    .bar-btn.close { border-color: #c0392b; background: #c0392b; }
+    .game-frame { flex: 1; width: 100%; border: 0; background: #000; }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 2.4rem; margin-top: 22px; }
+      .subtitle { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back-btn" href="./">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 5 8 12 15 19"/></svg>
+      Назад к PixelBillboard
+    </a>
+
+    <h1>PixelGames</h1>
+    <div class="subtitle">Играй в игры прямо в браузере!</div>
+
+    <div class="games-grid" id="games-grid"></div>
+    <div class="games-empty" id="games-empty">Игры появятся совсем скоро 🎮</div>
+
+    <div class="more-soon"><span>🎮 Больше игр скоро!</span></div>
+  </div>
+
+  <!-- Окно запущенной игры -->
+  <div class="game-player" id="game-player">
+    <div class="game-player-bar">
+      <button class="bar-btn close" id="game-player-close" type="button">✕ Закрыть</button>
+      <div class="game-player-title" id="game-player-title"></div>
+      <button class="bar-btn" id="game-player-fs" type="button">⛶</button>
+    </div>
+    <iframe class="game-frame" id="game-frame" src="about:blank" allow="autoplay; fullscreen; gamepad; accelerometer; gyroscope" allowfullscreen></iframe>
+  </div>
+
+  <!-- Внешний SDK GamePush: показывает рекламу на вашем сайте по запросу игры. Должен стоять на странице рядом с iframe -->
+  <script src="https://s3.gamepush.com/files/gs/sdk/external-sdk.js"></script>
+
+  <script src="js/pixelgames-list.js"></script>
+  <script src="js/pixelgames.js"></script>
+</body>
+</html>
