@@ -19,12 +19,7 @@
 
 window.PIXEL_GAMES = [
 
-   {
-  id: 'builder',
-  title: 'Строитель',
-  description: 'Бесконечный забег.',
-  url: 'https://s3.gamepush.com/games/32317/v4/?_platform=custom&_platform-key=my_platform'
-},
+   
 
   // Пример (уберите // перед каждой строкой, чтобы включить):
   // {
